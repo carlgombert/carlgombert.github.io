@@ -10,7 +10,7 @@ export default function NodeBreadcrumb({ nodes, activeIndex }: NodeBreadcrumbPro
     <div className="flex items-center gap-0">
       {nodes.map((label, i) => (
         <div key={label} className="flex items-center">
-          {/* Node — glossy orb */}
+          {/* Node */}
           <Link
             to={i === 0 ? '/' : `/${label.toLowerCase()}`}
             className="group relative flex flex-col items-center cursor-pointer bg-transparent border-none p-0 no-underline"
@@ -22,17 +22,17 @@ export default function NodeBreadcrumb({ nodes, activeIndex }: NodeBreadcrumbPro
               style={
                 i === activeIndex
                   ? {
-                      background: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95), #22D3EE 60%, #0891B2)',
-                      borderColor: 'rgba(255,255,255,0.7)',
-                      boxShadow: '0 0 10px rgba(34,211,238,0.5), 0 0 30px rgba(34,211,238,0.15)',
-                    }
+                    background: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95), #22D3EE 60%, #0891B2)',
+                    borderColor: 'rgba(255,255,255,0.7)',
+                    boxShadow: '0 0 10px rgba(34,211,238,0.5), 0 0 30px rgba(34,211,238,0.15)',
+                  }
                   : i < activeIndex
-                  ? {
+                    ? {
                       background: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.7), #BAE6FD 60%, #7DD3FC)',
                       borderColor: 'rgba(255,255,255,0.5)',
                       boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
                     }
-                  : {
+                    : {
                       background: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.6), #E5E7EB 70%, #D1D5DB)',
                       borderColor: 'rgba(255,255,255,0.4)',
                       boxShadow: '0 1px 4px rgba(0,0,0,0.08)',

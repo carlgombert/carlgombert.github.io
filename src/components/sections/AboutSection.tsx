@@ -76,7 +76,7 @@ export default function AboutSection() {
                 </div>
                 <div>
                   <span className="font-mono block mb-1">EXPERIENCE</span>
-                  <span className="text-sm font-semibold text-aero-text">1 Years</span>
+                  <span className="text-sm font-semibold text-aero-text">1 Year</span>
                 </div>
                 <div>
                   <span className="font-mono block mb-1">FOCUS</span>
