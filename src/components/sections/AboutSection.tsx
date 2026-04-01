@@ -6,7 +6,7 @@ import StatusLed from '../ui/StatusLed';
 const skillCategories = [
   {
     title: 'LANGUAGES',
-    skills: ['Python', 'Java', 'JavaScript', 'TypeScript', 'C++']
+    skills: ['Python', 'Java', 'JavaScript', 'TypeScript', 'C++', 'C']
   },
   {
     title: 'FRONTEND',
@@ -18,12 +18,8 @@ const skillCategories = [
   },
   {
     title: 'TOOLS & INFRA',
-    skills: ['Git', 'Docker', 'AWS', 'Azure', 'Insomnia', 'Vitest']
-  },
-  {
-    title: 'SYSTEMS',
-    skills: ['C', 'RISC-V', 'Linux', 'Bash']
-  },
+    skills: ['Git', 'Docker', 'AWS', 'Azure', 'Insomnia', 'Vitest', 'Linux', 'Bash']
+  }
 ];
 
 const stagger = {
