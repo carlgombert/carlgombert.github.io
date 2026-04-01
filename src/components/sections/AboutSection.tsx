@@ -40,9 +40,10 @@ export default function AboutSection() {
   return (
     <div className="w-full h-full overflow-y-auto p-6 space-y-6">
       <motion.div
-        variants={stagger}
         initial="hidden"
-        animate="visible"
+        whileInView="visible"
+        viewport={{ once: true }}
+        variants={stagger}
         className="max-w-4xl mx-auto space-y-6"
       >
         {/* Header */}

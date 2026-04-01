@@ -34,7 +34,7 @@ export default function ProjectCard({ project, index, onClick }: ProjectCardProp
       <div className="h-36 relative overflow-hidden z-20"
         style={{
           background: project.imageUrl
-            ? `url(${project.imageUrl}) center/cover no-repeat`
+            ? `url(${project.imageUrl}) top/cover no-repeat`
             : 'linear-gradient(135deg, rgba(224,242,254,0.5) 0%, rgba(186,230,253,0.3) 40%, rgba(34,211,238,0.1) 100%)',
         }}
       >

@@ -1,5 +1,6 @@
 import outfitExplorerImg from '../assets/outfitexplorer.png';
 import raytracingEngineImg from '../assets/raytracing_engine.jpg';
+import portfolioImg from '../assets/portfolio.png';
 
 export interface Project {
   id: string;
@@ -34,6 +35,16 @@ Key Features:
     imageUrl: outfitExplorerImg,
     liveUrl: 'http://outfitexplorer.com/',
     repoUrl: 'https://github.com/carlgombert/WardrobeOrganizer',
+  },
+  {
+    id: 'portfolio',
+    title: 'Personal Portfolio',
+    description: 'Modern, interactive portfolio website showcasing my software engineering projects and technical skills.',
+    longDescription: `This portfolio website showcases my software engineering projects. Built with React, TypeScript, and Tailwind CSS.`,
+    techStack: ['React', 'TypeScript', 'Tailwind'],
+    imageUrl: portfolioImg,
+    liveUrl: 'https://carlgombert.github.io/',
+    repoUrl: 'https://github.com/carlgombert/carlgombert.github.io',
   },
   {
     id: 'raytracing-engine',

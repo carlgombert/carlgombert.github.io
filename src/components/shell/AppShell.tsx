@@ -29,7 +29,7 @@ export default function AppShell({ sections, children }: AppShellProps) {
         </div>
 
         {/* Content viewport — recessed screen */}
-        <main className="flex-1 overflow-hidden relative rounded-3xl screen-recess bg-white/20 backdrop-blur-sm">
+        <main className="flex-1 overflow-hidden relative rounded-3xl screen-recess">
           {/* Content */}
           <div className="relative z-0 w-full h-full">
             {children}
