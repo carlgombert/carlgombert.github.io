@@ -2,6 +2,7 @@ import outfitExplorerImg from '../assets/outfitexplorer.png';
 import raytracingEngineImg from '../assets/raytracing_engine.jpg';
 import portfolioImg from '../assets/portfolio.png';
 import florenciaPortfolioImage from '../assets/florenciaportfolio.png';
+import gopherGraphicsImage from '../assets/gopher-graphics.png';
 
 export interface Project {
   id: string;
@@ -38,13 +39,23 @@ Key Features:
     repoUrl: 'https://github.com/carlgombert/WardrobeOrganizer',
   },
   {
+    id: 'gopher-graphics',
+    title: 'Gopher Graphics Site',
+    description: 'A full-stack web app used by the computer graphics club at UMN.',
+    longDescription: `This site allows members of the Gopher Graphics Club to post their projects, message individually and in channels and view others work.
+
+    This project also serves as an entrypoint for new and prospective members with info about the group as well as a display of our work.`,
+    techStack: ['React', 'TypeScript', 'Express', 'Socket.IO', 'PostgreSQL', 'Vitest'],
+    imageUrl: gopherGraphicsImage,
+    repoUrl: 'https://github.com/Gopher-Graphics/site',
+  },
+  {
     id: 'portfolio',
     title: 'Personal Portfolio',
     description: 'Modern, interactive portfolio website showcasing my software engineering projects and technical skills.',
     longDescription: `This portfolio website showcases my software engineering projects. Built with React, TypeScript, and Tailwind CSS.`,
     techStack: ['React', 'TypeScript', 'Tailwind'],
     imageUrl: portfolioImg,
-    liveUrl: 'https://carlgombert.github.io/',
     repoUrl: 'https://github.com/carlgombert/carlgombert.github.io',
   },
   {
