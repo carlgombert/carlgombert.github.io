@@ -110,31 +110,6 @@ export default function DesignInspirationSection() {
           </h2>
         </motion.div>
 
-        {/* Statement */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="p-6 rounded-2xl aero-glass"
-        >
-          <div className="flex-1">
-            <p className="text-sm text-aero-text/85 leading-relaxed mb-4">
-              The design of this portfolio is heavily inspired by early 2000s web design.
-            </p>
-            <p className="text-sm text-aero-text/85 leading-relaxed mb-4">
-              What I love most about this style is that it feels like you're interacting with a physical machine. The outer frame of the application stays fixed while the content inside changes within specific screen areas. This makes the outer frame feel like a machine casing. Furthermore, buttons and components feel like physical mechanisms instead of clickable areas.
-            </p>
-            <p className="text-sm text-aero-text/85 leading-relaxed mb-4">
-              I think applications where the user can scroll endlessly feel impersonal. The contained viewpoint design forces the user to interact with the content rather than scroll past it. For something like a portfolio, the site also feels much faster and more efficient to navigate.
-            </p>
-            <p className="text-sm text-aero-text/85 leading-relaxed mb-4">
-              Finally, I find that this style offers me the most creative freedom. With more minimalist aesthetics I feel limited with how I can make my application stand out. However, this design feels much more customizable and expressive.
-            </p><p className="text-sm text-aero-text/85 leading-relaxed">
-              This style motivated my design for my Outfit Explorer application as well. Below are some sites that helped guide me.
-            </p>
-          </div>
-        </motion.div>
-
         {/* Gallery Grid */}
         <motion.div
           variants={stagger}
