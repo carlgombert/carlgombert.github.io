@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import StatusLed from '../ui/StatusLed';
 
 // Import images
 import img2advanced2000 from '../../assets/design/2advanced-2000.png';
@@ -104,7 +103,6 @@ export default function DesignInspirationSection() {
           transition={{ duration: 0.4 }}
           className="flex items-center gap-3"
         >
-          <StatusLed color="cyan" size="md" />
           <h2 className="font-display text-sm tracking-[0.2em] text-aero-text">
             Design Inspiration
           </h2>
@@ -143,7 +141,6 @@ export default function DesignInspirationSection() {
                 }}
               >
                 <div className="flex items-center gap-2">
-                  <StatusLed color="cyan" size="sm" />
                   <span className="font-mono text-xs font-semibold text-cyan-950 truncate">
                     {item.title}
                   </span>

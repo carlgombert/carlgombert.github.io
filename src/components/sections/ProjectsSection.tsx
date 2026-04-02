@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { projects, type Project } from '../../data/projects';
 import ProjectCard from './ProjectCard';
 import ProjectModal from '../ui/ProjectModal';
-import StatusLed from '../ui/StatusLed';
 
 export default function ProjectsSection() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -19,7 +18,6 @@ export default function ProjectsSection() {
             transition={{ duration: 0.4 }}
             className="flex items-center gap-3"
           >
-            <StatusLed color="cyan" size="md" />
             <h2 className="font-display text-sm tracking-[0.2em] text-aero-text">
               Projects
             </h2>

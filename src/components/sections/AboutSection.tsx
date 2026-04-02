@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import GlassPanel from '../ui/GlassPanel';
-import StatusLed from '../ui/StatusLed';
 
 
 const skillCategories = [
@@ -44,7 +43,6 @@ export default function AboutSection() {
       >
         {/* Header */}
         <motion.div variants={fadeUp} className="flex items-center gap-3 mb-2">
-          <StatusLed color="cyan" size="md" />
           <h2 className="font-display text-sm tracking-[0.2em] text-aero-text">
             Profile
           </h2>
@@ -87,7 +85,6 @@ export default function AboutSection() {
               <motion.div key={cat.title} variants={fadeUp}>
                 <GlassPanel>
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-400/60 shadow-[0_0_4px_rgba(34,211,238,0.5)]" />
                     <span className="font-display text-[0.55rem] tracking-[0.2em] text-aero-text-dim uppercase">
                       {cat.title}
                     </span>

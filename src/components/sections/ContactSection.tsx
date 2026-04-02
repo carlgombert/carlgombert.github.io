@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import StatusLed from '../ui/StatusLed';
 
 const contactLinks = [
   {
@@ -38,7 +37,6 @@ export default function ContactSection() {
       >
         {/* Header */}
         <motion.div variants={fadeUp} className="flex items-center gap-3">
-          <StatusLed color="cyan" size="md" />
           <h2 className="font-display text-sm tracking-[0.2em] text-aero-text">
             Contact
           </h2>
