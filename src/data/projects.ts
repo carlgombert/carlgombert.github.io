@@ -1,6 +1,7 @@
 import outfitExplorerImg from '../assets/outfitexplorer.png';
 import raytracingEngineImg from '../assets/raytracing_engine.jpg';
 import portfolioImg from '../assets/portfolio.png';
+import florenciaPortfolioImage from '../assets/florenciaportfolio.png';
 
 export interface Project {
   id: string;
@@ -54,15 +55,19 @@ Key Features:
 
 Features an interactive mode that allows the user to explore the generated 3D scene from different angles before capturing high-quality renders.
 
-Current capabilities include mathematical sphere rendering, recursive reflections, and diffuse materials. 
-
-Ongoing development goals:
-- Load complex 3D objects from OBJ files (requires polygon rendering).
-- Add custom light sources, volumetric fog, and texture mapping.
-- Implement motion blur and depth of field.
-- Explore GPU acceleration to improve the current 20-seconds-per-frame render time.`,
+Current capabilities include mathematical sphere rendering, recursive reflections, and diffuse materials. `,
     techStack: ['Java', 'Math', 'Linear Algebra', 'Ray Tracing'],
     imageUrl: raytracingEngineImg,
     repoUrl: 'https://github.com/carlgombert/Raytracer',
+  },
+  {
+    id: 'florencia-portfolio',
+    title: 'Architectural portfolio',
+    description: 'A custom architectural portfolio for a friend.',
+    longDescription: `Created a custom portfolio with a focus on editorial design for architectural designer Florencia Olivera. This site was built with React, Javascript and tailwind and hosted with github pages.`,
+    techStack: ['UI/UX Design', 'React', 'Tailwind CSS'],
+    imageUrl: florenciaPortfolioImage,
+    liveUrl: 'example.com',
+    repoUrl: 'example.com',
   }
 ];

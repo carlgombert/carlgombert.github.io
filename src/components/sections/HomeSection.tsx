@@ -7,35 +7,7 @@ export default function HomeSection() {
 
   return (
     <div className="w-full h-full flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Decorative floating orbs in background */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div
-          className="absolute w-48 h-48 rounded-full opacity-20"
-          style={{
-            top: '10%', right: '10%',
-            background: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.8), #22D3EE 50%, transparent)',
-            animation: 'float 6s ease-in-out infinite',
-          }}
-        />
-        <div
-          className="absolute w-32 h-32 rounded-full opacity-15"
-          style={{
-            bottom: '15%', left: '8%',
-            background: 'radial-gradient(circle at 40% 25%, rgba(255,255,255,0.8), #BAE6FD 50%, transparent)',
-            animation: 'float 8s ease-in-out infinite 1s',
-          }}
-        />
-        <div
-          className="absolute w-20 h-20 rounded-full opacity-25"
-          style={{
-            top: '60%', right: '25%',
-            background: 'radial-gradient(circle at 30% 25%, rgba(255,255,255,0.9), #67E8F9 50%, transparent)',
-            animation: 'float 5s ease-in-out infinite 0.5s',
-          }}
-        />
-      </div>
-
-
+      
       <AnimatePresence>
 
         <motion.div

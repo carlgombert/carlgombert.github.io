@@ -28,90 +28,42 @@ export default function Navbar({ sections }: NavbarProps) {
   }, [location.pathname]);
 
   return (
-    <nav className="h-20 flex flex-col items-center justify-end px-5 shrink-0 relative z-50">
-      {/* SVG Curved Bezel */}
-      <div className="absolute inset-0 pointer-events-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
-        <svg
-          viewBox="0 0 1407 120"
-          preserveAspectRatio="none"
-          className="w-full h-full"
-        >
-          <defs>
-            {/* Main Metal Gradient matching StatusBar */}
-            <linearGradient id="bezelMetal" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#E5E7EB" />
-              <stop offset="50%" stopColor="#C4C8CF" />
-              <stop offset="100%" stopColor="#B0B4BD" />
-            </linearGradient>
-
-            {/* Rim Highlight Gradient (Top Edge Lighting) */}
-            <linearGradient id="rimHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="rgba(255,255,255,1)" />
-              <stop offset="15%" stopColor="rgba(255,255,255,0.4)" />
-              <stop offset="30%" stopColor="rgba(255,255,255,0)" />
-            </linearGradient>
-          </defs>
-
-          {/* Core Shape Path with better industrial curves */}
-          <path
-            d="M 0 120 C 21 18 13 -2 110 1 C 363 -4 430 27 575 48 C 1085 48 577 48 1087 48 C 1237 31 1394 -52 1407 120"
-            fill="url(#bezelMetal)"
-            stroke="rgba(255,255,255,0.5)"
-            strokeWidth="0.5"
-          />
-
-          {/* Rim Lighting (Highlights Curve) */}
-          <path
-            d="M 0 120 C 21 18 13 -2 110 1 C 363 -4 430 27 575 48 C 1085 48 577 48 1087 48 C 1237 31 1394 -52 1407 120"
-            fill="none"
-            stroke="url(#rimHighlight)"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-
-          {/* Bottom Contrast Line */}
-          <line x1="0" y1="119.5" x2="1400" y2="119.5" stroke="rgba(0,0,0,0.1)" strokeWidth="1" />
-        </svg>
+    <nav className="h-14 flex items-center justify-between px-5 bezel-frame shrink-0 rounded-t-2xl relative z-50">
+      {/* Logo / Identity */}
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0 mr-2 min-w-0">
+        <div className="flex flex-col truncate">
+          <span className="font-display text-[0.55rem] sm:text-[0.65rem] text-aero-text tracking-[0.1em] sm:tracking-[0.2em] truncate">
+            CARL GOMBERT
+          </span>
+          <span className="font-mono text-[0.35rem] sm:text-[0.4rem]">PORTFOLIO</span>
+        </div>
       </div>
 
-      {/* Identity & Nav Container (Center Row) */}
-      <div className="relative z-10 w-full mb-3 flex items-center justify-between">
-        {/* Logo / Identity */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0 mr-2 min-w-0">
-          <div className="flex flex-col truncate drop-shadow-md">
-            <span className="font-display text-[0.55rem] sm:text-[0.65rem] text-aero-text tracking-[0.1em] sm:tracking-[0.2em] truncate">
-              CARL GOMBERT
-            </span>
-            <span className="font-mono text-[0.35rem] sm:text-[0.4rem] text-aero-text-pixel">PORTFOLIO</span>
-          </div>
-        </div>
+      {/* Node navigation - desktop content */}
+      <div className="hidden sm:flex absolute left-1/2 -translate-x-1/2">
+        <NodeBreadcrumb
+          nodes={sections}
+          activeIndex={activeIndex}
+        />
+      </div>
 
-        {/* Global Navigation - Desktop */}
-        <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 translate-y-2.5 items-center justify-center">
-          <NodeBreadcrumb
-            nodes={sections}
-            activeIndex={activeIndex}
-          />
-        </div>
-
-        {/* Mobile nav trigger */}
-        <div className="flex md:hidden">
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="p-2 rounded-full orb-button flex items-center justify-center text-white scale-90"
-            style={{ width: '42px', height: '42px' }}
-          >
-            {isMenuOpen ? (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            )}
-          </button>
-        </div>
+      {/* Mobile nav trigger */}
+      <div className="flex sm:hidden">
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="p-2 rounded-xl orb-button flex items-center justify-center text-white"
+          style={{ width: '36px', height: '36px' }}
+        >
+          {isMenuOpen ? (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
+        </button>
       </div>
 
       {/* Mobile Dropdown Menu */}

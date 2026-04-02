@@ -75,10 +75,6 @@ export default function AboutSection() {
                   <span className="text-sm font-semibold text-aero-text">Minneapolis, MN</span>
                 </div>
                 <div>
-                  <span className="font-mono block mb-1">EXPERIENCE</span>
-                  <span className="text-sm font-semibold text-aero-text">1 Year</span>
-                </div>
-                <div>
                   <span className="font-mono block mb-1">FOCUS</span>
                   <span className="text-sm font-semibold text-aero-text">Full-Stack / Systems</span>
                 </div>
