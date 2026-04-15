@@ -29,21 +29,6 @@ export default function Home() {
             lineHeight: 1.6,
             color: "#000000",
             maxWidth: "42rem",
-            letterSpacing: "-0.01em"
-          }}
-        >
-            Key Skills: Python, Typescript, React, Express, PostgreSQL, AWS
-        </p>
-        <p
-          className="mb-8"
-          style={{
-            fontFamily:
-              "-apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif",
-            fontSize: "clamp(1rem, 2vw, 1.25rem)",
-            fontWeight: 400,
-            lineHeight: 1.6,
-            color: "#000000",
-            maxWidth: "42rem",
             letterSpacing: "-0.01em",
           }}
         >
@@ -62,7 +47,7 @@ export default function Home() {
             letterSpacing: "-0.01em",
           }}
         >
-           I’m actively seeking Software Engineering opportunities and open to collaborating on interesting projects. Outside of coding, I enjoy Brazilian Jiu-Jitsu, hiking, rock climbing, reading, and learning Portuguese.
+          I’m actively seeking Software Engineering opportunities and open to collaborating on interesting projects. Outside of coding, I enjoy Brazilian Jiu-Jitsu, hiking, rock climbing, reading, and learning Portuguese.
         </p>
       </div>
     </div>

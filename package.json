@@ -58,8 +58,8 @@
     "react-popper": "2.3.0",
     "react-resizable-panels": "2.1.7",
     "react-responsive-masonry": "2.7.1",
-    "react-router": "7.13.0",
-    "react-router-dom": "^7.14.1",
+    "react-router": "7.14.1",
+    "react-router-dom": "7.14.1",
     "react-slick": "0.31.0",
     "recharts": "2.15.2",
     "sonner": "2.0.3",
@@ -89,6 +89,9 @@
     "overrides": {
       "vite": "6.3.5"
     }
+  },
+  "overrides": {
+    "react-router": "7.14.1"
   },
   "description": "This is a code bundle for White Liquid Glass Website. The original project is available at https://www.figma.com/design/zB55ubRe8Ytyhknio8Djnz/White-Liquid-Glass-Website.",
   "main": "index.js",
