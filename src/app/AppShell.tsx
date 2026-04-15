@@ -42,12 +42,17 @@ export default function AppShell() {
       </svg>
 
       {/* Background image — path must be absolute from root for GitHub Pages */}
-      <img
-        src="/assets/Firefly.jpg"
-        alt=""
+      <video
+        autoPlay
+        muted
+        poster="/assets/Firefly.jpg"
+        loop
+        playsInline
         className="fixed inset-0 w-full h-full object-cover"
         style={{ zIndex: 0 }}
-      />
+      >
+        <source src="/assets/video.mp4" type="video/mp4" />
+      </video>
 
       {/* Content wrapper */}
       <div className="relative z-10 min-h-full flex flex-col">
