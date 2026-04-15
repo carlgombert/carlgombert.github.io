@@ -5,9 +5,12 @@ import Projects from "./components/Projects";
 import Cv from "./components/Cv";
 
 
+import { useLocation } from "react-router-dom";
+
 export default function AppShell() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     if (videoRef.current) {
@@ -30,6 +33,24 @@ export default function AppShell() {
       }
     };
   }, []);
+
+  // If the path is /video, render only the background video
+  if (location.pathname === "/video") {
+    return (
+      <video
+        ref={videoRef}
+        autoPlay
+        muted
+        poster="/assets/Firefly.jpg"
+        loop
+        playsInline
+        className="fixed inset-0 w-full h-full object-cover"
+        style={{ zIndex: 0 }}
+      >
+        <source src="/assets/video.mp4" type="video/mp4" />
+      </video>
+    );
+  }
 
   return (
     <div className="size-full relative overflow-y-auto">
