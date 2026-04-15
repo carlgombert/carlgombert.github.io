@@ -16,7 +16,7 @@ function figmaAssetResolver() {
   }
 }
 
-export default defineConfig({
+export default defineConfig(({ isSsrBuild }) => ({
   plugins: [
     figmaAssetResolver(),
     // The React and Tailwind plugins are both required for Make, even if
@@ -33,4 +33,19 @@ export default defineConfig({
 
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
-})
+
+  // SSR configuration — only used when building the server entry
+  ...(isSsrBuild && {
+    build: {
+      ssr: true,
+      outDir: 'dist/server',
+      rollupOptions: {
+        input: 'src/entry-server.tsx',
+        output: {
+          entryFileNames: 'entry-server.js',
+          format: 'esm',
+        },
+      },
+    },
+  }),
+}))
