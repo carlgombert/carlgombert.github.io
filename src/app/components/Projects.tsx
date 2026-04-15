@@ -211,6 +211,22 @@ export default function Projects() {
             >
               Projects
             </h1>
+            <p
+              className="mb-8"
+              style={{
+                fontFamily:
+                  "-apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif",
+                fontSize: "clamp(1rem, 2vw, 1.25rem)",
+                fontWeight: 400,
+                lineHeight: 1.6,
+                color: "#000000",
+                maxWidth: "42rem",
+                letterSpacing: "-0.01em",
+              }}
+            >
+              You can find all the projects below on my <a style={{color:"#053ba6", textDecoration: "underline"}}href="https://github.com/carlgombert" target="none">github</a>
+            </p>
+
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {projects.map((project) => (
