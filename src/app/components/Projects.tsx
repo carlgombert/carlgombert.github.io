@@ -84,10 +84,10 @@ export default function Projects() {
     {
       id: 4,
       title: "Hoppers Game",
-      description: "",
+      description: "2D Multiplayer level building game",
       tags: ["React", "TypeScript", "Express", "PostgreSQL", "Socket.io"],
       images: [game2, game1, game3],
-      details: ``
+      details: `Hoppers is a 2D game that allows you to build your own levels, share them to the community and play online with other players.`
     }
   ];
 
