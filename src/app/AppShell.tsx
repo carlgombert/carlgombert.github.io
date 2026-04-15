@@ -1,11 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import Home from "./components/Home";
 import Projects from "./components/Projects";
 import Cv from "./components/Cv";
 
+
 export default function AppShell() {
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = 0.7;
+    }
+  }, []);
 
   useEffect(() => {
     // Only load metallicss on the client (not during SSR pre-rendering)
@@ -43,6 +51,7 @@ export default function AppShell() {
 
       {/* Background image — path must be absolute from root for GitHub Pages */}
       <video
+        ref={videoRef}
         autoPlay
         muted
         poster="/assets/Firefly.jpg"
