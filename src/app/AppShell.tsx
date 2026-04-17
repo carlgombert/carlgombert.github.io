@@ -97,18 +97,44 @@ export default function AppShell() {
               } as React.CSSProperties
             }
           >
-            <div
-              style={{
-                fontFamily:
-                  "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif",
-                fontSize: "1.5rem",
-                fontWeight: 600,
-                color: "#000000",
-                letterSpacing: "-0.02em",
-              }}
-            >
-              Carl Gombert
-            </div>
+            {!menuOpen ? (
+              <div
+                style={{
+                  fontFamily:
+                    "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif",
+                  fontSize: "1.5rem",
+                  fontWeight: 600,
+                  color: "#000000",
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                Carl Gombert
+              </div>
+            ) : (
+              <div className="flex md:hidden gap-1.5 h-full items-stretch flex-1 min-w-0 mr-4">
+                <Link
+                  to="/"
+                  className="dark-nav-btn px-3 py-1.5"
+                  onClick={() => setMenuOpen(false)}
+                >
+                    about
+                </Link>
+                <Link
+                  to="/cv"
+                  className="dark-nav-btn px-4 py-1.5"
+                  onClick={() => setMenuOpen(false)}
+                >
+                    CV
+                </Link>
+                <Link
+                  to="/projects"
+                  className="dark-nav-btn px-3 py-1.5"
+                  onClick={() => setMenuOpen(false)}
+                >
+                    projects
+                </Link>
+              </div>
+            )}
 
             {/* Desktop menu */}
             <div className="hidden md:flex gap-3 h-full items-stretch">
@@ -203,39 +229,6 @@ export default function AppShell() {
               <div className={`hamburger-line ${menuOpen ? "open" : ""}`} />
             </button>
 
-            {/* Mobile menu dropdown */}
-            {menuOpen && (
-              <div className="mobile-menu md:hidden">
-                <Link
-                  to="/"
-                  className="mobile-nav-link"
-                  style={{
-                    fontFamily:
-                      "-apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif",
-                    fontSize: "1rem",
-                    fontWeight: 400,
-                    color: "#000000",
-                  }}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  about
-                </Link>
-                <Link
-                  to="/projects"
-                  className="mobile-nav-link"
-                  style={{
-                    fontFamily:
-                      "-apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif",
-                    fontSize: "1rem",
-                    fontWeight: 400,
-                    color: "#000000",
-                  }}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  projects
-                </Link>
-              </div>
-            )}
           </div>
         </nav>
 
@@ -280,23 +273,23 @@ export default function AppShell() {
         }
 
         .glass-nav {
-          background: linear-gradient(135deg,
-            rgba(255, 255, 255, 0.95) 0%,
-            rgba(240, 240, 245, 0.98) 50%,
-            rgba(255, 255, 255, 0.95) 100%);
-          backdrop-filter: blur(12px) saturate(200%);
-          -webkit-backdrop-filter: blur(12px) saturate(200%);
-          border: 1px solid rgba(255, 255, 255, 0.95);
-          border-top: 1px solid rgba(255, 255, 255, 1);
-          border-radius: 20px;
-          box-shadow:
-            0 4px 24px 0 rgba(0, 0, 0, 0.12),
-            0 2px 8px 0 rgba(0, 0, 0, 0.08),
-            inset 0 1px 0 0 rgba(255, 255, 255, 1),
-            inset 0 -1px 0 0 rgba(200, 200, 210, 0.3),
-            inset 2px 0 6px 0 rgba(255, 255, 255, 0.6),
-            inset -2px 0 6px 0 rgba(180, 180, 200, 0.2);
-          position: relative;
+            background: linear-gradient(135deg,
+              rgba(255, 255, 255, 0.95) 0%,
+              rgba(240, 240, 245, 0.98) 50%,
+              rgba(255, 255, 255, 0.95) 100%);
+            backdrop-filter: blur(12px) saturate(200%);
+            -webkit-backdrop-filter: blur(12px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            border-top: 1px solid rgba(255, 255, 255, 1);
+            border-radius: 20px;
+            box-shadow:
+              0 4px 24px 0 rgba(0, 0, 0, 0.12),
+              0 2px 8px 0 rgba(0, 0, 0, 0.08),
+              inset 0 1px 0 0 rgba(255, 255, 255, 1),
+              inset 0 -1px 0 0 rgba(200, 200, 210, 0.3),
+              inset 2px 0 6px 0 rgba(255, 255, 255, 0.6),
+              inset -2px 0 6px 0 rgba(180, 180, 200, 0.2);
+            position: relative;
         }
 
         .glass-nav::after {
@@ -330,8 +323,8 @@ export default function AppShell() {
           inset: 0;
           z-index: 1;
           border-radius: inherit;
-          box-shadow: inset 0 0 20px -5px rgba(255, 255, 255, 0.45);
-          background: rgba(255, 255, 255, 0.08);
+          box-shadow: inset 0 0 20px -5px rgba(255, 255, 255, 0.18);
+          background: rgba(255, 255, 255, 0.03);
           pointer-events: none;
         }
 
@@ -343,7 +336,7 @@ export default function AppShell() {
           border-radius: inherit;
           backdrop-filter: blur(40px) saturate(1.5);
           -webkit-backdrop-filter: blur(40px) saturate(1.5);
-          background: rgba(255, 255, 255, 0.02);
+          background: rgba(255, 255, 255, 0.01);
           isolation: isolate;
         }
 
@@ -377,6 +370,30 @@ export default function AppShell() {
 
         .nav-chrome-btn:active {
           transform: translateY(0);
+        }
+
+        .dark-nav-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-decoration: none;
+          background: rgba(30, 41, 59, 0.85);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 12px;
+          color: #ffffff;
+          font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+          font-size: 0.875rem;
+          font-weight: 500;
+          white-space: nowrap;
+          transition: all 0.2s ease;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .dark-nav-btn:active {
+          transform: scale(0.96);
+          background: rgba(15, 23, 42, 0.95);
         }
 
         .hamburger-btn {
@@ -414,45 +431,6 @@ export default function AppShell() {
 
         .hamburger-line.open:nth-child(3) {
           transform: translateY(-7px) rotate(-45deg);
-        }
-
-        .mobile-menu {
-          position: absolute;
-          top: calc(100% + 12px);
-          right: 0;
-          background: linear-gradient(135deg,
-            rgba(255, 255, 255, 0.95) 0%,
-            rgba(240, 240, 245, 0.98) 50%,
-            rgba(255, 255, 255, 0.95) 100%);
-          backdrop-filter: blur(12px) saturate(200%);
-          -webkit-backdrop-filter: blur(12px) saturate(200%);
-          border: 1px solid rgba(255, 255, 255, 0.95);
-          border-top: 1px solid rgba(255, 255, 255, 1);
-          border-radius: 16px;
-          padding: 8px;
-          min-width: 160px;
-          box-shadow:
-            0 4px 24px 0 rgba(0, 0, 0, 0.12),
-            0 2px 8px 0 rgba(0, 0, 0, 0.08),
-            inset 0 1px 0 0 rgba(255, 255, 255, 1),
-            inset 0 -1px 0 0 rgba(200, 200, 210, 0.3),
-            inset 2px 0 6px 0 rgba(255, 255, 255, 0.6),
-            inset -2px 0 6px 0 rgba(180, 180, 200, 0.2);
-          animation: slide-down 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        .mobile-nav-link {
-          display: block;
-          padding: 12px 16px;
-          border-radius: 12px;
-          transition: all 0.2s ease;
-          text-decoration: none;
-          color: #000000;
-        }
-
-        .mobile-nav-link:hover {
-          background: rgba(255, 255, 255, 0.7);
-          box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
 
         @keyframes slide-down {
