@@ -64,8 +64,8 @@ export default function Projects() {
       This allows the agent to understand the structure of a large file using only a few hundred tokens, instead of thousands.
 
       It keeps much better history of file changes by using git worktrees. All changes done by the Agent will show up in your git history so it's much easier
-      to accurately revert changes and keep track of exactly what the agent has done. Cursor and Antigravity just keep temporary copies of files in the application
-      file system but can be unreliable and buggy when trying to revert old file changes. I find it very frusterating when it makes a change I don't like but I'm unable to
+      to accurately revert changes and keep track of exactly what the agent has done. Cursor and Antigravity 
+      can be unreliable and buggy when trying to revert file changes. I find it very frusterating when the agent makes a change but I'm unable to
       easily revert it.
       
       The IDE is integrated with github and it's easy to manage github issues from within the app. The workflow for creating and assigning issues with the agent as well as sending
