@@ -53,7 +53,7 @@ export default function Projects() {
 
       The agents use tokens efficiently, the agent is able to search through and understand the codebasing using a semantic memory system that uses 
       vector embeddings to selectively retrieve only the most relevant code snippets instead of reading the entire codebase. Code is broken up into logical chunks and then
-      embedded into vectors using sqlite-vec. Then when the agent send a query for a specific task or concept, that query is also converted into a vector 
+      embedded into vectors using sqlite-vec. Then when the agent sends a query for a specific task or concept, that query is also converted into a vector 
       coordinate. The system then uses a K-Nearest Neighbors (KNN) search to identify and retrieve the "closest" code blocks, providing the agent with precise context
       while minimizing unnecessary token waste. 
 
@@ -63,7 +63,7 @@ export default function Projects() {
       The agent doesn't always have to read every line of a file. The implementation uses a summarizer and symbol extraction to create a "skeleton" of a file (listing its functions, imports, and exports).
       This allows the agent to understand the structure of a large file using only a few hundred tokens, instead of thousands.
 
-      It keep much better history of file changes by using git worktrees. All changes done by the Agent will show up in your git history so it's much easier
+      It keeps much better history of file changes by using git worktrees. All changes done by the Agent will show up in your git history so it's much easier
       to accurately revert changes and keep track of exactly what the agent has done. Cursor and Antigravity just keep temporary copies of files in the application
       file system but can be unreliable and buggy when trying to revert old file changes. I find it very frusterating when it makes a change I don't like but I'm unable to
       easily revert it.
