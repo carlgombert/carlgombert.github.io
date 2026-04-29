@@ -20,6 +20,8 @@ import gophergraphics from "../../assets/image_copy.png";
 import game1 from "../../assets/game1.png";
 import game2 from "../../assets/game2.png";
 import game3 from "../../assets/game3.png";
+import libreide1 from "../../assets/libreide2.png";
+import libreide2 from "../../assets/libreide1.png";
 
 export default function Projects() {
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
@@ -39,6 +41,37 @@ export default function Projects() {
   }, [api]);
 
   const projects = [
+    {
+      id: 0,
+      title: "LibreIDE",
+      description: "An AI-native IDE built in Rust",
+      tags: ["Rust", "Tauri", "Dioxus", "sqlite-vec"],
+      images: [libreide1, libreide2],
+      details: `This project is still in progress and it's going to take me a long time to finish. 
+      It's an AI native IDE, similar to Cursor or Antigravity that allows user to use local open source models or their own API keys.
+      This was primarily built for my specific workflow so it has a lot of features that I think are really nice.
+
+      The agents use tokens efficiently, the agent is able to search through and understand the codebasing using a semantic memory system that uses 
+      vector embeddings to selectively retrieve only the most relevant code snippets instead of reading the entire codebase. Code is broken up into logical chunks and then
+      embedded into vectors using sqlite-vec. Then when the agent send a query for a specific task or concept, that query is also converted into a vector 
+      coordinate. The system then uses a K-Nearest Neighbors (KNN) search to identify and retrieve the "closest" code blocks, providing the agent with precise context
+      while minimizing unnecessary token waste. 
+
+      The semantic search often missing specific names so this is combined with a keyword search using ripgrep to combine keywork results with 
+      semantic results, forming a hybrid search. 
+      
+      The agent doesn't always have to read every line of a file. The implementation uses a summarizer and symbol extraction to create a "skeleton" of a file (listing its functions, imports, and exports).
+      This allows the agent to understand the structure of a large file using only a few hundred tokens, instead of thousands.
+
+      It keep much better history of file changes by using git worktrees. All changes done by the Agent will show up in your git history so it's much easier
+      to accurately revert changes and keep track of exactly what the agent has done. Cursor and Antigravity just keep temporary copies of files in the application
+      file system but can be unreliable and buggy when trying to revert old file changes. I find it very frusterating when it makes a change I don't like but I'm unable to
+      easily revert it.
+      
+      The IDE is integrated with github and it's easy to manage github issues from within the app. The workflow for creating and assigning issues with the agent as well as sending
+      issues straight to the agent for help is streamlined.
+      `
+    },
     {
       id: 1,
       title: "Outfit Explorer",
