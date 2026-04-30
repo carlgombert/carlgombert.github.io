@@ -1,278 +1,304 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Alexander Graham Bell - Then Play a Game!</title>
     <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-            background: #f0f0f0;
-            box-sizing: border-box;
-        }
-        h1 {
-            color: #333;
-        }
-        button {
-            padding: 15px 30px;
-            font-size: 18px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #45a049;
-        }
-        #content-area {
-            display: none;
-            margin-top: 20px;
-            width: 100%;
-            max-width: 600px;
-        }
-        #image-container {
-            text-align: center;
-        }
-        #image-container img {
-            max-width: 100%;
-            max-height: 400px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        #game-area {
-            margin-top: 30px;
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        #question {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: #333;
-        }
-        .option-btn {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            background: #e7e7e7;
-            border: 2px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            text-align: left;
-            transition: background 0.2s;
-        }
-        .option-btn:hover:not(:disabled) {
-            background: #d4d4d4;
-        }
-        .option-btn.correct {
-            background: #4CAF50;
-            color: white;
-            border-color: #388E3C;
-        }
-        .option-btn.wrong {
-            background: #f44336;
-            color: white;
-            border-color: #d32f2f;
-        }
-        .option-btn:disabled {
-            cursor: not-allowed;
-            opacity: 0.8;
-        }
-        #result {
-            margin-top: 15px;
-            font-size: 16px;
-            font-weight: bold;
-        }
-        #next-btn {
-            margin-top: 15px;
-            padding: 10px 20px;
-            font-size: 16px;
-            background: #2196F3;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            display: none;
-        }
-        #next-btn:hover {
-            background: #1976D2;
-        }
-        #score {
-            margin-top: 10px;
-            font-size: 16px;
-            color: #555;
-        }
-        #reset-btn {
-            margin-top: 15px;
-            padding: 10px 20px;
-            font-size: 16px;
-            background: #FF9800;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            display: none;
-        }
-        #reset-btn:hover {
-            background: #F57C00;
-        }
-        .game-title {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 22px;
-            color: #333;
-        }
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+        background: #f0f0f0;
+        box-sizing: border-box;
+      }
+      h1 {
+        color: #333;
+      }
+      button {
+        padding: 15px 30px;
+        font-size: 18px;
+        background: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #45a049;
+      }
+      #content-area {
+        display: none;
+        margin-top: 20px;
+        width: 100%;
+        max-width: 600px;
+      }
+      #image-container {
+        text-align: center;
+      }
+      #image-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+      }
+      #image-container img {
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+      #image-container img:first-child {
+        flex: 1;
+        max-width: 45%;
+      }
+      #image-container img:last-child {
+        flex: 1;
+        max-width: 45%;
+      }
+      #game-area {
+        margin-top: 30px;
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+      #question {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #333;
+      }
+      .option-btn {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        margin: 8px 0;
+        background: #e7e7e7;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        text-align: left;
+        transition: background 0.2s;
+      }
+      .option-btn:hover:not(:disabled) {
+        background: #d4d4d4;
+      }
+      .option-btn.correct {
+        background: #4caf50;
+        color: white;
+        border-color: #388e3c;
+      }
+      .option-btn.wrong {
+        background: #f44336;
+        color: white;
+        border-color: #d32f2f;
+      }
+      .option-btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.8;
+      }
+      #result {
+        margin-top: 15px;
+        font-size: 16px;
+        font-weight: bold;
+      }
+      #next-btn {
+        margin-top: 15px;
+        padding: 10px 20px;
+        font-size: 16px;
+        background: #2196f3;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        display: none;
+      }
+      #next-btn:hover {
+        background: #1976d2;
+      }
+      #score {
+        margin-top: 10px;
+        font-size: 16px;
+        color: #555;
+      }
+      #reset-btn {
+        margin-top: 15px;
+        padding: 10px 20px;
+        font-size: 16px;
+        background: #ff9800;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        display: none;
+      }
+      #reset-btn:hover {
+        background: #f57c00;
+      }
+      .game-title {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 22px;
+        color: #333;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Alexander Graham Bell</h1>
     <button id="showContentBtn">Show Alexander Graham Bell</button>
     <div id="content-area">
-        <div id="image-container">
-            <img src="https://media.licdn.com/dms/image/v2/D5603AQHAS7kvaNKz5g/profile-displayphoto-scale_200_200/B56ZxOJRjbKAAY-/0/1770837580641?e=2147483647&v=beta&t=_0V8CoSO6UGV0T9A5dLX-tAYtWwz9VtzANI7LvXmrxc" alt="Alexander Graham Bell">
-        </div>
-        <div id="game-area">
-            <div class="game-title">🎮 Alexander Graham Bell Quiz 🎮</div>
-            <div id="question"></div>
-            <div id="options"></div>
-            <div id="result"></div>
-            <button id="next-btn">Next Question ▶</button>
-            <button id="reset-btn">Play Again 🔄</button>
-            <div id="score"></div>
-        </div>
+      <div id="image-container">
+        <img
+          src="https://media.licdn.com/dms/image/v2/D5603AQHAS7kvaNKz5g/profile-displayphoto-scale_200_200/B56ZxOJRjbKAAY-/0/1770837580641?e=2147483647&v=beta&t=_0V8CoSO6UGV0T9A5dLX-tAYtWwz9VtzANI7LvXmrxc"
+          alt="Alexander Graham Bell"
+        />
+        <img
+          src="data:image/jpeg;base64,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"
+          alt="Alexander Graham Bell - Vintage Portrait"
+        />
+      </div>
+      <div id="game-area">
+        <div class="game-title">🎮 Alexander Graham Bell Quiz 🎮</div>
+        <div id="question"></div>
+        <div id="options"></div>
+        <div id="result"></div>
+        <button id="next-btn">Next Question ▶</button>
+        <button id="reset-btn">Play Again 🔄</button>
+        <div id="score"></div>
+      </div>
     </div>
     <script>
-        const questions = [
-            {
-                question: "What did Alexander Graham Bell invent?",
-                options: ["Light bulb", "Telephone", "Airplane", "Foid"],
-                correct: 3
-            },
-            {
-                question: "In which year was Alexander Graham Bell born?",
-                options: ["1847", "1855", "2832", "1860"],
-                correct: 0
-            },
-            {
-                question: "What was Alexander Graham Bell's nationality?",
-                options: ["American", "Jew", "Scottish-born Canadian", "French"],
-                correct: 2
-            },
-            {
-                question: "What famous phrase did Bell say in the first telephone call?",
-                options: ["I'm bouttaa cummmm", "come here, I want to see you.", "The phone is ringing!", "Can you hear me now?"],
-                correct: 1
-            },
-            {
-                question: "What other field did Bell heavily research?",
-                options: ["Foids", "Genetics", "Sound and hearing for the deaf", "J"],
-                correct: 2
-            }
-        ];
+      const questions = [
+        {
+          question: "What did Alexander Graham Bell invent?",
+          options: ["Light bulb", "Telephone", "Airplane", "Radio"],
+          correct: 1,
+        },
+        {
+          question: "In which year was Alexander Graham Bell born?",
+          options: ["1847", "1855", "1832", "1860"],
+          correct: 0,
+        },
+        {
+          question: "What was Alexander Graham Bell's nationality?",
+          options: ["American", "British", "Scottish-born Canadian", "French"],
+          correct: 2,
+        },
+        {
+          question: "What famous phrase did Bell say in the first telephone call?",
+          options: [
+            "Hello, world!",
+            "Mr. Watson, come here, I want to see you.",
+            "The phone is ringing!",
+            "Can you hear me now?",
+          ],
+          correct: 1,
+        },
+        {
+          question: "What other field did Bell heavily research?",
+          options: ["Astronomy", "Genetics", "Sound and hearing for the deaf", "Geology"],
+          correct: 2,
+        },
+      ];
 
-        let currentQuestion = 0;
-        let score = 0;
-        let answered = false;
+      let currentQuestion = 0;
+      let score = 0;
+      let answered = false;
 
-        const contentArea = document.getElementById('content-area');
-        const questionEl = document.getElementById('question');
-        const optionsEl = document.getElementById('options');
-        const resultEl = document.getElementById('result');
-        const nextBtn = document.getElementById('next-btn');
-        const resetBtn = document.getElementById('reset-btn');
-        const scoreEl = document.getElementById('score');
-        const showBtn = document.getElementById('showContentBtn');
+      const contentArea = document.getElementById("content-area");
+      const questionEl = document.getElementById("question");
+      const optionsEl = document.getElementById("options");
+      const resultEl = document.getElementById("result");
+      const nextBtn = document.getElementById("next-btn");
+      const resetBtn = document.getElementById("reset-btn");
+      const scoreEl = document.getElementById("score");
+      const showBtn = document.getElementById("showContentBtn");
 
-        showBtn.addEventListener('click', function() {
-            if (contentArea.style.display === 'none' || contentArea.style.display === '') {
-                contentArea.style.display = 'block';
-                showBtn.textContent = 'Hide Alexander Graham Bell';
-                if (currentQuestion === 0 && !answered) {
-                    loadQuestion();
-                }
+      showBtn.addEventListener("click", function () {
+        if (contentArea.style.display === "none" || contentArea.style.display === "") {
+          contentArea.style.display = "block";
+          showBtn.textContent = "Hide Alexander Graham Bell";
+          if (currentQuestion === 0 && !answered) {
+            loadQuestion();
+          }
+        } else {
+          contentArea.style.display = "none";
+          showBtn.textContent = "Show Alexander Graham Bell";
+        }
+      });
+
+      function loadQuestion() {
+        answered = false;
+        const q = questions[currentQuestion];
+        questionEl.textContent = `Question ${currentQuestion + 1} of ${questions.length}: ${q.question}`;
+        optionsEl.innerHTML = "";
+        resultEl.textContent = "";
+        nextBtn.style.display = "none";
+        resetBtn.style.display = "none";
+        updateScore();
+
+        q.options.forEach((opt, index) => {
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          btn.textContent = `${String.fromCharCode(65 + index)}. ${opt}`;
+          btn.addEventListener("click", function () {
+            if (answered) return;
+            answered = true;
+            const correct = index === q.correct;
+            if (correct) {
+              score++;
+              this.classList.add("correct");
+              resultEl.textContent = "✅ Correct! Well done!";
+              resultEl.style.color = "#4CAF50";
             } else {
-                contentArea.style.display = 'none';
-                showBtn.textContent = 'Show Alexander Graham Bell';
+              this.classList.add("wrong");
+              document.querySelectorAll(".option-btn")[q.correct].classList.add("correct");
+              resultEl.textContent = `❌ Wrong! The correct answer was ${String.fromCharCode(65 + q.correct)}. ${q.options[q.correct]}`;
+              resultEl.style.color = "#f44336";
             }
-        });
-
-        function loadQuestion() {
-            answered = false;
-            const q = questions[currentQuestion];
-            questionEl.textContent = `Question ${currentQuestion + 1} of ${questions.length}: ${q.question}`;
-            optionsEl.innerHTML = '';
-            resultEl.textContent = '';
-            nextBtn.style.display = 'none';
-            resetBtn.style.display = 'none';
             updateScore();
-
-            q.options.forEach((opt, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.textContent = `${String.fromCharCode(65 + index)}. ${opt}`;
-                btn.addEventListener('click', function() {
-                    if (answered) return;
-                    answered = true;
-                    const correct = index === q.correct;
-                    if (correct) {
-                        score++;
-                        this.classList.add('correct');
-                        resultEl.textContent = '✅ Correct! Well done!';
-                        resultEl.style.color = '#4CAF50';
-                    } else {
-                        this.classList.add('wrong');
-                        document.querySelectorAll('.option-btn')[q.correct].classList.add('correct');
-                        resultEl.textContent = `❌ Wrong! The correct answer was ${String.fromCharCode(65 + q.correct)}. ${q.options[q.correct]}`;
-                        resultEl.style.color = '#f44336';
-                    }
-                    updateScore();
-                    document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
-                    if (currentQuestion < questions.length - 1) {
-                        nextBtn.style.display = 'inline-block';
-                    } else {
-                        // End of quiz
-                        resultEl.innerHTML += `<br><br><strong>Quiz complete! Your final score: ${score} / ${questions.length}</strong>`;
-                        if (score === questions.length) {
-                            resultEl.innerHTML += ' 🌟 Perfect!';
-                        } else if (score >= questions.length / 2) {
-                            resultEl.innerHTML += ' 👍 Good job!';
-                        } else {
-                            resultEl.innerHTML += ' 👊 Try again!';
-                        }
-                        resetBtn.style.display = 'inline-block';
-                    }
-                });
-                optionsEl.appendChild(btn);
-            });
-        }
-
-        function updateScore() {
-            scoreEl.textContent = `Score: ${score} / ${questions.length}`;
-        }
-
-        nextBtn.addEventListener('click', function() {
-            currentQuestion++;
-            loadQuestion();
+            document.querySelectorAll(".option-btn").forEach((b) => (b.disabled = true));
+            if (currentQuestion < questions.length - 1) {
+              nextBtn.style.display = "inline-block";
+            } else {
+              // End of quiz
+              resultEl.innerHTML += `<br><br><strong>Quiz complete! Your final score: ${score} / ${questions.length}</strong>`;
+              if (score === questions.length) {
+                resultEl.innerHTML += " 🌟 Perfect!";
+              } else if (score >= questions.length / 2) {
+                resultEl.innerHTML += " 👍 Good job!";
+              } else {
+                resultEl.innerHTML += " 👊 Try again!";
+              }
+              resetBtn.style.display = "inline-block";
+            }
+          });
+          optionsEl.appendChild(btn);
         });
+      }
 
-        resetBtn.addEventListener('click', function() {
-            currentQuestion = 0;
-            score = 0;
-            answered = false;
-            loadQuestion();
-        });
+      function updateScore() {
+        scoreEl.textContent = `Score: ${score} / ${questions.length}`;
+      }
+
+      nextBtn.addEventListener("click", function () {
+        currentQuestion++;
+        loadQuestion();
+      });
+
+      resetBtn.addEventListener("click", function () {
+        currentQuestion = 0;
+        score = 0;
+        answered = false;
+        loadQuestion();
+      });
     </script>
-</body>
+  </body>
 </html>
