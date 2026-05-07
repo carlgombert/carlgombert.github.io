@@ -160,25 +160,7 @@
             "topic": "Segmentation and Pipelining Delay Formula",
             "difficulty": "Hard",
             "scenario": {
-              "setup": "A source host wants to send a 7.2 megabit (7,200,000-bit) file to a destination host through 3 intermediate routers (4 links total). Each link has a bandwidth of 1.2 Mbps. Ignore propagation and processing delays.",
-              "parts": [
-                {
-                  "label": "A",
-                  "prompt": "How long does it take to deliver the file if it is sent as a single, unsegmented packet?"
-                },
-                {
-                  "label": "B",
-                  "prompt": "How long does it take if the file is segmented into 1200 packets of 6000 bits each?"
-                },
-                {
-                  "label": "C",
-                  "prompt": "Why is Part B faster? Explain the mechanism in one or two sentences. Then identify one cost that Part B incurs that Part A does not."
-                },
-                {
-                  "label": "D",
-                  "prompt": "A network engineer proposes making packets smaller — say 600 bits each (yielding 12,000 packets). Without calculating the exact answer, explain whether this will be faster, slower, or the same as Part B, and why."
-                }
-              ]
+              "description": "A source host wants to send a 7.2 megabit (7,200,000-bit) file to a destination host through 3 intermediate routers (4 links total). Each link has a bandwidth of 1.2 Mbps. Ignore propagation and processing delays."
             },
             "answer": {
               "parts": {
@@ -203,7 +185,25 @@
               },
               "common_mistake": "For Part A, students apply the segmentation formula with P=1 instead of the simpler N × (M/R). They are equivalent — (N + 1 - 1) × (M/R) = N × (M/R) — but students should recognize both forms. For Part B, students drop the '-1' from (N + P - 1), which is a small error here but matters conceptually.",
               "deeper_concept": "Why pipelining reduces delay by converting a sequential process into a parallel one; the tradeoff between packet size, header overhead, and pipeline efficiency"
-            }
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "How long does it take to deliver the file if it is sent as a single, unsegmented packet?"
+              },
+              {
+                "label": "B",
+                "prompt": "How long does it take if the file is segmented into 1200 packets of 6000 bits each?"
+              },
+              {
+                "label": "C",
+                "prompt": "Why is Part B faster? Explain the mechanism in one or two sentences. Then identify one cost that Part B incurs that Part A does not."
+              },
+              {
+                "label": "D",
+                "prompt": "A network engineer proposes making packets smaller — say 600 bits each (yielding 12,000 packets). Without calculating the exact answer, explain whether this will be faster, slower, or the same as Part B, and why."
+              }
+            ]
           },
           {
             "id": "Q8",
@@ -212,21 +212,7 @@
             "topic": "Throughput and Bottleneck Link",
             "difficulty": "Medium",
             "scenario": {
-              "setup": "Consider the following end-to-end path: A server with an outgoing access link of 80 Mbps connects through a shared backbone link of 200 Mbps to a client with an incoming access link of 30 Mbps. The backbone link is shared by 5 simultaneous connections (including this one).",
-              "parts": [
-                {
-                  "label": "A",
-                  "prompt": "What is the end-to-end throughput for this connection?"
-                },
-                {
-                  "label": "B",
-                  "prompt": "The server upgrades its access link to 160 Mbps. What is the new end-to-end throughput? Did the upgrade help?"
-                },
-                {
-                  "label": "C",
-                  "prompt": "What single infrastructure upgrade would most improve throughput for this connection, and by how much?"
-                }
-              ]
+              "description": "Consider the following end-to-end path: A server with an outgoing access link of 80 Mbps connects through a shared backbone link of 200 Mbps to a client with an incoming access link of 30 Mbps. The backbone link is shared by 5 simultaneous connections (including this one)."
             },
             "answer": {
               "parts": {
@@ -247,7 +233,21 @@
               },
               "common_mistake": "Students average the three rates instead of taking the minimum. They also commonly ignore the R/N term entirely, treating the backbone as having full 200 Mbps capacity per connection.",
               "deeper_concept": "Bottleneck identification as a prerequisite for any effective capacity upgrade; why improving non-bottleneck links wastes money; the min() nature of end-to-end throughput"
-            }
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "What is the end-to-end throughput for this connection?"
+              },
+              {
+                "label": "B",
+                "prompt": "The server upgrades its access link to 160 Mbps. What is the new end-to-end throughput? Did the upgrade help?"
+              },
+              {
+                "label": "C",
+                "prompt": "What single infrastructure upgrade would most improve throughput for this connection, and by how much?"
+              }
+            ]
           }
         ]
       },
@@ -321,21 +321,7 @@
             "topic": "Statistical Multiplexing — Probability and Capacity Planning",
             "difficulty": "Hard",
             "scenario": {
-              "setup": "An ISP has a shared 10 Mbps uplink. Each of its residential customers requires exactly 1 Mbps when active, and each customer is independently active 8% of the time.",
-              "parts": [
-                {
-                  "label": "A",
-                  "prompt": "How many customers can the ISP support with circuit switching?"
-                },
-                {
-                  "label": "B",
-                  "prompt": "With packet switching, the ISP wants the probability of more than 10 customers being simultaneously active to be below 1%. Using the binomial probability formula, set up (but do not fully evaluate) the expression for the congestion probability with 80 customers. Explain qualitatively whether 80 customers is likely to satisfy the 1% threshold."
-                },
-                {
-                  "label": "C",
-                  "prompt": "The ISP doubles its residential base to 160 customers on the same 10 Mbps link. A customer complains that their internet feels slower even though no one seems to be using the internet at the same time. Give two distinct technical explanations for why this can happen even under statistical multiplexing."
-                }
-              ]
+              "description": "An ISP has a shared 10 Mbps uplink. Each of its residential customers requires exactly 1 Mbps when active, and each customer is independently active 8% of the time."
             },
             "answer": {
               "parts": {
@@ -355,7 +341,21 @@
               },
               "common_mistake": "For Part B, students set up P(X = 10) instead of P(X > 10). Congestion occurs when demand exceeds capacity — the threshold is strictly greater than, not equal to. For Part C, students give only the 'other users are active but you can't see them' explanation and miss the fundamentally different explanation of queuing delay non-linearity.",
               "deeper_concept": "The gap between average-case and worst-case performance under statistical multiplexing; why link utilization percentages are misleading without accounting for delay variance"
-            }
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "How many customers can the ISP support with circuit switching?"
+              },
+              {
+                "label": "B",
+                "prompt": "With packet switching, the ISP wants the probability of more than 10 customers being simultaneously active to be below 1%. Using the binomial probability formula, set up (but do not fully evaluate) the expression for the congestion probability with 80 customers. Explain qualitatively whether 80 customers is likely to satisfy the 1% threshold."
+              },
+              {
+                "label": "C",
+                "prompt": "The ISP doubles its residential base to 160 customers on the same 10 Mbps link. A customer complains that their internet feels slower even though no one seems to be using the internet at the same time. Give two distinct technical explanations for why this can happen even under statistical multiplexing."
+              }
+            ]
           },
           {
             "id": "Q13",
@@ -364,21 +364,7 @@
             "topic": "FDM vs. TDM — Resource Division Mechanics",
             "difficulty": "Medium",
             "scenario": {
-              "setup": "A circuit-switched network has a 12 Mbps link shared among 4 users.",
-              "parts": [
-                {
-                  "label": "A",
-                  "prompt": "Under FDM, what transmission rate does each user get? If User 3 is idle, what happens to their allocated bandwidth?"
-                },
-                {
-                  "label": "B",
-                  "prompt": "Under TDM with 4 slots per frame and a frame rate of 8000 frames/second, what is the transmission rate per user? How does User 3's silence affect the other users?"
-                },
-                {
-                  "label": "C",
-                  "prompt": "A fifth user suddenly wants to join. What happens under FDM? What happens under TDM?"
-                }
-              ]
+              "description": "A circuit-switched network has a 12 Mbps link shared among 4 users."
             },
             "answer": {
               "parts": {
@@ -397,7 +383,21 @@
               },
               "common_mistake": "Students confuse FDM and TDM by saying FDM is 'better' because it's continuous. Both have identical static allocation problems — the difference is only in the dimension being divided (frequency vs. time). Both waste resources when users are idle.",
               "deeper_concept": "Static resource reservation as the fundamental inefficiency of circuit switching; why both FDM and TDM fail to exploit idle capacity and how this motivates statistical multiplexing"
-            }
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "Under FDM, what transmission rate does each user get? If User 3 is idle, what happens to their allocated bandwidth?"
+              },
+              {
+                "label": "B",
+                "prompt": "Under TDM with 4 slots per frame and a frame rate of 8000 frames/second, what is the transmission rate per user? How does User 3's silence affect the other users?"
+              },
+              {
+                "label": "C",
+                "prompt": "A fifth user suddenly wants to join. What happens under FDM? What happens under TDM?"
+              }
+            ]
           }
         ]
       },

@@ -630,65 +630,25 @@
                 if (typeof q.scenario === 'string') {
                     scenarioDiv.innerHTML = `<strong>Scenario:</strong> ${q.scenario}`;
                 } else if (typeof q.scenario === 'object') {
-                    let html = q.scenario.description
-                        ? `<p class="font-medium text-on-surface mb-2">${q.scenario.description}</p>`
-                        : '';
-
-                    // Terminal command block
+                    let html = `<strong>Scenario:</strong> ${q.scenario.description || ''}`;
+                    // Special rendering for known scenario structures
                     if (q.scenario.command) {
                         html += `<div class="bg-inverse-surface text-inverse-on-surface font-mono p-2 rounded mt-2 text-xs">${q.scenario.command}</div>`;
                     }
                     if (q.scenario.response_observed) {
                         html += `<div class="bg-inverse-surface text-inverse-on-surface font-mono p-2 rounded mt-1 text-xs whitespace-pre">${q.scenario.response_observed.join('\n')}</div>`;
                     }
-
-                    // Generic rendering for remaining keys
+                    // Generic rendering for other object properties
                     const skipKeys = ['description', 'command', 'response_observed'];
                     const details = Object.entries(q.scenario).filter(([k]) => !skipKeys.includes(k));
-
-                    details.forEach(([k, v]) => {
-                        // Format key name nicely
-                        const label = k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-
-                        if (Array.isArray(v)) {
-                            // Check if it's an array of objects with label+prompt (part-like)
-                            if (v.length > 0 && typeof v[0] === 'object' && (v[0].label || v[0].prompt || v[0].from)) {
-                                // Skip parts arrays — they are rendered separately as question parts below
-                                if (k === 'parts') return;
-                                // Render other object arrays as a structured list
-                                html += `<div class="mt-2"><strong class="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">${label}:</strong>`;
-                                html += `<div class="mt-1 flex flex-col gap-1">`;
-                                v.forEach(item => {
-                                    const itemLabel = item.label || item.name || item.from || '';
-                                    const itemDesc = item.prompt || item.description || item.action || JSON.stringify(item);
-                                    if (itemLabel) {
-                                        html += `<div class="flex gap-2 text-xs"><span class="font-bold text-primary w-4 shrink-0">${itemLabel}.</span><span class="text-on-surface-variant">${itemDesc}</span></div>`;
-                                    } else {
-                                        html += `<div class="text-xs text-on-surface-variant">• ${itemDesc}</div>`;
-                                    }
-                                });
-                                html += `</div></div>`;
-                            } else {
-                                // Array of strings/primitives — bullet list
-                                html += `<div class="mt-2"><strong class="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">${label}:</strong>`;
-                                html += `<ul class="list-disc list-inside mt-1 text-xs text-on-surface-variant space-y-0.5">`;
-                                v.forEach(item => html += `<li>${typeof item === 'object' ? JSON.stringify(item) : item}</li>`);
-                                html += `</ul></div>`;
-                            }
-                        } else if (typeof v === 'object' && v !== null) {
-                            // Nested object — key: value pairs
-                            html += `<div class="mt-2"><strong class="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">${label}:</strong>`;
-                            html += `<div class="mt-1 flex flex-col gap-0.5">`;
-                            Object.entries(v).forEach(([subk, subv]) => {
-                                html += `<div class="text-xs"><span class="font-medium text-on-surface capitalize">${subk.replace(/_/g, ' ')}:</span> <span class="text-on-surface-variant">${subv}</span></div>`;
-                            });
-                            html += `</div></div>`;
-                        } else {
-                            // Simple string/number
-                            html += `<div class="mt-2 text-xs"><strong class="font-semibold text-on-surface">${label}:</strong> <span class="text-on-surface-variant">${v}</span></div>`;
-                        }
-                    });
-
+                    if (details.length > 0) {
+                        html += `<ul class="list-disc list-inside mt-2 text-xs opacity-80">`;
+                        details.forEach(([k, v]) => {
+                            let displayVal = typeof v === 'object' ? JSON.stringify(v) : v;
+                            html += `<li><strong>${k}:</strong> ${displayVal}</li>`;
+                        });
+                        html += `</ul>`;
+                    }
                     scenarioDiv.innerHTML = html;
                 }
                 card.appendChild(scenarioDiv);
