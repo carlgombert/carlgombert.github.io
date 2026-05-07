@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>guide</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+
+    @media print {
+      html {
+        background-color: white;
+      }
+
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+
+      p,
+      h2,
+      h3 {
+        orphans: 3;
+        widows: 3;
+      }
+
+      h2,
+      h3,
+      h4 {
+        page-break-after: avoid;
+      }
+    }
+
+    p {
+      margin: 1em 0;
+    }
+
+    a {
+      color: #1a1a1a;
+    }
+
+    a:visited {
+      color: #1a1a1a;
+    }
+
+    img {
+      max-width: 100%;
+    }
+
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      margin-top: 1.4em;
+    }
+
+    h5,
+    h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+
+    h6 {
+      font-weight: normal;
+    }
+
+    ol,
+    ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+
+    li>ol,
+    li>ul {
+      margin-top: 0;
+    }
+
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+
+    .sourceCode {
+      background-color: transparent;
+      overflow: visible;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+
+    table caption {
+      margin-bottom: 0.75em;
+    }
+
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+
+    #TOC li {
+      list-style: none;
+    }
+
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+
+    #TOC>ul {
+      padding-left: 0;
+    }
+
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+
+    span.smallcaps {
+      font-variant: small-caps;
+    }
+
+    div.columns {
+      display: flex;
+      gap: min(4vw, 1.5em);
+    }
+
+    div.column {
+      flex: auto;
+      overflow-x: auto;
+    }
+
+    div.hanging-indent {
+      margin-left: 1.5em;
+      text-indent: -1.5em;
+    }
+
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class] {
+      list-style: none;
+    }
+
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+        ? 'dark'
+        : 'default'
+    });
+  </script>
+  <h1 id="network-layer-data-plane">Network Layer: Data Plane</h1>
+  <p>The network layer's primary goal is to transport segments from a sending host to a receiving host. Unlike the
+    transport layer (process-to-process) or the data link layer (hop-to-hop over a single link), the network layer is a
+    <strong>network-wide</strong> concern, involving every host and router in the path.
+  </p>
+  <h2 id="1-key-network-layer-functions">1. Key Network Layer Functions</h2>
+  <p>There are two vital functions performed by the network layer:</p>
+  <ul>
+    <li><strong>Forwarding (Data Plane)</strong>: The local, per-router action of transferring a packet from an input
+      link interface to the appropriate output link interface.</li>
+    <li><strong>Routing (Control Plane)</strong>: The network-wide process that determines the end-to-end path that
+      packets take from source to destination.</li>
+  </ul>
+  <h3 id="11-the-analogy">1.1 The Analogy</h3>
+  <ul>
+    <li><strong>Forwarding</strong>: Taking a specific interchange/exit while driving through a single city.</li>
+    <li><strong>Routing</strong>: Planning the entire trip from New York to Los Angeles using a map.</li>
+  </ul>
+  <hr>
+  <h2 id="2-network-service-models">2. Network Service Models</h2>
+  <p>A service model defines the characteristics of end-to-end delivery of data between sending and receiving hosts.</p>
+  <h3 id="21-the-internets-best-effort-model">2.1 The Internet's &quot;Best Effort&quot; Model</h3>
+  <p>The Internet's network layer provides a <strong>best-effort service</strong>. This means:</p>
+  <ul>
+    <li><strong>No Guarantees</strong>: There is no guarantee that a datagram will eventually be delivered, that it will
+      arrive in order, or that it will meet any specific timing/bandwidth constraints.</li>
+    <li><strong>Why it works</strong>: Its simplicity has allowed for massive scalability and rapid deployment.
+      Performance is often &quot;good enough&quot; due to over-provisioning of bandwidth and the use of Content
+      Distribution Networks (CDNs).</li>
+  </ul>
+  <hr>
+  <h2 id="3-router-architecture">3. Router Architecture</h2>
+  <p>A router's primary job is to move packets from input links to the appropriate output links.</p>
+  <h3 id="31-high-level-components">3.1 High-Level Components</h3>
+  <ol>
+    <li><strong>Routing Processor (Control Plane)</strong>: Runs routing protocols (OSPF, BGP), maintains routing
+      tables, and computes forwarding tables. Operates in the <strong>millisecond</strong> timeframe.</li>
+    <li><strong>Switching Fabric (Data Plane)</strong>: Connects the router's input ports to its output ports. It is the
+      &quot;network inside the router.&quot; Operates in the <strong>nanosecond</strong> timeframe.</li>
+    <li><strong>Input Ports</strong>: Perform physical and link-layer functions, and decentralized lookup (using a copy
+      of the forwarding table).</li>
+    <li><strong>Output Ports</strong>: Store packets received from the switching fabric and transmit them on the
+      outgoing link.</li>
+  </ol>
+  <h3 id="32-input-ports-and-decentralized-switching">3.2 Input Ports and Decentralized Switching</h3>
+  <p>To avoid a central bottleneck, each input port has its own copy of the forwarding table.</p>
+  <ul>
+    <li><strong>Lookup</strong>: The port examines the destination IP and determines the output port.</li>
+    <li><strong>Match plus Action</strong>: The &quot;match&quot; is the destination IP (using longest prefix matching),
+      and the &quot;action&quot; is forwarding the packet into the switching fabric.</li>
+    <li><strong>Queueing</strong>: If datagrams arrive at the input port faster than the switching fabric can process
+      them, <strong>input queueing</strong> occurs. This can lead to <strong>Head-of-the-Line (HOL) Blocking</strong>,
+      where a packet at the front of the queue prevents other packets behind it from moving forward, even if their
+      output ports are free.</li>
+  </ul>
+  <h3 id="33-switching-fabrics">3.3 Switching Fabrics</h3>
+  <p>The fabric is the heart of the router. There are three main types:</p>
+  <ol>
+    <li><strong>Memory</strong>: Switching under direct control of the CPU. Packets are copied to system memory and then
+      to the output port. (Limited by memory bandwidth).</li>
+    <li><strong>Bus</strong>: Input ports transfer packets directly to output ports via a shared bus. (Limited by bus
+      speed).</li>
+    <li><strong>Crossbar (Interconnection Network)</strong>: Uses a complex mesh of buses to allow multiple packets to
+      be transferred simultaneously as long as they are going to different output ports. (High performance).</li>
+  </ol>
+  <h3 id="34-output-ports-and-buffer-management">3.4 Output Ports and Buffer Management</h3>
+  <p>If the switching fabric delivers packets faster than the output link can transmit them, <strong>output
+      queueing</strong> occurs.</p>
+  <ul>
+    <li><strong>Buffer Management</strong>: Deciding which packets to store and which to drop when the buffer is full.
+      <ul>
+        <li><strong>Tail Drop</strong>: Drop the arriving packet.</li>
+        <li><strong>Priority Drop</strong>: Drop lower-priority packets.</li>
+        <li><strong>RED (Random Early Detection)</strong>: Randomly drop packets before the buffer is completely full to
+          signal congestion to the sender (e.g., using <strong>ECN - Explicit Congestion Notification</strong>).</li>
+      </ul>
+    </li>
+  </ul>
+  <h3 id="35-packet-scheduling">3.5 Packet Scheduling</h3>
+  <p>Determining the order in which queued packets are transmitted:</p>
+  <ul>
+    <li><strong>FCFS / FIFO</strong>: First-Come, First-Served.</li>
+    <li><strong>Priority Scheduling</strong>: Send highest priority packets first.</li>
+    <li><strong>Round Robin</strong>: Cycle through different classes of traffic.</li>
+    <li><strong>Weighted Fair Queueing (WFQ)</strong>: A generalized version of round robin where each class is
+      guaranteed a minimum percentage of the link's bandwidth.</li>
+  </ul>
+  <hr>
+  <h2 id="4-forwarding-logic-longest-prefix-matching">4. Forwarding Logic: Longest Prefix Matching</h2>
+  <p>When a router looks up a destination address in its forwarding table, it may find multiple matches (if prefixes
+    overlap).</p>
+  <ul>
+    <li><strong>Rule</strong>: The router always uses the <strong>Longest Prefix Match</strong>—the entry with the most
+      specific (longest) subnet mask that matches the destination IP.</li>
+  </ul>
+  <blockquote>
+    <p>[!TIP]
+      <strong>Why Longest Prefix Match?</strong>
+      This allows for hierarchical addressing. An ISP might have a broad rule for <code>200.23.0.0/16</code>, but a
+      specific organization within that ISP might have a rule for <code>200.23.18.0/23</code>. The router will correctly
+      send traffic for the specific organization to the more specific link.
+    </p>
+  </blockquote>
+  <hr>
+  <h2 id="5-ip-addressing-ipv4">5. IP Addressing (IPv4)</h2>
+  <p>An IP address is a <strong>32-bit</strong> identifier for a host or router interface. Every interface on the
+    Internet must have a unique IP address (globally unique, or unique within its private network).</p>
+  <h3 id="31-dotted-decimal-notation">3.1 Dotted-Decimal Notation</h3>
+  <p>Instead of reading 32 bits (e.g., <code>11011111 00000001 00000001 00000001</code>), we use dotted-decimal format:
+    <code>223.1.1.1</code>. Each number represents one byte (8 bits), ranging from 0 to 255.
+  </p>
+  <h3 id="32-subnets">3.2 Subnets</h3>
+  <p>A <strong>Subnet</strong> is a group of device interfaces that can physically reach each other without passing
+    through an intervening router.</p>
+  <ul>
+    <li><strong>IP Structure</strong>: <code>[Subnet Part] [Host Part]</code></li>
+    <li>Interfaces in the same subnet share the same high-order bits (the subnet part).</li>
+  </ul>
+  <h3 id="52-cidr-classless-inter-domain-routing">5.2 CIDR: Classless Inter-Domain Routing</h3>
+  <p>CIDR is the modern standard for address allocation. It uses a <strong>Prefix</strong> notation:
+    <code>a.b.c.d/x</code>, where <code>x</code> is the number of bits in the subnet portion of the address.
+  </p>
+  <ul>
+    <li><strong>Example</strong>: <code>200.23.16.0/23</code> means the first 23 bits identify the subnet.</li>
+    <li><strong>Route Aggregation</strong>: Hierarchical addressing allows an ISP to advertise a single large prefix
+      (e.g., <code>/20</code>) to the world, even if it has divided that space into multiple smaller subnets (e.g.,
+      <code>/23</code>) for different organizations.
+    </li>
+  </ul>
+  <h3 id="53-practical-subnet-calculations">5.3 Practical Subnet Calculations</h3>
+  <p>When calculating the capacity of a subnet:</p>
+  <ul>
+    <li><strong>Total Addresses</strong>: $2^{(32 - x)}$</li>
+    <li><strong>Usable Host Addresses</strong>: $2^{(32 - x)} - 2$ (Subtract one for the network address and one for the
+      broadcast address).</li>
+    <li><strong>Example (/29)</strong>: $32 - 29 = 3$ bits for hosts. $2^3 = 8$ total addresses. $8 - 2 = 6$ usable host
+      addresses.</li>
+  </ul>
+  <hr>
+  <h2 id="6-getting-an-ip-address">6. Getting an IP Address</h2>
+  <h3 id="61-isp-and-icann-allocation">6.1 ISP and ICANN Allocation</h3>
+  <ul>
+    <li><strong>ISP Allocation</strong>: An ISP gets a block of addresses from <strong>ICANN</strong> (Internet
+      Corporation for Assigned Names and Numbers) or regional registries.</li>
+    <li><strong>Hierarchical Delegation</strong>: ICANN $\rightarrow$ Regional Registry $\rightarrow$ ISP $\rightarrow$
+      Organization.</li>
+  </ul>
+  <h3 id="62-dhcp-dynamic-host-configuration-protocol">6.2 DHCP: Dynamic Host Configuration Protocol</h3>
+  <p>DHCP allows a host to dynamically obtain an IP address from a network server when it joins the network. This is
+    known as &quot;plug-and-play&quot; networking.</p>
+  <h4 id="the-4-step-dhcp-process-dora">The 4-Step DHCP Process (DORA)</h4>
+  <ol>
+    <li><strong>Discover</strong>: Client broadcasts &quot;Is there a DHCP server?&quot;
+      (<code>dest: 255.255.255.255</code>).</li>
+    <li><strong>Offer</strong>: Server responds &quot;I am a server; here is an IP you can use.&quot;</li>
+    <li><strong>Request</strong>: Client says &quot;I'd like to use that IP.&quot;</li>
+    <li><strong>ACK</strong>: Server confirms &quot;OK, you've got that IP.&quot;</li>
+  </ol>
+  <h4 id="beyond-the-ip-address">Beyond the IP Address</h4>
+  <p>DHCP typically provides four key pieces of information to a client:</p>
+  <ol>
+    <li><strong>IP Address</strong></li>
+    <li><strong>Subnet Mask</strong></li>
+    <li><strong>Default Gateway</strong> (The address of the first-hop router).</li>
+    <li><strong>DNS Server</strong> (Name and IP address of the local DNS server).</li>
+  </ol>
+  <hr>
+  <h2 id="5-special-ip-addresses">5. Special IP Addresses</h2>
+  <ul>
+    <li><strong>Network Address</strong>: Host portion is all <strong>0s</strong>. Used to identify the subnet itself.
+    </li>
+    <li><strong>Directed Broadcast</strong>: Host portion is all <strong>1s</strong>. Sent to all hosts on a specific
+      subnet.</li>
+    <li><strong>Local Broadcast</strong>: <code>255.255.255.255</code>. Sent to all hosts on the local link.</li>
+    <li><strong>Loopback Address</strong>: <code>127.0.0.1</code>. Refers to the local machine (the
+      &quot;localhost&quot;).</li>
+    <li><strong>Local Host</strong>: <code>0.0.0.0</code>. Refers to &quot;this computer&quot; during startup (e.g., in
+      DHCP Discover).</li>
+  </ul>
+  <hr>
+  <h2 id="8-link-layer-fundamentals-integrated">8. Link Layer Fundamentals (Integrated)</h2>
+  <p>While typically a separate layer, the data plane heavily relies on Link Layer technologies to move packets across a
+    single physical link.</p>
+  <h3 id="81-mac-addresses">8.1 MAC Addresses</h3>
+  <p>A <strong>MAC (Media Access Control)</strong> address is a 48-bit permanent identifier assigned to a network
+    interface (NIC).</p>
+  <ul>
+    <li><strong>Analogy</strong>: MAC is like a Social Security Number (permanent/portable); IP is like a Postal Address
+      (location-dependent).</li>
+    <li><strong>Notation</strong>: Hexadecimal (e.g., <code>1A-2F-BB-76-09-AD</code>).</li>
+  </ul>
+  <h3 id="82-ethernet">8.2 Ethernet</h3>
+  <p>Ethernet is the dominant wired LAN technology. It is <strong>connectionless</strong> (no handshaking) and
+    <strong>unreliable</strong> (no ACKs/NAKs; dropped frames are recovered only by higher layers like TCP).
+  </p>
+  <ul>
+    <li><strong>Topology</strong>: Modern Ethernet uses a <strong>Switched</strong> topology (star).</li>
+    <li><strong>Frame Structure</strong>:
+      <ul>
+        <li><strong>Preamble (8 bytes)</strong>: 7 bytes of <code>10101010</code> followed by 1 byte of
+          <code>10101011</code> (<strong>Start of Frame - SoF</strong>). Used to synchronize clock rates.
+        </li>
+        <li><strong>Addresses</strong>: Destination and Source MAC (6 bytes each).</li>
+        <li><strong>Type</strong>: Indicates the higher-layer protocol (mostly IP: <code>0x0800</code>).</li>
+        <li><strong>Data (Payload)</strong>: The IP datagram.</li>
+        <li><strong>CRC (4 bytes)</strong>: Cyclic Redundancy Check for error detection. If an error is detected, the
+          frame is dropped.</li>
+      </ul>
+    </li>
+  </ul>
+  <h3 id="83-ethernet-switches">8.3 Ethernet Switches</h3>
+  <p>A switch is a Link-Layer (Layer 2) device.</p>
+  <ul>
+    <li><strong>Plug-and-Play</strong>: Switches are transparent; hosts are unaware of their presence, and they require
+      no manual configuration.</li>
+    <li><strong>No MAC Address</strong>: Unlike routers, switch interfaces do not typically have MAC addresses assigned.
+    </li>
+    <li><strong>Self-Learning</strong>: Switches build a &quot;Switch Table&quot; automatically:
+      <ol>
+        <li><strong>Learning</strong>: When a frame arrives, the switch records the <strong>Source MAC</strong> address
+          and the incoming port.</li>
+        <li><strong>Lookup</strong>: It examines the <strong>Destination MAC</strong> to decide the action.</li>
+      </ol>
+    </li>
+    <li><strong>Actions</strong>:
+      <ul>
+        <li><strong>Forward</strong>: If the destination is in the table, send it to the specific port
+          (<strong>Selective Forwarding</strong>).</li>
+        <li><strong>Flood</strong>: If the destination is unknown or is a broadcast address (<code>FF-FF...</code>),
+          send it to all ports except the incoming one.</li>
+        <li><strong>Filter/Drop</strong>: Discard the frame if the destination is on the same segment it arrived from.
+        </li>
+      </ul>
+    </li>
+    <li><strong>Collision-Free</strong>: Switches buffer packets and provide dedicated links to each host, eliminating
+      collisions and isolating collision domains.</li>
+  </ul>
+  <h3 id="84-switches-vs-routers">8.4 Switches vs. Routers</h3>
+  <p>Both are store-and-forward devices with forwarding tables, but they operate at different layers.</p>
+  <table>
+    <thead>
+      <tr>
+        <th style="text-align:left">Feature</th>
+        <th style="text-align:left">Ethernet Switch</th>
+        <th style="text-align:left">IP Router</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align:left"><strong>Layer</strong></td>
+        <td style="text-align:left">Link Layer (Layer 2)</td>
+        <td style="text-align:left">Network Layer (Layer 3)</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>Addressing</strong></td>
+        <td style="text-align:left">MAC Addresses</td>
+        <td style="text-align:left">IP Addresses</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>Configuration</strong></td>
+        <td style="text-align:left">Plug-and-Play (Transparent)</td>
+        <td style="text-align:left">Requires IP configuration</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>Logic</strong></td>
+        <td style="text-align:left">Self-learning, Flooding</td>
+        <td style="text-align:left">Routing algorithms (OSPF, BGP)</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>Broadcasts</strong></td>
+        <td style="text-align:left">Vulnerable to Broadcast Storms</td>
+        <td style="text-align:left">Provides protection against storms</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>Topology</strong></td>
+        <td style="text-align:left">Confined to Spanning Tree</td>
+        <td style="text-align:left">Supports arbitrary topologies</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>Use Case</strong></td>
+        <td style="text-align:left">Small networks (hundreds of hosts)</td>
+        <td style="text-align:left">Large networks (thousands of hosts)</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="85-spanning-tree-protocol-stp">8.5 Spanning Tree Protocol (STP)</h3>
+  <p>While redundancy is good for reliability, it creates physical loops in a switched network.</p>
+  <ul>
+    <li><strong>The Problem</strong>: <strong>Broadcast Storms</strong>. Switches will multiply and forward broadcast
+      frames forever in a loop, eventually crashing the network.</li>
+    <li><strong>The Solution</strong>: Organizes switches into a loop-free <strong>Spanning Tree</strong>.
+      <ul>
+        <li>A subset of interfaces is disabled to break the loops while maintaining connectivity.</li>
+        <li>Invented by <strong>Radia Perlman</strong> (the &quot;Mother of the Internet&quot;).</li>
+      </ul>
+    </li>
+  </ul>
+  <hr>
+  <h2 id="9-address-resolution-protocol-arp">9. Address Resolution Protocol (ARP)</h2>
+  <p>ARP is the &quot;bridge&quot; between the Network Layer (IP) and the Link Layer (MAC). It is used to find the MAC
+    address of a host given its IP address.</p>
+  <h3 id="91-how-arp-works">9.1 How ARP Works</h3>
+  <ol>
+    <li><strong>ARP Table</strong>: Every host and router on a LAN maintains an ARP table (cache) that maps IP addresses
+      to MAC addresses.</li>
+    <li><strong>Soft State</strong>: Information in the ARP table is &quot;soft&quot;—it times out (typically after 20
+      minutes) and is discarded if not refreshed.</li>
+    <li><strong>Plug-and-Play</strong>: Nodes create their tables automatically without administrator intervention.</li>
+    <li><strong>The Process</strong>:
+      <ul>
+        <li><strong>A wants to send to B</strong>: If B's MAC is not in A's ARP table, A sends an <strong>ARP
+            Query</strong>.</li>
+        <li><strong>Broadcast</strong>: The query is sent to the broadcast MAC address <code>FF-FF-FF-FF-FF-FF</code>.
+          All nodes on the LAN receive it.</li>
+        <li><strong>Unicast Reply</strong>: B sees its IP in the query and sends an <strong>ARP Response</strong>
+          directly to A (unicast) containing its MAC address.</li>
+        <li><strong>Update</strong>: A updates its table and sends the data frame.</li>
+      </ul>
+    </li>
+  </ol>
+  <h3 id="92-arp-packet-format">9.2 ARP Packet Format</h3>
+  <p>ARP messages are encapsulated directly in Ethernet frames (Type <code>0x0806</code>). Key fields include:</p>
+  <ul>
+    <li><strong>Hardware Type</strong>: e.g., Ethernet.</li>
+    <li><strong>Protocol Type</strong>: e.g., IP.</li>
+    <li><strong>HLEN &amp; PLEN</strong>: Length of physical (MAC) and protocol (IP) addresses.</li>
+    <li><strong>Operation</strong>: Indicates if the packet is a <strong>Request (1)</strong> or a <strong>Reply
+        (2)</strong>.</li>
+    <li><strong>Sender/Target Addresses</strong>: Both MAC and IP addresses for the sender and target.</li>
+  </ul>
+  <hr>
+  <h2 id="10-routing-between-subnets-addressing-walkthrough">10. Routing Between Subnets (Addressing Walkthrough)</h2>
+  <p>When sending a packet to a destination on a <strong>different</strong> subnet, the packet must pass through a
+    router.</p>
+  <h3 id="101-key-principle-subnet-determination">10.1 Key Principle: Subnet Determination</h3>
+  <p>Before sending a packet, a host must determine if the destination is on the <strong>same LAN</strong> or a
+    <strong>remote subnet</strong>:
+  </p>
+  <ul>
+    <li><strong>The Logic</strong>: The host performs a bitwise <strong>AND</strong> operation between the destination
+      IP and its own subnet mask to find the <strong>Network Prefix</strong>.</li>
+    <li><strong>Binary Example</strong>:
+      <ul>
+        <li>Host IP: <code>153.169.4.235</code></li>
+        <li>Subnet Mask: <code>255.255.254.0</code> (Prefix: /23)</li>
+        <li>Expanding the 3rd byte: <code>4 = 00000100</code>, <code>254 = 11111110</code>.</li>
+        <li><code>00000100 &amp; 11111110 = 00000100</code> (which is 4).</li>
+        <li>Network Prefix: <code>153.169.4.0</code>.</li>
+      </ul>
+    </li>
+    <li><strong>Result</strong>:
+      <ul>
+        <li>If the result matches its own network prefix, the destination is local (use ARP for the destination's MAC).
+        </li>
+        <li>If they do not match, the destination is remote (send the frame to the <strong>Default Gateway</strong> MAC
+          address).</li>
+      </ul>
+    </li>
+  </ul>
+  <h3 id="102-ip-vs-mac-headers">10.2 IP vs. MAC Headers</h3>
+  <ul>
+    <li><strong>IP Addresses</strong>: Source and Destination IP addresses <strong>NEVER CHANGE</strong> during the
+      entire journey (from end-to-end).</li>
+    <li><strong>MAC Addresses</strong>: Source and Destination MAC addresses <strong>CHANGE AT EVERY HOP</strong> (from
+      link-to-link).</li>
+  </ul>
+  <h3 id="102-step-by-step-walkthrough-a-rightarrow-router-r-rightarrow-b">10.2 Step-by-Step Walkthrough (A
+    $\rightarrow$ Router R $\rightarrow$ B)</h3>
+  <ol>
+    <li><strong>At Source A</strong>:
+      <ul>
+        <li>A realizes B is on a different subnet (using subnet mask).</li>
+        <li>A must send the packet to its <strong>Default Gateway</strong> (Router R).</li>
+        <li><strong>IP Header</strong>: Source = A, Dest = B.</li>
+        <li><strong>Ethernet Header</strong>: Source MAC = A, Dest MAC = <strong>Router R</strong>.</li>
+      </ul>
+    </li>
+    <li><strong>At Router R</strong>:
+      <ul>
+        <li>R receives the frame, strips the Ethernet header, and looks at the IP destination (B).</li>
+        <li>R consults its forwarding table to find the correct outgoing interface.</li>
+        <li><strong>IP Header</strong>: Source = A, Dest = B (Unchanged).</li>
+        <li><strong>Ethernet Header</strong>: Source MAC = <strong>Router R</strong> (outgoing port), Dest MAC =
+          <strong>B</strong>.
+        </li>
+      </ul>
+    </li>
+    <li><strong>At Destination B</strong>:
+      <ul>
+        <li>B receives the frame, strips the Ethernet header, and passes the IP datagram up the stack.</li>
+      </ul>
+    </li>
+  </ol>
+  <h3 id="104-prerequisites-for-host-communication">10.4 Prerequisites for Host Communication</h3>
+  <p>For a host (A) to communicate with another host (B/C):</p>
+  <ul>
+    <li><strong>IP of Destination</strong>: Usually obtained via <strong>DNS</strong> (Domain Name System).</li>
+    <li><strong>Subnet Membership</strong>: A determines if the destination is local using its own <strong>IP and Subnet
+        Mask</strong>.</li>
+    <li><strong>Default Gateway</strong>: A learns the IP of its first-hop router (R) usually via <strong>DHCP</strong>.
+    </li>
+    <li><strong>Gateway MAC</strong>: A finds the MAC address of R using <strong>ARP</strong>.</li>
+  </ul>
+  <hr>
+  <h2 id="11-ip-fragmentation-and-reassembly">11. IP Fragmentation and Reassembly</h2>
+  <p>Different physical networks have different <strong>MTU (Maximum Transmission Unit)</strong> limits (e.g., Ethernet
+    is 1500 bytes). If a router receives a datagram larger than the next link's MTU, it must fragment it.</p>
+  <h3 id="111-fragmentation-mechanism">11.1 Fragmentation Mechanism</h3>
+  <ul>
+    <li><strong>Identification (ID)</strong>: All fragments from the same original datagram share the same ID.</li>
+    <li><strong>Flags</strong>:
+      <ul>
+        <li><strong>DF (Don't Fragment)</strong>: If set to 1, the router drops the packet and sends an ICMP error
+          instead of fragmenting.</li>
+        <li><strong>MF (More Fragments)</strong>: Set to 1 for all fragments except the last one (which is 0).</li>
+      </ul>
+    </li>
+    <li><strong>Fragment Offset</strong>: Indicates where in the original datagram this fragment's data belongs.
+      <ul>
+        <li><strong>Unit</strong>: Measured in blocks of <strong>8 bytes</strong>.</li>
+      </ul>
+    </li>
+    <li><strong>Constraints</strong>:
+      <ul>
+        <li><strong>Payload Size</strong>: The payload size of every fragment (except the last) <strong>must be a
+            multiple of 8</strong>.</li>
+        <li><strong>Double Fragmentation</strong>: Fragments can be further fragmented by downstream routers if they
+          encounter even smaller MTUs.</li>
+      </ul>
+    </li>
+  </ul>
+  <h3 id="112-reassembly">11.2 Reassembly</h3>
+  <ul>
+    <li><strong>Where?</strong>: Reassembly is performed <strong>ONLY at the destination host</strong> to keep routers
+      fast and simple.</li>
+    <li><strong>Mechanism</strong>:
+      <ul>
+        <li><strong>Timer</strong>: A reassembly timer is set when the first fragment arrives. If all fragments don't
+          arrive before the timer expires, the datagram is discarded.</li>
+        <li><strong>Missing Fragments</strong>: If one fragment is lost, the entire original datagram is discarded (IP
+          does not recover missing fragments; it relies on higher layers like TCP).</li>
+      </ul>
+    </li>
+  </ul>
+  <hr>
+  <h2 id="12-icmp-internet-control-message-protocol">12. ICMP (Internet Control Message Protocol)</h2>
+  <p>ICMP is used by hosts and routers to communicate network-layer information, primarily for <strong>error
+      reporting</strong> and <strong>diagnostics</strong>.</p>
+  <h3 id="121-detailed-icmp-types-and-codes">12.1 Detailed ICMP Types and Codes</h3>
+  <p>ICMP messages are carried in IP datagrams (Protocol 1). They contain a type, code, and the first 8 bytes of the IP
+    datagram that caused the error.</p>
+  <table>
+    <thead>
+      <tr>
+        <th style="text-align:left">Type</th>
+        <th style="text-align:left">Code</th>
+        <th style="text-align:left">Description</th>
+        <th style="text-align:left">Example/Usage</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align:left"><strong>0</strong></td>
+        <td style="text-align:left">0</td>
+        <td style="text-align:left">Echo Reply</td>
+        <td style="text-align:left"><code>ping</code> response</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>3</strong></td>
+        <td style="text-align:left">0</td>
+        <td style="text-align:left">Net Unreachable</td>
+        <td style="text-align:left">Router has no matching route entry</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>3</strong></td>
+        <td style="text-align:left">1</td>
+        <td style="text-align:left">Host Unreachable</td>
+        <td style="text-align:left">Router has route, but ARP fails</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>3</strong></td>
+        <td style="text-align:left">3</td>
+        <td style="text-align:left">Port Unreachable</td>
+        <td style="text-align:left">Used as <code>traceroute</code> stopping criteria</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>3</strong></td>
+        <td style="text-align:left">4</td>
+        <td style="text-align:left">Datagram Too Big</td>
+        <td style="text-align:left">Fragment required but <code>DF</code> flag set</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>5</strong></td>
+        <td style="text-align:left">0/1</td>
+        <td style="text-align:left">Redirect</td>
+        <td style="text-align:left">Redirect for Network/Host</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>8</strong></td>
+        <td style="text-align:left">0</td>
+        <td style="text-align:left">Echo Request</td>
+        <td style="text-align:left"><code>ping</code> request</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>11</strong></td>
+        <td style="text-align:left">0</td>
+        <td style="text-align:left">TTL Expired</td>
+        <td style="text-align:left"><code>traceroute</code> hop identification</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>12</strong></td>
+        <td style="text-align:left">0</td>
+        <td style="text-align:left">Bad IP Header</td>
+        <td style="text-align:left">Header checksum or parameter error</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="122-key-tools-and-mechanisms">12.2 Key Tools and Mechanisms</h3>
+  <ul>
+    <li><strong>Ping</strong>: Tests reachability using Echo Request/Reply.</li>
+    <li><strong>Traceroute</strong>:
+      <ul>
+        <li>Sends sets of <strong>3 probes</strong> (UDP segments) with increasing TTL (1, 2, 3...).</li>
+        <li>Each router sends back an ICMP <strong>Time Exceeded (11/0)</strong> message.</li>
+        <li><strong>Stopping Criteria</strong>: The destination receives the packet but can't find the UDP port, so it
+          sends <strong>Port Unreachable (3/3)</strong>.</li>
+      </ul>
+    </li>
+    <li><strong>Path MTU Discovery (RFC 1191)</strong>:
+      <ul>
+        <li>Source sends packets with <code>DF=1</code>.</li>
+        <li>Routers unable to forward return <strong>Type 3 Code 4</strong>.</li>
+        <li><strong>The &quot;Unused&quot; Field</strong>: The router includes the next-hop MTU in the low-order 16 bits
+          of the ICMP header's &quot;unused&quot; field.</li>
+      </ul>
+    </li>
+  </ul>
+  <hr>
+  <h2 id="13-nat-network-address-translation">13. NAT (Network Address Translation)</h2>
+  <p>NAT allows a local network to use a single public IP address for all its devices, helping mitigate IPv4 address
+    exhaustion.</p>
+  <h3 id="131-private-ip-ranges-rfc-1918">13.1 Private IP Ranges (RFC 1918)</h3>
+  <p>These addresses are for local use only and are never routed on the public Internet:</p>
+  <ul>
+    <li><code>10.0.0.0</code> - <code>10.255.255.255</code> (10/8)</li>
+    <li><code>172.16.0.0</code> - <code>172.31.255.255</code> (172.16/12)</li>
+    <li><code>192.168.0.0</code> - <code>192.168.255.255</code> (192.168/16)</li>
+  </ul>
+  <h3 id="132-how-nat-works-implementation">13.2 How NAT Works: Implementation</h3>
+  <p>The NAT router maintains a <strong>Translation Table</strong> and performs three main steps:</p>
+  <ol>
+    <li><strong>Outgoing</strong>: Replace the (Internal IP, Internal Port) with (NAT Public IP, <strong>New External
+        Port</strong>). Update the translation table.</li>
+    <li><strong>External Storage</strong>: Remote servers respond using the NAT IP and the new port.</li>
+    <li><strong>Incoming</strong>: Look up the incoming destination port in the table to find the corresponding internal
+      IP/Port and rewrite the header.</li>
+  </ol>
+  <h3 id="133-pros-and-cons">13.3 Pros and Cons</h3>
+  <ul>
+    <li><strong>Advantages</strong>:
+      <ul>
+        <li><strong>IPv4 Conservation</strong>: Use one public IP for many local hosts.</li>
+        <li><strong>Flexibility</strong>: Change ISPs or local addresses without reconfiguring the entire network.</li>
+        <li><strong>Security</strong>: Internal hosts are not directly addressable or visible to the outside world.</li>
+      </ul>
+    </li>
+    <li><strong>Controversies</strong>:
+      <ul>
+        <li><strong>Layer Violation</strong>: Routers (Layer 3) should not modify Port numbers (Layer 4).</li>
+        <li><strong>End-to-End Principle</strong>: Violates the concept that hosts should communicate directly without
+          intermediate modification.</li>
+        <li><strong>Traversal</strong>: Difficulty for P2P applications where external hosts need to initiate
+          connections to hosts behind NAT.</li>
+      </ul>
+    </li>
+  </ul>
+  <hr>
+  <h2 id="14-software-defined-networking-sdn--generalized-forwarding">14. Software Defined Networking (SDN) &amp;
+    Generalized Forwarding</h2>
+  <p>Traditional routers use <strong>Destination-Based Forwarding</strong> (longest prefix match). Modern networks
+    increasingly use <strong>Generalized Forwarding</strong>, where forwarding decisions are based on any header field
+    (L2, L3, or L4).</p>
+  <h3 id="141-the-sdn-philosophy">14.1 The SDN Philosophy</h3>
+  <ul>
+    <li><strong>Separation of Planes</strong>: The <strong>Control Plane</strong> (deciding where to send traffic) is
+      logically centralized in a controller, while the <strong>Data Plane</strong> (executing the decisions) remains in
+      the switches.</li>
+    <li><strong>Programmability</strong>: Network administrators can program the behavior of switches through the
+      controller using protocols like <strong>OpenFlow</strong>.</li>
+  </ul>
+  <h3 id="142-openflow-abstraction-match--action">14.2 OpenFlow Abstraction: Match + Action</h3>
+  <p>A switch contains a <strong>Flow Table</strong>. Each entry in the table consists of:</p>
+  <ol>
+    <li><strong>Match (Pattern)</strong>: A set of header values to match (e.g., Source IP, Dest Port, MAC Address).
+      Wildcards (<code>*</code>) can be used.</li>
+    <li><strong>Actions</strong>: What to do with a matching packet:
+      <ul>
+        <li><strong>Forward</strong>: Send to a specific output port.</li>
+        <li><strong>Drop</strong>: Discard the packet (Firewall functionality).</li>
+        <li><strong>Modify</strong>: Change header fields (NAT functionality).</li>
+        <li><strong>Send to Controller</strong>: Encapsulate and send to the SDN controller for further processing.</li>
+      </ul>
+    </li>
+    <li><strong>Stats</strong>: Counters for packets and bytes matched by the rule.</li>
+  </ol>
+  <h3 id="143-unified-device-abstraction">14.3 Unified Device Abstraction</h3>
+  <p>The &quot;Match + Action&quot; model allows a single physical device to act as multiple types of middleboxes:</p>
+  <ul>
+    <li><strong>Router</strong>: Match: Destination IP Prefix $\rightarrow$ Action: Forward.</li>
+    <li><strong>Switch</strong>: Match: Destination MAC $\rightarrow$ Action: Forward/Flood.</li>
+    <li><strong>Firewall</strong>: Match: IP/Port $\rightarrow$ Action: Permit/Deny.</li>
+    <li><strong>NAT</strong>: Match: IP/Port $\rightarrow$ Action: Rewrite Header.</li>
+  </ul>
+  <h3 id="144-sdn-controller-eg-pox">14.4 SDN Controller (e.g., POX)</h3>
+  <p>The controller is the &quot;network operating system&quot; that maintains global network state.</p>
+  <ul>
+    <li><strong>Logically Centralized</strong>: While it may be a distributed system for robustness, it provides a
+      single consistent view of the network.</li>
+    <li><strong>APIs</strong>:
+      <ul>
+        <li><strong>Northbound API</strong>: Provides abstractions (like a network graph) to control applications (e.g.,
+          routing, firewall).</li>
+        <li><strong>Southbound API</strong>: Protocols (like <strong>OpenFlow</strong>) used to communicate with and
+          program the switches.</li>
+      </ul>
+    </li>
+    <li><strong>POX</strong>: A Python-based controller with built-in modules for hub behavior, L2 learning, and L3
+      learning.</li>
+  </ul>
+  <h3 id="145-openflow-protocol-messages">14.5 OpenFlow Protocol Messages</h3>
+  <p>OpenFlow defines how the controller and switches communicate over TCP.</p>
+  <table>
+    <thead>
+      <tr>
+        <th style="text-align:left">Category</th>
+        <th style="text-align:left">Message</th>
+        <th style="text-align:left">Purpose</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align:left"><strong>Controller-to-Switch</strong></td>
+        <td style="text-align:left"><strong>Features</strong></td>
+        <td style="text-align:left">Controller queries switch capabilities.</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"></td>
+        <td style="text-align:left"><strong>Modify-State</strong></td>
+        <td style="text-align:left">Add, delete, or modify flow table entries.</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"></td>
+        <td style="text-align:left"><strong>Packet-Out</strong></td>
+        <td style="text-align:left">Controller sends a packet out of a specific switch port.</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>Switch-to-Controller</strong></td>
+        <td style="text-align:left"><strong>Packet-In</strong></td>
+        <td style="text-align:left">Send a packet to the controller if no flow table match exists.</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"></td>
+        <td style="text-align:left"><strong>Flow-Removed</strong></td>
+        <td style="text-align:left">Inform controller that a flow entry has expired.</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"></td>
+        <td style="text-align:left"><strong>Port-Status</strong></td>
+        <td style="text-align:left">Inform controller of link/port changes (up/down).</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="146-motivation-why-sdn">14.6 Motivation: Why SDN?</h3>
+  <p>Traditional destination-based routing has significant limitations in <strong>Traffic Engineering</strong>:</p>
+  <ol>
+    <li><strong>Load Balancing</strong>: Traditional routing cannot easily split traffic to the same destination across
+      multiple paths.</li>
+    <li><strong>Flow-Specific Routing</strong>: Routers cannot easily route traffic differently based on the source or
+      transport protocol (e.g., send UDP on a low-latency path and TCP on a high-bandwidth path).</li>
+    <li><strong>Ease of Management</strong>: Centrally programming a network is less error-prone than configuring
+      hundreds of individual routers running distributed protocols.</li>
+  </ol>
+  <hr>
+  <h2 id="15-data-center-networking">15. Data Center Networking</h2>
+  <p>Modern data centers (like those of Google or Amazon) house hundreds of thousands of hosts and require specialized
+    network architectures.</p>
+  <h3 id="151-hierarchical-architecture">15.1 Hierarchical Architecture</h3>
+  <ol>
+    <li><strong>Blades</strong>: Individual servers mounted in racks.</li>
+    <li><strong>Top of Rack (TOR) Switch</strong>: A switch at the top of each rack connecting the blades (usually
+      40-100Gbps).</li>
+    <li><strong>Tier-2 / Tier-1 Switches</strong>: Connect multiple TOR switches together in a hierarchy.</li>
+    <li><strong>Border Routers</strong>: Connect the data center to the public Internet.</li>
+  </ol>
+  <h3 id="152-key-features">15.2 Key Features</h3>
+  <ul>
+    <li><strong>Multipath</strong>: High-density interconnects between switches allow for multiple disjoint paths
+      between any two racks, increasing both throughput and reliability.</li>
+    <li><strong>Load Balancers</strong>: Application-layer devices that distribute incoming requests across many servers
+      to prevent bottlenecks and ensure high availability.</li>
+    <li><strong>Protocols</strong>: Innovations like <strong>RoCE</strong> (RDMA over Converged Ethernet) allow for
+      direct memory access between servers with minimal CPU overhead. <strong>ECN</strong> (Explicit Congestion
+      Notification) is often used in transport-layer congestion control (e.g., DCTCP).</li>
+  </ul>
+  <hr>
+  <h2 id="16-network-prototyping-with-mininet">16. Network Prototyping with Mininet</h2>
+  <p><strong>Mininet</strong> is a network emulator used to create virtual networks of hosts, switches, links, and
+    controllers on a single machine.</p>
+  <h3 id="161-why-mininet">16.1 Why Mininet?</h3>
+  <ul>
+    <li><strong>Rapid Prototyping</strong>: Test complex topologies and SDN controllers (like POX) without needing
+      physical hardware.</li>
+    <li><strong>Real Code</strong>: Runs real Linux network software (e.g., web servers, iPerf, Ping).</li>
+    <li><strong>Performance Modeling</strong>: Allows setting bandwidth limits and propagation delays on links.</li>
+  </ul>
+  <h3 id="162-common-tools-for-testing">16.2 Common Tools for Testing</h3>
+  <ul>
+    <li><strong>Ping</strong>: Tests connectivity and latency.</li>
+    <li><strong>iPerf</strong>: Measures maximum TCP and UDP bandwidth performance.</li>
+  </ul>
+  <hr>
+  <h2 id="17-ipv6-internet-protocol-version-6">17. IPv6 (Internet Protocol Version 6)</h2>
+  <p>IPv6 was developed to address the looming exhaustion of the IPv4 address space and to streamline packet processing.
+  </p>
+  <h3 id="171-motivation">17.1 Motivation</h3>
+  <ul>
+    <li><strong>Address Space</strong>: 32-bit (IPv4) vs <strong>128-bit</strong> (IPv6).</li>
+    <li><strong>Efficiency</strong>: Fixed-length <strong>40-byte header</strong> speeds up processing in routers.</li>
+    <li><strong>QoS Support</strong>: Includes a &quot;Flow Label&quot; to identify and prioritize specific traffic
+      flows.</li>
+  </ul>
+  <h3 id="172-ipv6-header-fields">17.2 IPv6 Header Fields</h3>
+  <ul>
+    <li><strong>Version</strong>: 4 bits (set to 6).</li>
+    <li><strong>Priority/Traffic Class</strong>: 8 bits; used for Quality of Service (QoS).</li>
+    <li><strong>Flow Label</strong>: 20 bits; identifies packets in the same &quot;flow.&quot;</li>
+    <li><strong>Payload Length</strong>: 16 bits; size of the data following the header.</li>
+    <li><strong>Next Header</strong>: 8 bits; identifies the upper-layer protocol (TCP/UDP) or extension headers.</li>
+    <li><strong>Hop Limit</strong>: 8 bits (equivalent to IPv4 TTL).</li>
+    <li><strong>Source/Destination Addresses</strong>: 128 bits each.</li>
+  </ul>
+  <h3 id="173-key-differences-whats-missing">17.3 Key Differences: What's Missing?</h3>
+  <p>To ensure high-speed forwarding, several IPv4 features were removed from the IPv6 header:</p>
+  <ul>
+    <li><strong>No Checksum</strong>: Removed to reduce processing time at every router (L2 and L4 layers already
+      perform error detection).</li>
+    <li><strong>No Fragmentation</strong>: Routers are <strong>not allowed</strong> to fragment IPv6 packets. If a
+      packet is too large, the router drops it and sends an ICMPv6 &quot;Packet Too Big&quot; message.
+      <ul>
+        <li><strong>Requirement</strong>: End hosts must perform <strong>Path MTU Discovery</strong> before sending
+          data.</li>
+      </ul>
+    </li>
+    <li><strong>No Options</strong>: Options are moved to &quot;Extension Headers&quot; indicated by the &quot;Next
+      Header&quot; field.</li>
+  </ul>
+  <hr>
+  <h2 id="18-ipv6-transition-strategies">18. IPv6 Transition Strategies</h2>
+  <p>Since the entire Internet cannot switch to IPv6 overnight, transition mechanisms allow the two protocols to
+    coexist.</p>
+  <h3 id="181-dual-stack">18.1 Dual Stack</h3>
+  <p>A &quot;Dual Stack&quot; node has both IPv4 and IPv6 implementations. It can send and receive both types of
+    datagrams, choosing the protocol based on the destination's capability (often determined via DNS).</p>
+  <h3 id="182-tunneling-ipv6-over-ipv4">18.2 Tunneling (IPv6 over IPv4)</h3>
+  <p>Tunneling is used when two IPv6 nodes need to communicate but are separated by IPv4-only routers.</p>
+  <ul>
+    <li><strong>Encapsulation</strong>: The entire IPv6 datagram is placed inside the payload of an IPv4 datagram.</li>
+    <li><strong>Addressing</strong>:
+      <ul>
+        <li><strong>IPv6 Header</strong>: Source/Dest = Original IPv6 endpoints.</li>
+        <li><strong>IPv4 Header</strong>: Source/Dest = The IPv4 addresses of the tunnel &quot;entry&quot; and
+          &quot;exit&quot; points.</li>
+      </ul>
+    </li>
+    <li><strong>View</strong>: To the IPv4 routers, it looks like a normal IPv4 packet. To the IPv6 nodes, the IPv4
+      network looks like a single logical link (a &quot;tunnel&quot;).</li>
+  </ul>
+  <hr>
+  <h2 id="19-error-detection-and-correction">19. Error Detection and Correction</h2>
+  <p>Errors can occur due to signal attenuation or noise. The Link Layer uses redundancy to detect and sometimes correct
+    these errors.</p>
+  <h3 id="191-parity-checking">19.1 Parity Checking</h3>
+  <ul>
+    <li><strong>Single Bit Parity</strong>: Adds one bit to ensure the total number of 1s is even (or odd). Detects
+      single-bit errors.</li>
+    <li><strong>Two-Dimensional (2D) Bit Parity</strong>: Arranges data in a grid and calculates parity for every row
+      and column.
+      <ul>
+        <li><strong>Feature</strong>: Can detect <strong>and correct</strong> a single-bit error (the intersection of
+          the row and column parity errors).</li>
+      </ul>
+    </li>
+  </ul>
+  <h3 id="192-cyclic-redundancy-check-crc">19.2 Cyclic Redundancy Check (CRC)</h3>
+  <p>CRC is a powerful error-detection method used in Ethernet and WiFi.</p>
+  <ul>
+    <li><strong>The Math</strong>: Uses modulo-2 arithmetic (XOR).</li>
+    <li><strong>Mechanism</strong>:
+      <ol>
+        <li>Sender and receiver agree on an <strong>$r+1$ bit generator (G)</strong>.</li>
+        <li>Sender appends <strong>$r$ CRC bits (R)</strong> to the data <strong>D</strong> such that $&lt;D, R&gt;$ is
+          exactly divisible by <strong>G</strong> (remainder 0).</li>
+        <li>Receiver divides the incoming bits by <strong>G</strong>. If the remainder is non-zero, an error occurred.
+        </li>
+      </ol>
+    </li>
+    <li><strong>Performance</strong>: CRC can detect all burst errors of length less than $r+1$ bits.</li>
+  </ul>
+  <hr>
+  <h2 id="20-multiple-access-protocols">20. Multiple Access Protocols</h2>
+  <p>When multiple nodes share a single broadcast channel (e.g., WiFi, traditional Ethernet), a protocol is needed to
+    prevent/manage collisions.</p>
+  <h3 id="201-taxonomy-of-protocols">20.1 Taxonomy of Protocols</h3>
+  <ol>
+    <li><strong>Channel Partitioning</strong>:
+      <ul>
+        <li><strong>TDMA (Time Division)</strong>: Each node gets a fixed time slot in each round. Unused slots go idle.
+        </li>
+        <li><strong>FDMA (Frequency Division)</strong>: Each node is assigned a fixed frequency band.</li>
+      </ul>
+    </li>
+    <li><strong>Random Access</strong>: Nodes transmit at the full rate whenever they have data. Collisions are allowed
+      and recovered from.
+      <ul>
+        <li><strong>ALOHA</strong>: Simple but inefficient.</li>
+        <li><strong>CSMA</strong>: Listen before you talk.</li>
+      </ul>
+    </li>
+    <li><strong>Taking Turns</strong>:
+      <ul>
+        <li><strong>Polling</strong>: A master node invites other nodes to transmit.</li>
+        <li><strong>Token Passing</strong>: A special token is passed; only the holder can transmit.</li>
+      </ul>
+    </li>
+  </ol>
+  <h3 id="202-csma-carrier-sense-multiple-access">20.2 CSMA (Carrier Sense Multiple Access)</h3>
+  <ul>
+    <li><strong>Basic Rule</strong>: &quot;Listen before you talk.&quot; If the channel is busy, defer transmission.
+    </li>
+    <li><strong>Why Collisions Still Occur</strong>: Due to <strong>Propagation Delay</strong>. Two nodes may start
+      transmitting nearly simultaneously because they haven't yet &quot;heard&quot; the other's signal.</li>
+  </ul>
+  <hr>
+  <h2 id="21-csmacd-collision-detection">21. CSMA/CD (Collision Detection)</h2>
+  <p>CSMA/CD is used in wired Ethernet to reduce the time wasted by collisions.</p>
+  <h3 id="211-the-algorithm">21.1 The Algorithm</h3>
+  <ol>
+    <li><strong>Sense</strong>: If the channel is idle, start transmitting. If busy, wait.</li>
+    <li><strong>Transmit</strong>: Send the frame.</li>
+    <li><strong>Detect</strong>: While transmitting, listen for other signals.</li>
+    <li><strong>Abort</strong>: If a collision is detected, stop immediately and send a <strong>Jam Signal</strong>.
+    </li>
+    <li><strong>Backoff</strong>: Wait a random amount of time (Binary Exponential Backoff) before retrying.</li>
+  </ol>
+  <h3 id="212-binary-exponential-backoff">21.2 Binary Exponential Backoff</h3>
+  <p>After the $m$-th consecutive collision for a frame:</p>
+  <ul>
+    <li>The node chooses a random value <strong>K</strong> from the set ${0, 1, 2, \dots, 2^m - 1}$.</li>
+    <li>The node waits <strong>$K \times 512$ bit times</strong> before returning to Step 1.</li>
+    <li><strong>Goal</strong>: Adapts to network load. More collisions $\rightarrow$ longer average wait time.</li>
+  </ul>
+  <h3 id="213-minimum-frame-size-the-64-byte-rule">21.3 Minimum Frame Size (The 64-Byte Rule)</h3>
+  <p>Ethernet requires a minimum frame size of <strong>64 bytes</strong> (512 bits).</p>
+  <ul>
+    <li><strong>Why?</strong> To ensure the sender is still transmitting when a collision signal from the farthest point
+      of the network returns. If the frame were too small, the sender might finish transmitting and think it was
+      successful before the collision signal arrived.</li>
+  </ul>
+
+</body>
+
+</html>

@@ -1,0 +1,752 @@
+{
+  "exam": {
+    "title": "Computer Networking — Practice Exam",
+    "subtitle": "Application Layer: HTTP, DNS, Sockets, Streaming",
+    "pre_exam_analysis": {
+      "highest_priority_topics": [
+        "HTTP connection types (non-persistent vs. persistent), RTT calculations, pipelining",
+        "DNS resolution chain, caching, TTL, record types, iterated vs. recursive queries",
+        "Socket programming: TCP vs. UDP demultiplexing, 5-tuple, welcoming sockets",
+        "DASH adaptive streaming, playout delay, jitter buffering",
+        "Cookies and stateful vs. stateless design tradeoffs",
+        "CDN architecture and server selection"
+      ],
+      "common_misconceptions_targeted": [
+        "Thinking HTTP/1.1 persistent = always faster (pipelining still has HOL blocking)",
+        "Confusing DNS recursive vs. iterated (who does the work)",
+        "Thinking UDP demuxes on 4-tuple like TCP",
+        "Assuming DNS always goes all the way to root (caching skips levels)",
+        "Confusing RTT counting — double-counting or forgetting transmission time",
+        "Thinking the welcoming socket handles data, not just connection setup",
+        "Assuming 'stateless' means no memory is possible (cookies layer state on top)"
+      ]
+    },
+    "sections": [
+      {
+        "id": "section_1",
+        "title": "True / False",
+        "instructions": "State TRUE or FALSE, then write 2–3 sentences justifying your answer. No credit for the answer alone.",
+        "questions": [
+          {
+            "id": "Q1",
+            "number": 1,
+            "type": "true_false",
+            "topic": "HTTP Persistence",
+            "difficulty": "Medium",
+            "prompt": "An HTTP/1.1 persistent connection with pipelining eliminates head-of-line blocking.",
+            "answer": {
+              "verdict": "FALSE",
+              "explanation": "Persistent connections with pipelining allow the client to send multiple requests without waiting for each response, but the server must still respond in order. If the first requested object takes a long time to generate or transmit, all subsequent pipelined responses are held up behind it — this is head-of-line (HOL) blocking at the application layer. HOL blocking is only truly addressed by HTTP/2's multiplexed streams or QUIC/HTTP/3.",
+              "common_mistake": "Students confuse 'can send requests without waiting' with 'responses arrive independently.' Pipelining fixes request stalling, not response ordering.",
+              "deeper_concept": "Application-layer head-of-line blocking in HTTP/1.1 vs. HTTP/2 multiplexing"
+            }
+          },
+          {
+            "id": "Q2",
+            "number": 2,
+            "type": "true_false",
+            "topic": "DNS Caching",
+            "difficulty": "Medium",
+            "prompt": "If your local DNS server has a cached A record for www.example.com, the DNS resolution process will not contact any other DNS server.",
+            "answer": {
+              "verdict": "TRUE",
+              "caveat": "Only if the cached A record is valid (TTL not expired). If only a cached NS record exists but not the A record, the local DNS must still contact the authoritative server.",
+              "explanation": "If the local DNS server has a valid (non-expired TTL) cached A record for the exact hostname, it returns the IP directly to the client without forwarding the query anywhere. The entire DNS hierarchy is bypassed.",
+              "common_mistake": "Students assume DNS always contacts the root. The whole point of caching is that it doesn't have to.",
+              "deeper_concept": "DNS caching hierarchy and TTL-based cache validity"
+            }
+          },
+          {
+            "id": "Q3",
+            "number": 3,
+            "type": "true_false",
+            "topic": "UDP Demultiplexing",
+            "difficulty": "Hard",
+            "prompt": "Two UDP datagrams arriving at a host on destination port 53 from two different source IPs will be delivered to two different sockets.",
+            "answer": {
+              "verdict": "FALSE",
+              "explanation": "UDP demultiplexes based only on the destination IP and destination port number. Both datagrams are headed to the same destination port (53), so they are delivered to the same socket. The application must use recvfrom() to read the source address from each datagram and manage sessions manually. This contrasts sharply with TCP, which uses the full 4-tuple.",
+              "common_mistake": "Applying TCP's 4-tuple demux logic to UDP.",
+              "deeper_concept": "UDP vs. TCP demultiplexing: destination-port-only vs. full 4-tuple"
+            }
+          },
+          {
+            "id": "Q4",
+            "number": 4,
+            "type": "true_false",
+            "topic": "HTTP Statelessness",
+            "difficulty": "Easy",
+            "prompt": "Because HTTP is a stateless protocol, it is impossible for a web server to remember that you logged in yesterday.",
+            "answer": {
+              "verdict": "FALSE",
+              "explanation": "HTTP itself carries no session state, but cookies provide a mechanism to layer state on top of HTTP. The server sets a cookie with a unique ID on the first authenticated response; the client sends that cookie in every subsequent request. The server matches the ID to a backend database entry, effectively reconstructing state across stateless HTTP exchanges. Statelessness describes the protocol, not the application.",
+              "common_mistake": "Conflating protocol-level statelessness with the impossibility of application-level state.",
+              "deeper_concept": "Layering stateful behavior on a stateless protocol using cookies"
+            }
+          },
+          {
+            "id": "Q5",
+            "number": 5,
+            "type": "true_false",
+            "topic": "DNS Transport Protocol",
+            "difficulty": "Hard",
+            "prompt": "DNS always uses UDP; TCP is never involved in the DNS process.",
+            "answer": {
+              "verdict": "FALSE",
+              "explanation": "DNS primarily uses UDP on port 53 for standard queries because the request/response fits in a single datagram and low latency matters. However, TCP is used for zone transfers — bulk synchronization of DNS records between a primary and secondary authoritative server — because those payloads are too large for a single UDP datagram. Additionally, when a DNS response is truncated (TC bit set), the resolver is supposed to retry over TCP.",
+              "common_mistake": "Memorizing 'DNS = UDP' as an absolute rule without understanding the zone transfer and truncation exceptions.",
+              "deeper_concept": "Protocol transport selection based on payload size and reliability requirements"
+            }
+          }
+        ]
+      },
+      {
+        "id": "section_2",
+        "title": "RTT Calculation Problems",
+        "instructions": "Show all work. Assume the client already knows the server's IP address (no DNS lookup needed) unless stated otherwise.",
+        "questions": [
+          {
+            "id": "Q6",
+            "number": 6,
+            "type": "calculation",
+            "topic": "Non-Persistent HTTP Timing",
+            "difficulty": "Medium",
+            "scenario": {
+              "description": "A client fetches a webpage that consists of one base HTML file and 4 embedded images.",
+              "rtt_ms": 20,
+              "transmission_time_per_object_ms": 10,
+              "max_parallel_connections": 2,
+              "http_version": "HTTP/1.0 (non-persistent)"
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "How long does it take to retrieve the base HTML file?"
+              },
+              {
+                "label": "B",
+                "prompt": "After the base HTML is received, how long does it take to retrieve all 4 images using 2 parallel connections?"
+              },
+              {
+                "label": "C",
+                "prompt": "What is the total page load time?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "workings": [
+                    "TCP SYN/SYN-ACK: 1 RTT = 20 ms",
+                    "HTTP GET + first byte of response: 1 RTT = 20 ms",
+                    "Transmission time: 10 ms"
+                  ],
+                  "result_ms": 50,
+                  "result_label": "Base HTML total = 50 ms"
+                },
+                {
+                  "label": "B",
+                  "workings": [
+                    "With 2 parallel connections, 4 images are fetched in 2 rounds (2 images at a time)",
+                    "Each image connection: TCP setup (1 RTT) + HTTP GET/response (1 RTT) + transmission (10 ms) = 50 ms",
+                    "Round 1 fetches images 1 & 2 in parallel: 50 ms",
+                    "Round 2 fetches images 3 & 4 in parallel: 50 ms"
+                  ],
+                  "result_ms": 100,
+                  "result_label": "Images total = 100 ms"
+                },
+                {
+                  "label": "C",
+                  "workings": ["50 + 100 = 150 ms"],
+                  "result_ms": 150,
+                  "result_label": "Total = 150 ms"
+                }
+              ],
+              "common_mistake": "Forgetting that parallel connections still each pay the TCP setup cost. Some students subtract the setup RTT, treating parallel connections as if they share a handshake.",
+              "deeper_concept": "Cost of TCP connection setup amortized across parallel vs. sequential object fetching"
+            }
+          },
+          {
+            "id": "Q7",
+            "number": 7,
+            "type": "calculation",
+            "topic": "DNS + HTTP Combined Latency",
+            "difficulty": "Hard",
+            "scenario": {
+              "description": "A user clicks a link to a site their browser has never visited. The browser has no DNS cache.",
+              "dns_rtts_ms": {
+                "client_to_local_dns": 4,
+                "local_dns_to_root": 30,
+                "local_dns_to_tld": 15,
+                "local_dns_to_authoritative": 40
+              },
+              "http_rtt_ms": 12,
+              "transmission_time": "negligible",
+              "page_structure": "1 base HTML + 3 embedded objects",
+              "http_version": "persistent with pipelining"
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "What is the total latency from click to fully loaded page?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "workings": [
+                    "DNS: client to local DNS = 4 ms",
+                    "DNS: local DNS to root = 30 ms",
+                    "DNS: local DNS to TLD = 15 ms",
+                    "DNS: local DNS to authoritative = 40 ms",
+                    "Total DNS delay = 4 + 30 + 15 + 40 = 89 ms",
+                    "HTTP TCP setup: 1 RTT = 12 ms",
+                    "HTTP GET base HTML + response: 1 RTT = 12 ms",
+                    "HTTP pipelined 3 embedded objects: 1 RTT = 12 ms",
+                    "Total HTTP = 36 ms"
+                  ],
+                  "result_ms": 125,
+                  "result_label": "Grand total = 89 + 36 = 125 ms"
+                }
+              ],
+              "common_mistake": "Students often add the client-to-local-DNS RTT again at the end, double-counting it. Also, many students add a full 2 RTTs per pipelined object instead of recognizing pipelining bundles them into 1 RTT.",
+              "deeper_concept": "DNS resolution cost as a hidden latency tax on first-visit HTTP requests"
+            }
+          },
+          {
+            "id": "Q8",
+            "number": 8,
+            "type": "calculation",
+            "topic": "Video Streaming Playout Delay",
+            "difficulty": "Hard",
+            "scenario": {
+              "description": "A video is divided into chunks delivered every 2 seconds.",
+              "chunk_interval_s": 2,
+              "chunks": [
+                { "id": 1, "network_delay_s": 1.0 },
+                { "id": 2, "network_delay_s": 2.5 },
+                { "id": 3, "network_delay_s": 0.8 },
+                { "id": 4, "network_delay_s": 1.8 },
+                { "id": 5, "network_delay_s": 3.1 }
+              ]
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "What is the minimum initial playout delay so that no chunk ever misses its playout deadline?"
+              },
+              {
+                "label": "B",
+                "prompt": "If the client used a playout delay of only 2.0 seconds, which chunk(s) would cause a rebuffering stall?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "workings": [
+                    "Playout delay must be >= max network delay across all chunks",
+                    "Max network delay = 3.1 s (chunk 5)"
+                  ],
+                  "result_s": 3.1,
+                  "result_label": "Minimum playout delay = 3.1 seconds"
+                },
+                {
+                  "label": "B",
+                  "workings": [
+                    "With 2.0 s playout delay, P1 = 2.0 s, playout time of chunk i = P1 + (i-1) * 2",
+                    "Chunk 2: deadline = 4.0 s, arrives at 2 + 2.5 = 4.5 s → MISS",
+                    "Chunk 5: deadline = 10.0 s, arrives at 8 + 3.1 = 11.1 s → MISS"
+                  ],
+                  "stalling_chunks": [2, 5],
+                  "result_label": "Chunks 2 and 5 cause rebuffering stalls"
+                }
+              ],
+              "common_mistake": "Students forget that 'network delay' is measured from the chunk's transmission time, not from time zero. Each chunk is transmitted 2 seconds after the previous one.",
+              "deeper_concept": "Playout buffer design as a tradeoff between startup latency and stall probability"
+            }
+          }
+        ]
+      },
+      {
+        "id": "section_3",
+        "title": "Short Answer / Conceptual",
+        "instructions": null,
+        "questions": [
+          {
+            "id": "Q9",
+            "number": 9,
+            "type": "short_answer",
+            "topic": "Conditional GET",
+            "difficulty": "Medium",
+            "scenario": "A proxy cache retrieved an image from cdn.example.com 6 hours ago. A new client now requests the same image through the proxy.",
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "What HTTP mechanism does the proxy use to avoid unnecessarily re-fetching the full image?"
+              },
+              {
+                "label": "B",
+                "prompt": "Write the specific request header line the proxy would include, and describe the two possible server responses."
+              },
+              {
+                "label": "C",
+                "prompt": "In which scenario does the proxy not even contact the origin server at all?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "response": "The Conditional GET mechanism. The proxy stores the Last-Modified date from the original response and uses it in subsequent requests."
+                },
+                {
+                  "label": "B",
+                  "header": "If-Modified-Since: <date-the-object-was-originally-fetched>",
+                  "server_responses": [
+                    {
+                      "condition": "Object has NOT changed",
+                      "status_code": 304,
+                      "status_phrase": "Not Modified",
+                      "body": false,
+                      "action": "Proxy serves cached copy"
+                    },
+                    {
+                      "condition": "Object HAS changed",
+                      "status_code": 200,
+                      "status_phrase": "OK",
+                      "body": true,
+                      "action": "Proxy receives and caches updated object"
+                    }
+                  ]
+                },
+                {
+                  "label": "C",
+                  "response": "If the cached object has not yet exceeded its max-age or Expires directive (Cache-Control or Expires headers), the proxy treats the cached copy as 'fresh' and serves it directly without contacting the origin at all. The Conditional GET only fires when the cache entry is stale but potentially still valid."
+                }
+              ],
+              "common_mistake": "Students think Conditional GET always prevents network traffic. It still sends a request to the origin — it just avoids re-downloading the body if unchanged.",
+              "deeper_concept": "Cache freshness vs. cache validation: two distinct caching optimization strategies"
+            }
+          },
+          {
+            "id": "Q10",
+            "number": 10,
+            "type": "short_answer",
+            "topic": "TCP Socket Internals",
+            "difficulty": "Hard",
+            "scenario": "A web server is running and has called listen() on port 443. Three clients connect simultaneously.",
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "How many sockets exist on the server after all three connections are established?"
+              },
+              {
+                "label": "B",
+                "prompt": "Two of the three clients are behind the same NAT device and share the same public IP. Explain precisely how the server distinguishes their connections."
+              },
+              {
+                "label": "C",
+                "prompt": "If this were a UDP server instead, how many sockets would exist and why?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "response": "4 sockets total: 1 welcoming (listening) socket that remains open for future connections, plus 1 dedicated connection socket per established client = 3 connection sockets. The welcoming socket is not 'used up' — it stays listening."
+                },
+                {
+                  "label": "B",
+                  "response": "Even though both NAT clients share the same public IP, the NAT device assigns them different source port numbers when translating. The server's 4-tuple for each connection is (client_public_IP, different_source_port, server_IP, 443). Since the source ports differ, the 4-tuples are unique and the server can demultiplex them to separate connection sockets."
+                },
+                {
+                  "label": "C",
+                  "response": "Typically 1 socket. UDP demultiplexes on destination port only, so all incoming datagrams from all clients arrive at that single socket. The application must use recvfrom() to read the source address from each datagram and manage sessions manually in application code."
+                }
+              ],
+              "common_mistake": "Students think the server creates a new socket for each UDP client the way it does for TCP.",
+              "deeper_concept": "TCP welcoming socket pattern and how NAT port translation enables multiple clients behind a single public IP"
+            }
+          },
+          {
+            "id": "Q11",
+            "number": 11,
+            "type": "short_answer",
+            "topic": "DNS Record Types",
+            "difficulty": "Medium",
+            "scenario": "You query DNS for mail.company.com and receive the following records in the response.",
+            "dns_records": [
+              { "name": "mail.company.com.", "ttl": 300, "class": "IN", "type": "CNAME", "value": "smtp.hosting.net." },
+              { "name": "smtp.hosting.net.", "ttl": 600, "class": "IN", "type": "A", "value": "198.51.100.42" },
+              { "name": "hosting.net.", "ttl": 3600, "class": "IN", "type": "NS", "value": "ns1.hosting.net." },
+              { "name": "ns1.hosting.net.", "ttl": 3600, "class": "IN", "type": "A", "value": "203.0.113.7" }
+            ],
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "What IP address should your mail client connect to? Trace the lookup chain."
+              },
+              {
+                "label": "B",
+                "prompt": "Why is there both an NS record for hosting.net and an A record for ns1.hosting.net in the same response? What is the A record in this context called?"
+              },
+              {
+                "label": "C",
+                "prompt": "The CNAME TTL is 300 seconds but the A record TTL is 600 seconds. After 5 minutes, what must a resolver re-query, and what can it still use from cache?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "ip": "198.51.100.42",
+                  "chain": "mail.company.com → CNAME → smtp.hosting.net → A record → 198.51.100.42"
+                },
+                {
+                  "label": "B",
+                  "response": "The NS record says the authoritative server for hosting.net is ns1.hosting.net — but that name itself needs resolving. Without the A record for ns1.hosting.net, the resolver would need another round of queries just to find the name server's IP. Including it preemptively is called a glue record. It avoids a circular dependency and saves a round trip.",
+                  "term": "glue record"
+                },
+                {
+                  "label": "C",
+                  "response": "After 300 seconds, the CNAME record for mail.company.com has expired — the resolver must re-query DNS to confirm the canonical name mapping. However, the A record for smtp.hosting.net still has 300 seconds left on its 600 s TTL (600 - 300 = 300 s remaining), so the resolver can still use the cached IP 198.51.100.42 — assuming the CNAME still resolves to smtp.hosting.net."
+                }
+              ],
+              "common_mistake": "Students think TTL expiry of the CNAME invalidates all downstream records. Each record's TTL is tracked independently.",
+              "deeper_concept": "Independent TTL tracking per DNS record and the glue record mechanism for avoiding circular dependencies"
+            }
+          },
+          {
+            "id": "Q12",
+            "number": 12,
+            "type": "short_answer",
+            "topic": "CDN + DNS Geographic Routing",
+            "difficulty": "Hard",
+            "scenario": "A streaming service uses a CDN to serve video. When a user types a URL into their browser, DNS is used to direct them to a nearby CDN server.",
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "Describe step by step how DNS is used to direct the user to a nearby CDN server rather than the origin. What DNS mechanism makes this possible?"
+              },
+              {
+                "label": "B",
+                "prompt": "A student argues: 'CDN redirection is unfair — the user asked for video.example.com but they end up talking to some server at a random IP they never explicitly requested.' Is this technically accurate? Is it a real problem?"
+              },
+              {
+                "label": "C",
+                "prompt": "If two users — one in Minneapolis and one in Tokyo — both resolve video.example.com at the same moment, will they get the same IP address in their DNS response? Why or why not?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "response": "The streaming service's authoritative DNS server is configured to return different A records depending on the requester's location — specifically, the IP of the requesting local DNS server, which is a proxy for the user's geographic region. When the local DNS server queries the authoritative server, the authoritative server inspects the local DNS server's IP, determines its approximate region, and returns the IP of a nearby CDN node. The mechanism is DNS-based load distribution / geographic routing: one hostname, many possible A record values depending on who's asking."
+                },
+                {
+                  "label": "B",
+                  "technically_accurate": true,
+                  "real_problem": false,
+                  "response": "Technically accurate in the narrow sense: the user requested one name but communicates with an IP they didn't explicitly choose. However, it is not a real problem because the CDN server is contractually authorized to serve the content, the content delivered is identical, and the user benefits from lower latency. The user cares about getting the video fast, not about which datacenter delivers it."
+                },
+                {
+                  "label": "C",
+                  "same_ip": false,
+                  "response": "No, they will likely get different IP addresses. The authoritative DNS server uses the local DNS server's source IP to infer geographic proximity. The Minneapolis local DNS server gets a North American CDN node IP; the Tokyo local DNS server gets an Asia-Pacific CDN node IP. Same hostname, different answers — that's geographic DNS routing."
+                }
+              ],
+              "common_mistake": "Students assume DNS always returns the same answer for the same query. Authoritative servers can and do return different answers based on the source of the query.",
+              "deeper_concept": "DNS as a load-balancing and geographic routing mechanism, not just a name resolution service"
+            }
+          }
+        ]
+      },
+      {
+        "id": "section_4",
+        "title": "Scenario / Troubleshooting",
+        "instructions": null,
+        "questions": [
+          {
+            "id": "Q13",
+            "number": 13,
+            "type": "troubleshooting",
+            "topic": "HTTP Debugging",
+            "difficulty": "Medium",
+            "scenario": {
+              "description": "A developer runs a curl command and observes a redirect response with no data returned.",
+              "command": "curl -v http://api.newsite.com/data",
+              "response_observed": [
+                "< HTTP/1.1 301 Moved Permanently",
+                "< Location: https://api.newsite.com/data"
+              ]
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "What happened, and why did the developer receive no useful data?"
+              },
+              {
+                "label": "B",
+                "prompt": "What should the developer do differently?"
+              },
+              {
+                "label": "C",
+                "prompt": "What are the two substantive differences between the original request and the redirect target?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "response": "The server responded with a 301 Moved Permanently redirect. curl by default does not automatically follow redirects — it just shows the redirect response and stops. The developer received no data because their tool did not issue a second request to the Location URL."
+                },
+                {
+                  "label": "B",
+                  "response": "Add the -L flag to tell curl to follow redirects: curl -vL http://api.newsite.com/data"
+                },
+                {
+                  "label": "C",
+                  "differences": [
+                    "Protocol: http:// → https:// (switches from plaintext HTTP to TLS-encrypted HTTPS)",
+                    "Port: implicitly changes from port 80 (HTTP default) to port 443 (HTTPS default)"
+                  ]
+                }
+              ],
+              "common_mistake": "Students only notice the http → https change and miss that this implies a completely different TCP connection to a different port, and that a TLS handshake must now occur before any HTTP data flows.",
+              "deeper_concept": "HTTP redirect semantics and the protocol/port implications of http vs https"
+            }
+          },
+          {
+            "id": "Q14",
+            "number": 14,
+            "type": "troubleshooting",
+            "topic": "DNS Failure Modes",
+            "difficulty": "Hard",
+            "scenario": {
+              "description": "All users on a university campus report that web browsing is broken — pages won't load even though they can ping IP addresses directly (e.g., ping 8.8.8.8 works fine). The university has one local DNS server."
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "What is the most likely cause, and what does the ability to ping IPs directly tell you?"
+              },
+              {
+                "label": "B",
+                "prompt": "A student says 'just use Google's DNS at 8.8.8.8.' Would this fix the problem? What must be changed for this to work?"
+              },
+              {
+                "label": "C",
+                "prompt": "If the university's local DNS server had been caching records, would cached entries still work after the server goes down? Why or why not?"
+              },
+              {
+                "label": "D",
+                "prompt": "Name one architectural improvement the university could make to prevent this outage entirely."
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "likely_cause": "Local DNS server is down or unreachable",
+                  "response": "The local DNS server is almost certainly down or unreachable. The fact that ping 8.8.8.8 (an IP address, requiring no DNS) works confirms that IP routing and basic connectivity are intact. DNS resolution — the translation of hostnames to IPs — is the broken layer. Without it, browsers can't resolve www.google.com to an IP, so pages fail even though the network itself is up."
+                },
+                {
+                  "label": "B",
+                  "would_fix": true,
+                  "conditions": "Only if clients (or DHCP server) are reconfigured to use 8.8.8.8 as their DNS resolver. Changing the DNS server setting in the OS/DHCP scope and flushing the local DNS cache would allow resolution to proceed through Google's resolver. It doesn't fix the campus server, but routes around the failure."
+                },
+                {
+                  "label": "C",
+                  "cached_entries_survive": false,
+                  "response": "No. DNS caching lives on the DNS server process. When the server goes down, its in-memory cache is gone. Individual client-side OS caches (e.g., nscd, browser DNS cache) might still have some records, but those are short-lived and would exhaust within minutes to hours depending on TTLs."
+                },
+                {
+                  "label": "D",
+                  "recommendation": "Deploy a secondary (redundant) local DNS server. A secondary server can be configured to receive zone transfers from the primary and answer queries independently. If the primary fails, clients configured with both IPs as resolvers automatically fall back to the secondary."
+                }
+              ],
+              "common_mistake": "Students suggest 'restart the DNS server' as the only fix, missing the architectural solution of redundancy.",
+              "deeper_concept": "DNS as a critical infrastructure dependency and the single-point-of-failure risk of a single local resolver"
+            }
+          },
+          {
+            "id": "Q15",
+            "number": 15,
+            "type": "short_answer",
+            "topic": "P2P vs Client-Server Architecture",
+            "difficulty": "Medium",
+            "scenario": "A startup is building a live video streaming platform and must choose between client-server and P2P architecture.",
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "The engineering lead argues P2P is better because 'every new viewer adds upload capacity to the network.' Explain the technical principle behind this claim and what it's called."
+              },
+              {
+                "label": "B",
+                "prompt": "A product manager counters that P2P has 'complex management problems.' Give two specific technical challenges that make P2P harder to manage than client-server."
+              },
+              {
+                "label": "C",
+                "prompt": "The startup expects massive traffic spikes (e.g., a live sports event). Which architecture handles this more gracefully, and why?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "principle": "Self-scalability",
+                  "response": "In a P2P system, each new peer (viewer) doesn't just consume bandwidth — it also contributes upload capacity that other peers can download from. As demand grows, so does the aggregate supply. In a pure client-server model, adding viewers only adds demand; the server's upload bandwidth is a fixed bottleneck."
+                },
+                {
+                  "label": "B",
+                  "challenges": [
+                    "Peer churn: Peers are intermittently connected and constantly joining/leaving. The system must continuously track which peers have which content chunks and are currently reachable — a complex distributed coordination problem.",
+                    "Dynamic IP addresses: Peers don't have permanent IPs, making it hard to maintain stable addresses for peer discovery. A centralized tracker or DHT is needed to locate peers, adding architectural complexity."
+                  ]
+                },
+                {
+                  "label": "C",
+                  "better_architecture": "Client-server with CDN",
+                  "response": "CDNs can pre-position content at edge nodes and absorb massive concurrent request loads through geographic distribution and caching. P2P struggles with live content because there are no seeders with the complete file — content exists only momentarily and peers who just joined have nothing to share yet. The self-scalability benefit of P2P applies best to file distribution where content is stable and peers can seed."
+                }
+              ],
+              "common_mistake": "Assuming P2P's self-scalability advantage applies equally to live streaming and file distribution.",
+              "deeper_concept": "The self-scalability property of P2P and why it breaks down for live/ephemeral content"
+            }
+          }
+        ]
+      },
+      {
+        "id": "section_5",
+        "title": "Synthesis / Edge Cases",
+        "instructions": null,
+        "questions": [
+          {
+            "id": "Q16",
+            "number": 16,
+            "type": "short_answer",
+            "topic": "Stateless Token Design Tradeoffs",
+            "difficulty": "Hard",
+            "scenario": "An architect proposes replacing all cookie-based authentication with a stateless token system (e.g., JWT — a signed token stored client-side containing user identity). The server would verify the token's cryptographic signature on every request and never look up a database.",
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "What specific advantage does this design have over cookie + server-side session database?"
+              },
+              {
+                "label": "B",
+                "prompt": "A security team raises a concern: 'If a token is stolen, we can't invalidate it before it expires.' Explain why this concern is valid given the stateless design."
+              },
+              {
+                "label": "C",
+                "prompt": "How does this tradeoff illustrate the fundamental tension between stateless and stateful protocols described in the course material?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "response": "Scalability and server simplicity. With stateless tokens, any server in a cluster can verify a request independently without consulting a shared session database. This eliminates a centralized database bottleneck and makes horizontal scaling trivial — add servers without synchronizing state. It also means the system survives individual server crashes without losing sessions (the token lives on the client)."
+                },
+                {
+                  "label": "B",
+                  "response": "In a stateless token design, the server performs no lookup — it only checks the cryptographic signature. There is no revocation list to consult. If a token is stolen and the attacker uses it before expiry, the server has no way to know it's been compromised. Invalidation would require adding a server-side blocklist of revoked tokens — which reintroduces state, partially defeating the purpose of the stateless design."
+                },
+                {
+                  "label": "C",
+                  "response": "The course material describes stateless protocols as having low server complexity and high reliability (survives crashes) but sacrificing the ability to maintain continuity. Stateful designs track context and enable revocation but require persistent storage and introduce single points of failure. JWTs live exactly on this boundary: they gain the reliability and scalability of statelessness but sacrifice the ability to invalidate sessions — the very control that stateful session databases provide. You can't get both simultaneously without hybrid compromises."
+                }
+              ],
+              "common_mistake": "Students treat JWT as strictly better than cookies without recognizing the revocation tradeoff.",
+              "deeper_concept": "The stateless/stateful design tension applied to real-world authentication system architecture"
+            }
+          },
+          {
+            "id": "Q17",
+            "number": 17,
+            "type": "calculation",
+            "topic": "DASH Adaptive Streaming + CDN",
+            "difficulty": "Hard",
+            "scenario": {
+              "description": "A user is watching a DASH-encoded video on a 50 Mbps home connection.",
+              "available_bitrates_mbps": [2, 5, 10, 20],
+              "cdn_rtt_ms": 5,
+              "initial_bandwidth_mbps": 50,
+              "event": "Another device starts a large download, dropping available bandwidth to 3 Mbps"
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "The client is currently receiving 10 Mbps chunks successfully. Suddenly, another device on the home network starts a large download, dropping available bandwidth to 3 Mbps. Describe precisely what the DASH client does."
+              },
+              {
+                "label": "B",
+                "prompt": "The user's buffer currently holds 8 seconds of video. The client estimates 3 Mbps available bandwidth. A 2 Mbps chunk takes 4 seconds to download. Does the buffer grow, shrink, or stay the same?",
+                "given": {
+                  "buffer_before_s": 8,
+                  "available_bandwidth_mbps": 3,
+                  "chunk_bitrate_mbps": 2,
+                  "chunk_download_time_s": 4,
+                  "chunk_duration_s": 2
+                }
+              },
+              {
+                "label": "C",
+                "prompt": "Why does DASH use the CDN edge node's IP (from DNS) rather than always going to the origin server for each chunk?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "selected_bitrate_mbps": 2,
+                  "response": "The DASH client continuously monitors available bandwidth. When bandwidth drops to 3 Mbps, the next chunk request selects the highest available bitrate that fits within 3 Mbps — which is the 2 Mbps encoding (since 5 Mbps would exceed available bandwidth and cause stalling). The client fetches the URL for the 2 Mbps version of the next chunk from the manifest file (MPD) and requests it. Quality drops but playback continues without rebuffering."
+                },
+                {
+                  "label": "B",
+                  "workings": [
+                    "Buffer before: 8 seconds",
+                    "Playback during 4 s download: 4 seconds consumed",
+                    "New chunk added: +2 seconds",
+                    "Buffer after: 8 - 4 + 2 = 6 seconds"
+                  ],
+                  "buffer_change": "shrinks",
+                  "buffer_after_s": 6,
+                  "result_label": "Buffer shrinks by 2 seconds. If this pattern continues, the buffer will eventually drain and cause a stall."
+                },
+                {
+                  "label": "C",
+                  "response": "The CDN edge node is geographically close to the user, so chunk downloads have low latency and high throughput compared to an origin server potentially thousands of miles away. The whole point of 'Enter Deep' CDN architecture is to place content inside the user's access network. Going to the origin every time would negate the CDN's entire purpose — higher RTT, higher latency per chunk, greater risk of congestion on long-haul links."
+                }
+              ],
+              "common_mistake": "Students assume if available bandwidth (3 Mbps) exceeds chunk bitrate (2 Mbps), the buffer must grow. They forget to account for playback consuming the buffer during download time.",
+              "deeper_concept": "DASH buffer dynamics: the race between download rate and playback consumption rate"
+            }
+          }
+        ]
+      }
+    ],
+    "post_exam_critique": {
+      "strongest_questions": ["Q10", "Q12", "Q14", "Q16", "Q17"],
+      "questions_to_strengthen": [
+        {
+          "id": "Q9",
+          "note": "Leans slightly toward recall of mechanism. A stronger version would give a Wireshark trace with headers and ask students to identify what went wrong when a stale cached copy was served."
+        },
+        {
+          "id": "Q13",
+          "note": "Somewhat procedural. A harder version would show a redirect loop and ask students to diagnose it."
+        }
+      ],
+      "under_tested_concepts": [
+        "Socket 5-tuple in the context of NAT rewriting (source IP/port translation)",
+        "Recursive vs. iterated DNS with actual message counts and timing",
+        "DASH manifest file structure and how chunk URLs are constructed",
+        "What happens when a CNAME chain is circular (DNS loop)",
+        "HTTP HEAD method use cases (cache validation without downloading body)"
+      ]
+    }
+  }
+}

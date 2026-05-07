@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>guide</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+
+    @media print {
+      html {
+        background-color: white;
+      }
+
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+
+      p,
+      h2,
+      h3 {
+        orphans: 3;
+        widows: 3;
+      }
+
+      h2,
+      h3,
+      h4 {
+        page-break-after: avoid;
+      }
+    }
+
+    p {
+      margin: 1em 0;
+    }
+
+    a {
+      color: #1a1a1a;
+    }
+
+    a:visited {
+      color: #1a1a1a;
+    }
+
+    img {
+      max-width: 100%;
+    }
+
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      margin-top: 1.4em;
+    }
+
+    h5,
+    h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+
+    h6 {
+      font-weight: normal;
+    }
+
+    ol,
+    ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+
+    li>ol,
+    li>ul {
+      margin-top: 0;
+    }
+
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+
+    .sourceCode {
+      background-color: transparent;
+      overflow: visible;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+
+    table caption {
+      margin-bottom: 0.75em;
+    }
+
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+
+    #TOC li {
+      list-style: none;
+    }
+
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+
+    #TOC>ul {
+      padding-left: 0;
+    }
+
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+
+    span.smallcaps {
+      font-variant: small-caps;
+    }
+
+    div.columns {
+      display: flex;
+      gap: min(4vw, 1.5em);
+    }
+
+    div.column {
+      flex: auto;
+      overflow-x: auto;
+    }
+
+    div.hanging-indent {
+      margin-left: 1.5em;
+      text-indent: -1.5em;
+    }
+
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class] {
+      list-style: none;
+    }
+
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+        ? 'dark'
+        : 'default'
+    });
+  </script>
+  <h1 id="application-layer">Application Layer</h1>
+  <p>The application layer is where network applications and their application-layer protocols reside. It is the
+    &quot;top&quot; layer of the Internet stack, providing services directly to the user.</p>
+  <h2 id="11-principles-of-network-applications">11. Principles of Network Applications</h2>
+  <p>Developing network applications involves writing programs that run on different end systems and communicate with
+    each other over the network. Crucially, application software does not need to be written for network-core devices
+    (routers or switches), as they function at lower layers.</p>
+  <h3 id="111-network-application-architectures">11.1 Network Application Architectures</h3>
+  <p>There are three primary paradigms for structuring network applications:</p>
+  <ol>
+    <li>
+      <p><strong>Client-Server Architecture</strong>:</p>
+      <ul>
+        <li><strong>Server</strong>:
+          <ul>
+            <li>Always-on host.</li>
+            <li>Permanent IP address.</li>
+            <li>Often resides in data centers for scaling.</li>
+          </ul>
+        </li>
+        <li><strong>Clients</strong>:
+          <ul>
+            <li>Communicate with the server.</li>
+            <li>May be intermittently connected.</li>
+            <li>May have dynamic IP addresses.</li>
+            <li><strong>Do not communicate directly with each other</strong>.</li>
+          </ul>
+        </li>
+        <li><em>Examples</em>: Web, E-mail, FTP.</li>
+      </ul>
+    </li>
+    <li>
+      <p><strong>Peer-to-Peer (P2P) Architecture</strong>:</p>
+      <ul>
+        <li>No always-on server.</li>
+        <li>Arbitrary end systems (peers) directly communicate.</li>
+        <li><strong>Self-Scalability</strong>: New peers bring new service capacity (upload bandwidth) as well as new
+          service demands.</li>
+        <li>Peers are intermittently connected and change IP addresses.</li>
+        <li><em>Challenges</em>: Complex management due to the highly decentralized nature.</li>
+        <li><em>Examples</em>: P2P file sharing (BitTorrent), Bitcoin.</li>
+      </ul>
+    </li>
+    <li>
+      <p><strong>Hybrid Architecture</strong>:</p>
+      <ul>
+        <li>Combines elements of both. For example, a centralized server might be used to find the address of a remote
+          party (directory service), but the actual data transfer happens peer-to-peer.</li>
+        <li><em>Examples</em>:
+          <ul>
+            <li><strong>Skype/VoIP</strong>: Centralized server for finding users; direct client-to-client connection
+              for the call.</li>
+            <li><strong>Instant Messaging</strong>: User registers IP with a central server; chatting between users is
+              P2P.</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ol>
+  <h3 id="112-processes-communicating">11.2 Processes Communicating</h3>
+  <p>A <strong>process</strong> is a program running within a host.</p>
+  <ul>
+    <li>Within the same host, processes communicate using inter-process communication (defined by the OS).</li>
+    <li>Processes on different hosts communicate by exchanging <strong>messages</strong>.</li>
+  </ul>
+  <h4 id="client-vs-server-processes">Client vs. Server Processes</h4>
+  <ul>
+    <li><strong>Client Process</strong>: The process that initiates the communication.</li>
+    <li><strong>Server Process</strong>: The process that waits to be contacted.</li>
+    <li><em>Note</em>: In P2P applications, a peer can have both a client process and a server process.</li>
+  </ul>
+  <h4 id="sockets">Sockets</h4>
+  <p>A process sends/receives messages to/from the network through a software interface called a
+    <strong>socket</strong>.
+  </p>
+  <ul>
+    <li><strong>Analogy</strong>: A socket is like a door. The sending process shoves the message out the door, relying
+      on the underlying transport infrastructure to deliver it to the socket at the receiving process.</li>
+  </ul>
+  <h4 id="addressing-processes">Addressing Processes</h4>
+  <p>To receive a message, a process must have an <strong>identifier</strong>, which includes:</p>
+  <ol>
+    <li><strong>IP Address</strong>: Identifies the specific host on the network (32-bit for IPv4).</li>
+    <li><strong>Port Number</strong>: Identifies the specific process/service on that host.
+      <ul>
+        <li>HTTP: Port 80</li>
+        <li>Mail (SMTP): Port 25</li>
+      </ul>
+    </li>
+  </ol>
+  <h3 id="113-application-layer-protocols">11.3 Application-Layer Protocols</h3>
+  <p>An application-layer protocol defines:</p>
+  <ul>
+    <li><strong>Types of messages</strong> exchanged (e.g., request, response).</li>
+    <li><strong>Syntax</strong>: Fields in the message and how they are delineated.</li>
+    <li><strong>Semantics</strong>: Meaning of the information in the fields.</li>
+    <li><strong>Rules</strong>: When and how a process sends and responds to messages.</li>
+  </ul>
+  <hr>
+  <h2 id="12-web-and-http">12. Web and HTTP</h2>
+  <h3 id="121-http-overview">12.1 HTTP Overview</h3>
+  <p>The <strong>HyperText Transfer Protocol (HTTP)</strong> is the Web's application-layer protocol. It follows a
+    client/server model:</p>
+  <ul>
+    <li><strong>Client</strong>: Browser that requests, receives, and displays Web objects.</li>
+    <li><strong>Server</strong>: Web server that sends objects in response to requests.</li>
+  </ul>
+  <h4 id="web-objects-and-urls">Web Objects and URLs</h4>
+  <p>A Web page consists of <strong>objects</strong> (HTML files, JPEG images, Java applets, audio files, etc.). Most
+    pages consist of a base HTML file that references several other objects.
+    Each object is addressable by a <strong>URL (Uniform Resource Locator)</strong>:
+    <code>http://www.someschool.edu/someDept/pic.gif</code>
+  </p>
+  <ul>
+    <li><strong>Host Name</strong>: <code>www.someschool.edu</code></li>
+    <li><strong>Path Name</strong>: <code>/someDept/pic.gif</code></li>
+  </ul>
+  <h4 id="transport-layer-tcp">Transport Layer: TCP</h4>
+  <ul>
+    <li>HTTP uses <strong>TCP</strong> as its underlying transport protocol.</li>
+    <li>The client initiates a TCP connection (creates a socket) to the server on <strong>port 80</strong>.</li>
+    <li>The server accepts the connection.</li>
+    <li>HTTP messages are exchanged.</li>
+    <li>TCP connection is closed.</li>
+  </ul>
+  <blockquote>
+    <p>[!NOTE]
+      <strong>HTTP is Stateless</strong>
+      The server maintains no information about past client requests. If a client asks for the same object twice, the
+      server sends it again. Stateless protocols are easier to design and manage because the server doesn't need to keep
+      track of complex state variables.
+    </p>
+  </blockquote>
+  <h3 id="122-http-connections">12.2 HTTP Connections</h3>
+  <h4 id="non-persistent-http">Non-Persistent HTTP</h4>
+  <ul>
+    <li>At most one object is sent over a single TCP connection.</li>
+    <li>Downloading multiple objects requires multiple TCP connections.</li>
+    <li><em>Process</em>:
+      <ol>
+        <li>TCP connection opened.</li>
+        <li>Request/Response exchanged.</li>
+        <li>TCP connection closed.</li>
+      </ol>
+    </li>
+  </ul>
+  <h4 id="persistent-http-http11">Persistent HTTP (HTTP/1.1)</h4>
+  <ul>
+    <li>The server leaves the connection open after sending a response.</li>
+    <li>Subsequent HTTP messages between the same client/server can be sent over the same connection.</li>
+    <li><strong>Pipelining</strong>: The client can send requests as soon as it encounters a referenced object (e.g.,
+      while still receiving the base HTML), rather than waiting for each object to finish.</li>
+  </ul>
+  <h3 id="123-performance-rtt-and-response-time">12.3 Performance: RTT and Response Time</h3>
+  <h4 id="round-trip-time-rtt">Round-Trip Time (RTT)</h4>
+  <p><strong>Definition</strong>: The time it takes for a small packet to travel from client to server and back.</p>
+  <h4 id="response-time-calculations">Response Time Calculations</h4>
+  <ol>
+    <li><strong>One RTT</strong> to initiate the TCP connection.</li>
+    <li><strong>One RTT</strong> for the HTTP request and the first few bytes of the HTTP response to return.</li>
+    <li><strong>File Transmission Time</strong>: The time to push all bits of the file into the link.</li>
+  </ol>
+  <p><strong>Total Response Time (Non-Persistent)</strong>:
+    $$T_{resp} = 2 \times RTT + \text{transmission time}$$</p>
+  <p><strong>Total Response Time (Persistent)</strong>:</p>
+  <ul>
+    <li>As little as <strong>one RTT</strong> for all referenced objects (after the initial connection and base HTML
+      RTTs), significantly cutting down latency.</li>
+  </ul>
+  <blockquote>
+    <p>[!IMPORTANT]
+      <strong>Exam Examples: Calculating RTTs</strong>
+      Assume the client knows the IP address of the server. Transmission time for each object (base HTML or JPEG) is
+      <strong>0.5 RTT</strong>.
+    </p>
+    <p><strong>Scenario 1: Base Page Only</strong></p>
+    <ul>
+      <li><strong>TCP Setup</strong>: 1 RTT</li>
+      <li><strong>HTTP Request/Response</strong>: 1 RTT</li>
+      <li><strong>Transmission</strong>: 0.5 RTT</li>
+      <li><strong>Total</strong>: <strong>2.5 RTT</strong></li>
+    </ul>
+    <p><strong>Scenario 2: Base Page + 1 JPEG (Non-Persistent HTTP 1.0)</strong></p>
+    <ul>
+      <li>Base Page: 2.5 RTT</li>
+      <li>New TCP Setup for JPEG: 1 RTT</li>
+      <li>HTTP Request/Response for JPEG: 1 RTT</li>
+      <li>Transmission for JPEG: 0.5 RTT</li>
+      <li><strong>Total</strong>: 2.5 + 2.5 = <strong>5 RTT</strong></li>
+    </ul>
+    <p><strong>Scenario 3: Base Page + 1 JPEG (Persistent HTTP 1.1)</strong></p>
+    <ul>
+      <li>Base Page (Setup + Request + Trans): 2.5 RTT</li>
+      <li>Request/Response for JPEG (Same Connection): 1 RTT</li>
+      <li>Transmission for JPEG: 0.5 RTT</li>
+      <li><strong>Total</strong>: 2.5 + 1.5 = <strong>4 RTT</strong></li>
+    </ul>
+  </blockquote>
+  <h4 id="parallel-connections">Parallel Connections</h4>
+  <p>To mitigate the slowness of non-persistent HTTP, modern browsers often open multiple <strong>parallel TCP
+      connections</strong> to fetch referenced objects simultaneously.</p>
+  <h3 id="124-http-message-formats">12.4 HTTP Message Formats</h3>
+  <p>HTTP messages are in human-readable ASCII format.</p>
+  <h4 id="http-request-message">HTTP Request Message</h4>
+  <ul>
+    <li><strong>Request Line</strong>: Method (GET, POST, HEAD, etc.), URL, and HTTP Version.</li>
+    <li><strong>Header Lines</strong>: Metadata like <code>Host</code>, <code>User-Agent</code>,
+      <code>Accept-Language</code>, <code>Connection</code> (e.g., <code>keep-alive</code>).
+    </li>
+    <li><strong>Entity Body</strong>: Used in POST and PUT methods to send data to the server.</li>
+  </ul>
+  <h4 id="http-request-methods">HTTP Request Methods</h4>
+  <table>
+    <thead>
+      <tr>
+        <th style="text-align:left">Method</th>
+        <th style="text-align:left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align:left"><strong>GET</strong></td>
+        <td style="text-align:left">Requests data. Can send user data in the URL (e.g., <code>search?q=monkeys</code>).
+        </td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>POST</strong></td>
+        <td style="text-align:left">Sends data in the entity body (e.g., form input, creating a resource).</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>HEAD</strong></td>
+        <td style="text-align:left">Requests only the headers (no body). Used for debugging/testing.</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>PUT</strong></td>
+        <td style="text-align:left">Uploads/replaces a file at the specified URL.</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>DELETE</strong></td>
+        <td style="text-align:left">Deletes a file at the specified URL.</td>
+      </tr>
+    </tbody>
+  </table>
+  <h4 id="http-response-message">HTTP Response Message</h4>
+  <ul>
+    <li><strong>Status Line</strong>: Protocol version, Status Code, and Status Phrase.</li>
+    <li><strong>Header Lines</strong>: <code>Date</code>, <code>Server</code>, <code>Last-Modified</code>,
+      <code>Content-Length</code>, <code>Content-Type</code>.
+    </li>
+    <li><strong>Entity Body</strong>: The actual data (e.g., requested HTML file).</li>
+  </ul>
+  <h3 id="125-http-status-codes">12.5 HTTP Status Codes</h3>
+  <p>These appear in the first line of the server response.</p>
+  <ul>
+    <li><strong>200 OK</strong>: Request succeeded; object is in the response.</li>
+    <li><strong>301 Moved Permanently</strong>: Object has a new location (specified in <code>Location:</code> header).
+    </li>
+    <li><strong>400 Bad Request</strong>: Server didn't understand the request.</li>
+    <li><strong>404 Not Found</strong>: Document not found on this server.</li>
+    <li><strong>505 HTTP Version Not Supported</strong>.</li>
+  </ul>
+  <h3 id="126-conditional-get">12.6 Conditional GET</h3>
+  <p>The goal of a conditional GET is to avoid sending an object if the client (or a proxy cache) already has an
+    up-to-date version in its cache. This saves bandwidth and reduces latency.</p>
+  <ul>
+    <li><strong>Mechanism</strong>:
+      <ol>
+        <li><strong>Cache</strong>: The client/proxy stores the object along with the `Last-Modified` date from the
+          server.</li>
+        <li><strong>Request</strong>: In a subsequent request, the client includes an `If-modified-since: <date>`
+            header.</li>
+        <li><strong>Server Response</strong>:
+          <ul>
+            <li>If the object <em>has not</em> changed, the server returns <strong>304 Not Modified</strong> with no
+              entity body.</li>
+            <li>If the object <em>has</em> changed, the server returns <strong>200 OK</strong> with the new object.</li>
+          </ul>
+        </li>
+      </ol>
+    </li>
+  </ul>
+  <hr>
+  <h2 id="13-cookies-maintaining-user-state">13. Cookies: Maintaining User State</h2>
+  <p>Although HTTP is stateless, many applications (e.g., shopping carts, authentication, personalized content) require
+    the server to identify users across multiple requests.</p>
+  <h3 id="131-cookie-components">13.1 Cookie Components</h3>
+  <p>To maintain state, the cookie system uses four components:</p>
+  <ol>
+    <li><strong>Response Header</strong>: <code>Set-cookie:</code> header in the HTTP response message.</li>
+    <li><strong>Request Header</strong>: <code>Cookie:</code> header in subsequent HTTP request messages.</li>
+    <li><strong>Client-Side File</strong>: A cookie file kept on the user's host, managed by the browser.</li>
+    <li><strong>Backend Database</strong>: A database at the Web site to associate cookie IDs with user data/actions.
+    </li>
+  </ol>
+  <h3 id="132-how-cookies-work">13.2 How Cookies Work</h3>
+  <ol>
+    <li><strong>First Visit</strong>: Client sends an ordinary HTTP request. Server creates a unique ID and an entry in
+      its database. Server responds with a <code>Set-cookie: ID</code> header.</li>
+    <li><strong>Subsequent Visits</strong>: The browser sees the cookie for that site and includes it in the request:
+      <code>Cookie: ID</code>.
+    </li>
+    <li><strong>State Tracking</strong>: The server uses the ID to look up the user's past actions or preferences in its
+      database.</li>
+  </ol>
+  <h3 id="133-summary-of-state-management">13.3 Summary of State Management</h3>
+  <table>
+    <thead>
+      <tr>
+        <th style="text-align:left">Aspect</th>
+        <th style="text-align:left">Stateless (Pure HTTP)</th>
+        <th style="text-align:left">Stateful (with Cookies)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align:left"><strong>Server Complexity</strong></td>
+        <td style="text-align:left">Low (no memory of past)</td>
+        <td style="text-align:left">High (must manage database)</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>Reliability</strong></td>
+        <td style="text-align:left">High (survives crashes)</td>
+        <td style="text-align:left">Lower (database/session loss issues)</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>User Privacy</strong></td>
+        <td style="text-align:left">Higher</td>
+        <td style="text-align:left">Lower (enables tracking/profiling)</td>
+      </tr>
+    </tbody>
+  </table>
+  <hr>
+  <h2 id="14-network-diagnostic-tools">14. Network Diagnostic Tools</h2>
+  <p>Several tools are used to interact with or observe HTTP:</p>
+  <ul>
+    <li><strong>telnet</strong>: Can be used to manually type HTTP requests to a server on port 80.</li>
+    <li><strong>curl / wget</strong>: Command-line tools to download objects and view headers.</li>
+    <li><strong>Wireshark</strong>: A packet sniffer that captures and displays all network traffic on an interface. It
+      is essential for debugging protocol interactions and viewing the &quot;raw&quot; bytes of HTTP messages.</li>
+  </ul>
+  <hr>
+  <h2 id="15-the-domain-name-system-dns">15. The Domain Name System (DNS)</h2>
+  <p>The DNS is a distributed database implemented in a hierarchy of many name servers and an application-layer protocol
+    that allows hosts to query the database.</p>
+  <h3 id="151-dns-services">15.1 DNS Services</h3>
+  <ul>
+    <li><strong>Hostname to IP Address Translation</strong>: The primary role of DNS.</li>
+    <li><strong>Host Aliasing</strong>: A host can have one or more alias names (e.g., a simple name like
+      <code>www.google.com</code> for a complex canonical name).
+    </li>
+    <li><strong>Mail Server Aliasing</strong>: Allows mail servers to have simpler aliases.</li>
+    <li><strong>Load Distribution</strong>: Replicated Web servers can be associated with a single hostname; DNS rotates
+      the list of IP addresses returned to distribute traffic.</li>
+  </ul>
+  <h3 id="152-the-dns-hierarchy">15.2 The DNS Hierarchy</h3>
+  <p>DNS uses a hierarchical structure to provide scalability and resilience.</p>
+  <ol>
+    <li><strong>Root DNS Servers</strong>: There are 13 logical root servers worldwide (replicated hundreds of times).
+      They provide the IP addresses of TLD servers.</li>
+    <li><strong>Top-Level Domain (TLD) Servers</strong>: Responsible for domains like <code>.com</code>,
+      <code>.org</code>, <code>.net</code>, <code>.edu</code>, and country codes (<code>.uk</code>, <code>.fr</code>).
+    </li>
+    <li><strong>Authoritative DNS Servers</strong>: An organization's own servers that provide the actual hostname-to-IP
+      mappings for that organization's hosts.</li>
+    <li><strong>Local DNS Servers</strong>: While not strictly part of the hierarchy, every ISP has a
+      &quot;default&quot; local DNS server. When a host makes a query, it goes to the local DNS server first.</li>
+  </ol>
+  <h3 id="153-name-resolution-processes">15.3 Name Resolution Processes</h3>
+  <ul>
+    <li><strong>Iterated Query</strong>:
+      <ul>
+        <li>The contacted server replies with the name of the <em>next</em> server to contact (&quot;I don't know this
+          name, but ask this server&quot;).</li>
+        <li>The burden of resolution stays on the local DNS server.</li>
+      </ul>
+    </li>
+    <li><strong>Recursive Query</strong>:
+      <ul>
+        <li>The contacted server takes on the task of finding the mapping itself by querying other servers.</li>
+        <li>This puts a heavy load on upper-level servers (like root servers) and is generally avoided at those levels.
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <h4 id="1531-the-role-of-the-local-dns-server">15.3.1 The Role of the Local DNS Server</h4>
+  <p>Every host is configured with a local DNS server (provided by the ISP or organization).</p>
+  <ul>
+    <li><strong>Advantages</strong>:
+      <ul>
+        <li><strong>Reduced Delay</strong>: Caching popular translations locally speeds up resolution for many users.
+        </li>
+        <li><strong>Reduced Load</strong>: It prevents repetitive queries from leaving the local network, saving
+          external bandwidth.</li>
+      </ul>
+    </li>
+    <li><strong>Disadvantages</strong>:
+      <ul>
+        <li><strong>Single Point of Failure</strong>: If the local DNS server is down, hosts on that network cannot
+          resolve any names.</li>
+      </ul>
+    </li>
+    <li><strong>Mitigation</strong>: Redundant local DNS servers (primary and secondary) are used to ensure
+      availability.</li>
+  </ul>
+  <h3 id="154-dns-caching">15.4 DNS Caching</h3>
+  <p>Once a name server learns a mapping, it caches it locally.</p>
+  <ul>
+    <li><strong>Benefit</strong>: Greatly improves response time and reduces network traffic.</li>
+    <li><strong>TTL (Time to Live)</strong>: Cached entries disappear after a set time.</li>
+    <li><strong>Issue</strong>: Cached entries can be out-of-date if a host changes its IP address before the TTL
+      expires.</li>
+  </ul>
+  <h3 id="155-dns-resource-records-rr">15.5 DNS Resource Records (RR)</h3>
+  <p>The DNS database stores resource records (RR) with the format: <code>(Name, Value, Type, TTL)</code>.</p>
+  <table>
+    <thead>
+      <tr>
+        <th style="text-align:left">Type</th>
+        <th style="text-align:left">Name</th>
+        <th style="text-align:left">Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align:left"><strong>A</strong></td>
+        <td style="text-align:left">Hostname</td>
+        <td style="text-align:left">IP Address</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>NS</strong></td>
+        <td style="text-align:left">Domain (e.g., foo.com)</td>
+        <td style="text-align:left">Hostname of authoritative name server</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>CNAME</strong></td>
+        <td style="text-align:left">Alias name</td>
+        <td style="text-align:left">Canonical (real) name</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>MX</strong></td>
+        <td style="text-align:left">Alias name</td>
+        <td style="text-align:left">Name of mail server associated with the name</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="156-dns-protocol-and-messages">15.6 DNS Protocol and Messages</h3>
+  <ul>
+    <li><strong>Protocol</strong>: DNS primarily uses <strong>UDP</strong> on <strong>port 53</strong> for queries and
+      replies. <strong>TCP</strong> is used for large zone transfers between servers.</li>
+    <li><strong>Message Format</strong>:
+      <ul>
+        <li><strong>Identification</strong>: 16-bit # for the query; reply uses the same #.</li>
+        <li><strong>Flags</strong>: Indicate if it's a query or reply, if recursion is desired, and if the reply is
+          authoritative.</li>
+        <li><strong>Questions</strong>: Name and type being queried.</li>
+        <li><strong>Answers</strong>: RRs in response to the query.</li>
+        <li><strong>Authority</strong>: Records for authoritative servers.</li>
+        <li><strong>Additional</strong>: Other helpful info (e.g., the IP address of a name server mentioned in the
+          Answer).</li>
+      </ul>
+    </li>
+  </ul>
+  <h3 id="157-diagnostic-tools">15.7 Diagnostic Tools</h3>
+  <ul>
+    <li><strong>nslookup</strong>: Queries DNS servers manually.</li>
+    <li><strong>dig</strong>: A more modern and flexible tool for DNS lookups (e.g.,
+      <code>dig www.google.com +short</code>).
+    </li>
+    <li><strong>whois</strong>: Used to find who owns an IP address block or domain name.</li>
+  </ul>
+  <hr>
+  <h2 id="16-video-streaming-and-content-distribution-networks-cdns">16. Video Streaming and Content Distribution
+    Networks (CDNs)</h2>
+  <h3 id="161-video-streaming-basics">16.1 Video Streaming Basics</h3>
+  <p>Streaming video applications must overcome the challenges of variable network delays and packet loss to provide a
+    smooth user experience.</p>
+  <ul>
+    <li><strong>Chunk</strong>: A small, self-contained segment of a larger video file (e.g., 2–10 seconds long). Chunks
+      allow the client to switch bitrates mid-stream to adapt to changing bandwidth.</li>
+    <li><strong>Continuous Playout Constraint</strong>: The client must play out the video at its original timing (e.g.,
+      30 frames/sec), even if network delays fluctuate.</li>
+    <li><strong>Jitter</strong>: Variability in the arrival time of packets.</li>
+    <li><strong>Client-Side Buffering</strong>: The client stores a few seconds of video before starting playout. This
+      buffer absorbs jitter and ensures continuous playout even if the network slows down temporarily.</li>
+  </ul>
+  <h3 id="162-dash-dynamic-adaptive-streaming-over-http">16.2 DASH: Dynamic Adaptive Streaming over HTTP</h3>
+  <p>DASH is the standard for modern video streaming (used by YouTube, Netflix).</p>
+  <ul>
+    <li><strong>Server-Side</strong>:
+      <ul>
+        <li>The video is divided into multiple <strong>chunks</strong>.</li>
+        <li>Each chunk is encoded at multiple <strong>different bitrates</strong> (qualities).</li>
+        <li>A <strong>Manifest File</strong> (Media Presentation Description - MPD) provides URLs for these different
+          chunks and their available bitrates.</li>
+      </ul>
+    </li>
+    <li><strong>Client-Side Intelligence</strong>:
+      <ul>
+        <li>The client periodically estimates its available bandwidth.</li>
+        <li>It requests one chunk at a time, choosing the <strong>maximum encoding rate</strong> that its current
+          bandwidth can support.</li>
+        <li>It can switch between qualities dynamically as network conditions change.</li>
+      </ul>
+    </li>
+  </ul>
+  <h3 id="163-content-distribution-networks-cdns">16.3 Content Distribution Networks (CDNs)</h3>
+  <p>To serve millions of users simultaneously, a single &quot;mega-server&quot; is insufficient due to bandwidth
+    limits, single points of failure, and high latency for distant users.</p>
+  <ul>
+    <li><strong>CDN Strategies</strong>:
+      <ol>
+        <li><strong>Enter Deep</strong>: Deploy small server clusters deep into thousands of access networks (ISPs)
+          worldwide (e.g., Akamai).</li>
+        <li><strong>Bring Home</strong>: Build larger clusters in a smaller number of strategic locations (POPs) near
+          access networks (e.g., Limelight).</li>
+      </ol>
+    </li>
+    <li><strong>CDN Operation</strong>:
+      <ul>
+        <li>Content is replicated across various CDN nodes.</li>
+        <li>When a user requests a video, the CDN must select a &quot;good&quot; node to stream from.</li>
+        <li><strong>Selection Methods</strong>:
+          <ul>
+            <li>Geographic proximity.</li>
+            <li>Shortest delay/hop count (monitored via pings).</li>
+            <li>Client-side choice (giving the client a list of servers to test).</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <hr>
+  <h2 id="17-socket-programming">17. Socket Programming</h2>
+  <p>A socket is the interface between the application layer and the transport layer (the &quot;door&quot; of the
+    process).</p>
+  <h3 id="171-socket-identifiers">17.1 Socket Identifiers</h3>
+  <ul>
+    <li><strong>IP Address</strong>: Identifies the host (NIC).</li>
+    <li><strong>Port Number</strong>: Identifies the specific process.
+      <ul>
+        <li><strong>1–255</strong>: Standard services (80: HTTP, 25: SMTP, 53: DNS).</li>
+        <li><strong>1–1023</strong>: Restricted to system/privileged use.</li>
+      </ul>
+    </li>
+    <li><strong>5-Tuple</strong>: A unique network connection is defined by:
+      <code>(Source IP, Source Port, Destination IP, Destination Port, Protocol)</code>.
+    </li>
+  </ul>
+  <h3 id="172-udp-socket-programming-unreliable-datagram">17.2 UDP Socket Programming (Unreliable Datagram)</h3>
+  <ul>
+    <li><strong>Connectionless</strong>: No handshaking before sending data.</li>
+    <li><strong>Explicit Addressing</strong>: The sender must attach the destination IP and Port to <em>every</em>
+      packet.</li>
+    <li><strong>Unreliable</strong>: Data may be lost or arrive out-of-order.</li>
+    <li><strong>Demultiplexing</strong>: Based only on the <strong>destination port number</strong>.</li>
+  </ul>
+  <h3 id="173-tcp-socket-programming-reliable-stream">17.3 TCP Socket Programming (Reliable Stream)</h3>
+  <ul>
+    <li><strong>Connection-Oriented</strong>: Requires a &quot;handshake&quot; to establish a connection before data
+      exchange.</li>
+    <li><strong>Two Socket Types on Server</strong>:
+      <ol>
+        <li><strong>Welcoming Socket</strong>: Listens for incoming connection requests from any client.</li>
+        <li><strong>Connection Socket</strong>: Created by the server specifically for <em>each</em> client after the
+          handshake, allowing the server to handle multiple simultaneous clients.</li>
+      </ol>
+    </li>
+    <li><strong>Reliable</strong>: Guarantees in-order, error-free delivery of a byte stream.</li>
+    <li><strong>Demultiplexing</strong>: Based on the full <strong>4-tuple</strong> (Source IP, Source Port, Dest IP,
+      Dest Port).</li>
+  </ul>
+  <h3 id="174-comparison-summary">17.4 Comparison Summary</h3>
+  <table>
+    <thead>
+      <tr>
+        <th style="text-align:left">Feature</th>
+        <th style="text-align:left">UDP Sockets</th>
+        <th style="text-align:left">TCP Sockets</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align:left"><strong>Connection</strong></td>
+        <td style="text-align:left">Connectionless</td>
+        <td style="text-align:left">Connection-oriented</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>Reliability</strong></td>
+        <td style="text-align:left">Best-effort (unreliable)</td>
+        <td style="text-align:left">Reliable byte stream</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>Addressing</strong></td>
+        <td style="text-align:left">Per-packet destination</td>
+        <td style="text-align:left">Set once during connect</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>Demux Criteria</strong></td>
+        <td style="text-align:left">Dest Port</td>
+        <td style="text-align:left">4-tuple (IPs and Ports)</td>
+      </tr>
+      <tr>
+        <td style="text-align:left"><strong>API Complexity</strong></td>
+        <td style="text-align:left">Simpler (sendto/recvfrom)</td>
+        <td style="text-align:left">More complex (listen/accept/connect)</td>
+      </tr>
+    </tbody>
+  </table>
+  <hr>
+  <h2 id="18-advanced-scenarios-and-exam-calculations">18. Advanced Scenarios and Exam Calculations</h2>
+  <h3 id="181-multi-level-dns-resolution-delay">18.1 Multi-Level DNS Resolution Delay</h3>
+  <p><strong>Scenario</strong>: A laptop queries for `www.xyz.com`. Local DNS does not have it cached.</p>
+  <ul>
+    <li><strong>Laptop to Local DNS (RTT)</strong>: 6 ms (3 ms each way).</li>
+    <li><strong>Local DNS to Root (RTT)</strong>: 21 ms.</li>
+    <li><strong>Local DNS to TLD (.com) (RTT)</strong>: 9 ms.</li>
+    <li><strong>Local DNS to Authoritative (dns.xyz.com) (RTT)</strong>: 50 ms.</li>
+  </ul>
+  <p><strong>Calculation</strong>:
+    The local DNS server must perform an iterated query:</p>
+  <ol>
+    <li>Query Root: +21 ms</li>
+    <li>Query TLD: +9 ms</li>
+    <li>Query Authoritative: +50 ms</li>
+    <li>Total Local DNS delay: 80 ms.</li>
+    <li>Add Laptop-to-Local delay: 6 ms.
+      <strong>Total Delay: 86 ms.</strong>
+    </li>
+  </ol>
+  <h3 id="182-dns--http-combined-latency">18.2 DNS + HTTP Combined Latency</h3>
+  <p><strong>Scenario</strong>: User clicks a link. Host must perform DNS lookup first.</p>
+  <ul>
+    <li><strong>DNS RTTs</strong>: Local Cache (3 ms), 2nd server (28 ms), 3rd server (32 ms), 4th server (32 ms).</li>
+    <li><strong>HTTP RTT (Local to Server)</strong>: 9 ms.</li>
+    <li><strong>Transmission Time</strong>: Negligible.</li>
+  </ul>
+  <p><strong>A. Base HTML Object Only (Non-persistent)</strong>:</p>
+  <ul>
+    <li>DNS Total: $3 + 28 + 32 + 32 = 95$ ms.</li>
+    <li>HTTP TCP Setup: 9 ms.</li>
+    <li>HTTP Request/Response: 9 ms.</li>
+    <li><strong>Total: 113 ms</strong>.</li>
+  </ul>
+  <p><strong>B. Base + 3 Small Objects (Non-persistent, No Parallel)</strong>:</p>
+  <ul>
+    <li>Previous: 113 ms.</li>
+    <li>Each additional object: 2 RTTs (18 ms).</li>
+    <li>Total: $113 + (3 \times 18) = \mathbf{167}$ <strong>ms</strong>.</li>
+  </ul>
+  <p><strong>C. Base + 3 Small Objects (Non-persistent, 5 Parallel)</strong>:</p>
+  <ul>
+    <li>Base: 113 ms.</li>
+    <li>The 3 objects are requested in parallel over 3 new TCP connections.</li>
+    <li>Parallel delay: 2 RTTs (18 ms).</li>
+    <li><strong>Total: 131 ms</strong>.</li>
+  </ul>
+  <p><strong>D. Base + 3 Small Objects (Persistent, 5 Parallel)</strong>:</p>
+  <ul>
+    <li>Base: 113 ms.</li>
+    <li>The 3 objects are requested over the <em>existing</em> connection.</li>
+    <li>Pipelining delay: 1 RTT (9 ms).</li>
+    <li><strong>Total: 122 ms</strong>.</li>
+  </ul>
+  <h3 id="183-playout-delay-in-video-streaming">18.3 Playout Delay in Video Streaming</h3>
+  <p>To calculate the <strong>minimum initial playout delay</strong> ($d$) such that no chunk misses its deadline:</p>
+  <ol>
+    <li>Identify the chunk with the largest <strong>network delay</strong> ($L_i = \text{Arrival}_i -
+      \text{Transmission}_i$).</li>
+    <li>The playout time of the first chunk ($P_1$) must be late enough that all subsequent chunks $i$ arrive at or
+      before their scheduled playout time: $P_i = P_1 + (i-1) \times \text{Interval}$.</li>
+    <li><strong>Rule of Thumb</strong>: The playout delay must be at least as large as the maximum network delay
+      experienced by any chunk.</li>
+  </ol>
+
+</body>
+
+</html>

@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>guide</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+
+    @media print {
+      html {
+        background-color: white;
+      }
+
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+
+      p,
+      h2,
+      h3 {
+        orphans: 3;
+        widows: 3;
+      }
+
+      h2,
+      h3,
+      h4 {
+        page-break-after: avoid;
+      }
+    }
+
+    p {
+      margin: 1em 0;
+    }
+
+    a {
+      color: #1a1a1a;
+    }
+
+    a:visited {
+      color: #1a1a1a;
+    }
+
+    img {
+      max-width: 100%;
+    }
+
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      margin-top: 1.4em;
+    }
+
+    h5,
+    h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+
+    h6 {
+      font-weight: normal;
+    }
+
+    ol,
+    ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+
+    li>ol,
+    li>ul {
+      margin-top: 0;
+    }
+
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+
+    .sourceCode {
+      background-color: transparent;
+      overflow: visible;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+
+    table caption {
+      margin-bottom: 0.75em;
+    }
+
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+
+    #TOC li {
+      list-style: none;
+    }
+
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+
+    #TOC>ul {
+      padding-left: 0;
+    }
+
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+
+    span.smallcaps {
+      font-variant: small-caps;
+    }
+
+    div.columns {
+      display: flex;
+      gap: min(4vw, 1.5em);
+    }
+
+    div.column {
+      flex: auto;
+      overflow-x: auto;
+    }
+
+    div.hanging-indent {
+      margin-left: 1.5em;
+      text-indent: -1.5em;
+    }
+
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class] {
+      list-style: none;
+    }
+
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+</head>
+
+<body>
+  <h1 id="csci-4211-computer-networks---master-study-reference">CSci 4211:
+    Computer Networks - Master Study Reference</h1>
+  <h2 id="network-layer-control-plane-overview">1. Network Layer: Control
+    Plane Overview</h2>
+  <p>The network layer is divided into two interacting parts: the
+    <strong>Data Plane</strong> and the <strong>Control Plane</strong>.
+    While the data plane handles the local, per-router function of
+    forwarding packets from input to output ports, the control plane manages
+    the network-wide logic that determines how packets are routed along the
+    end-to-end path from source to destination.
+  </p>
+  <h3 id="key-functions-of-the-network-layer">1.1 Key Functions of the
+    Network Layer</h3>
+  <ul>
+    <li><strong>Addressing:</strong> Global identification of hosts and
+      routers (e.g., IPv4/IPv6).</li>
+    <li><strong>Forwarding (Data Plane):</strong> The process of moving a
+      packet from a router’s input port to the appropriate output port.</li>
+    <li><strong>Routing (Control Plane):</strong> The process of determining
+      the end-to-end path taken by packets from source to destination.</li>
+  </ul>
+  <h3 id="control-plane-approaches">1.2 Control Plane Approaches</h3>
+  <p>There are two primary ways to implement the network control plane: 1.
+    <strong>Per-Router Control (Traditional):</strong> Routing algorithms
+    are implemented in every router. Each router contains a routing
+    component that communicates with the routing components in other routers
+    to compute forwarding tables. 2. <strong>Logically Centralized Control
+      (SDN):</strong> A separate, remote controller (typically a server)
+    computes and installs the forwarding tables in each router. This is the
+    foundation of <strong>Software-Defined Networking (SDN)</strong>. *
+    <strong>Match-Action Rules:</strong> SDN routers use generalized
+    forwarding. A table entry contains a <strong>Match</strong> (e.g., IP
+    source/dest, Port, Protocol like TCP/UDP) and an <strong>Action</strong>
+    (e.g., Forward to port <span class="math inline">\(X\)</span>, Drop, or
+    Modify header). * <strong>Policy Control:</strong> Allows the controller
+    to specify different paths for different types of traffic (e.g., route
+    TCP traffic via one path and UDP via another).
+  </p>
+  <hr />
+  <h2 id="routing-paradigms-and-graph-abstraction">2. Routing Paradigms
+    and Graph Abstraction</h2>
+  <h3 id="routing-goals">2.1 Routing Goals</h3>
+  <p>The primary goal of any routing protocol is to determine “good” paths
+    through the network. * <strong>Path:</strong> A sequence of routers that
+    a packet traverses from a given initial source host to the final
+    destination host. * <strong>“Good” criteria:</strong> Typically defined
+    as the path with the least cost, fastest speed, or least congested.</p>
+  <h3 id="icmp-internet-control-message-protocol">2.2 ICMP (Internet
+    Control Message Protocol)</h3>
+  <p>While the IP protocol handles the actual movement of data, ICMP is
+    used for: * <strong>Error Reporting:</strong> Notifying the source when
+    a packet cannot reach its destination or has been dropped. *
+    <strong>Router Signaling:</strong> Communicating control information
+    between routers and hosts. * <strong>Signaling Example:</strong> Used by
+    tools like <code>ping</code> and <code>traceroute</code>.
+  </p>
+  <h3 id="issues-in-route-selection">2.3 Issues in Route Selection</h3>
+  <p>Beyond finding the “least cost” path, several practical issues must
+    be addressed by routing protocols: * <strong>Performance:</strong>
+    Choosing routes based on specific metrics like smallest delay or maximum
+    throughput. * <strong>Policy:</strong> Routes may be selected based on
+    administrative rules (e.g., “do not route traffic through a competitor’s
+    network” or “avoid .gov networks”). * <strong>Adaptability
+      (Self-healing):</strong> The protocol must automatically respond to
+    changes in topology (link failures) or network conditions with little to
+    no human intervention. * <strong>Scalability:</strong> The algorithm
+    must be able to support a massive number of hosts and routers without
+    consuming excessive memory or bandwidth.</p>
+  <h3 id="classical-routing-paradigms">2.3 Classical Routing
+    Paradigms</h3>
+  <ol type="1">
+    <li><strong>Hop-by-Hop Routing (Default IP):</strong>
+      <ul>
+        <li>Each packet contains the destination address.</li>
+        <li>Each intermediate router independently chooses the next-hop for the
+          packet.</li>
+        <li><strong>Implication:</strong> Packets destined for the same host may
+          take different paths if the topology or costs change between
+          packets.</li>
+      </ul>
+    </li>
+    <li><strong>Source Routing:</strong>
+      <ul>
+        <li>The sender specifies the entire path to the destination within the
+          packet header.</li>
+        <li>Routers simply follow the path instructions provided by the
+          sender.</li>
+        <li><strong>Types:</strong> IP supports “loose” and “strict” source
+          routing options.</li>
+        <li><strong>Pros/Cons:</strong> Gives sender control, but fails if a
+          specified link in the path goes down.</li>
+        <li><strong>Examples:</strong> Virtual Circuit setups and MPLS
+          (Multiprotocol Label Switching).</li>
+      </ul>
+    </li>
+  </ol>
+  <h3 id="graph-abstraction">2.4 Graph Abstraction</h3>
+  <p>To solve routing mathematically, networks are modeled as graphs <span class="math inline">\(G = (N, E)\)</span>: *
+    <strong>Nodes (<span class="math inline">\(N\)</span>):</strong> Represent routers. <span class="math inline">\(N =
+      \{u, v, w, x, y, z\}\)</span>. * <strong>Edges
+      (<span class="math inline">\(E\)</span>):</strong> Represent physical
+    links between routers. <span class="math inline">\(E = \{(u,v), (u,x),
+      (v,x), \dots\}\)</span>. * <strong>Link Cost (<span class="math inline">\(c(x,y)\)</span>):</strong> A value
+    assigned to a
+    link, which can represent: * <strong>Shortest Path:</strong> All costs
+    set to 1. * <strong>Bandwidth:</strong> Costs inversely related to link
+    capacity. * <strong>Congestion:</strong> Costs directly related to
+    current traffic levels.
+  </p>
+  <h3 id="classification-of-routing-algorithms">2.3 Classification of
+    Routing Algorithms</h3>
+  <ul>
+    <li><strong>Global (Centralized):</strong> All routers have complete
+      topology and link cost info (e.g., Link State).</li>
+    <li><strong>Decentralized:</strong> Iterative process where routers
+      initially only know link costs to neighbors (e.g., Distance
+      Vector).</li>
+    <li><strong>Static:</strong> Routes change slowly over time.</li>
+    <li><strong>Dynamic:</strong> Routes change quickly in response to
+      topology or link cost updates.</li>
+  </ul>
+  <h3 id="common-assumptions-for-routing-algorithms">2.4 Common
+    Assumptions for Routing Algorithms</h3>
+  <p>Both Link State (LS) and Distance Vector (DV) algorithms typically
+    operate under the following assumptions: 1. <strong>Neighbor
+      Discovery:</strong> Each router knows the address of its directly
+    connected neighbors. 2. <strong>Cost Knowledge:</strong> Each router
+    knows the exact cost of the link reaching each of its immediate
+    neighbors. 3. <strong>Information Exchange:</strong> Global network
+    information is discovered by nodes exchanging routing data with their
+    neighbors.</p>
+  <hr />
+  <p>Link State algorithms are <strong>centralized</strong> algorithms
+    where every router must possess a complete map of the network topology
+    and all link costs to compute paths.</p>
+  <h4 id="ls-vs.-distance-vector-dv-information-exchange">LS vs. Distance
+    Vector (DV) Information Exchange:</h4>
+  <ul>
+    <li><strong>Link State (LS):</strong> Each node tells <strong>every
+        other node</strong> (via broadcast) about its distance to its
+      <strong>immediate neighbors</strong>.
+    </li>
+    <li><strong>Distance Vector (DV):</strong> Each node tells only its
+      <strong>immediate neighbors</strong> its distance to <strong>every other
+        node</strong> in the network.
+    </li>
+  </ul>
+  <h3 id="topology-dissemination">3.1 Topology Dissemination</h3>
+  <p>Before running the algorithm, nodes must share their local
+    information: 1. Each router creates a <strong>Link State Packet
+      (LSP)</strong> containing its ID, its neighbors’ IDs, and the associated
+    link costs. 2. LSPs are distributed to <strong>all</strong> other
+    routers in the network using <strong>controlled flooding</strong>. 3.
+    Every router maintains a <strong>Link State Database</strong>, ensuring
+    they all have an identical view of the network.</p>
+  <p><strong>Loop-Free Guarantee:</strong> Routes computed by LS
+    algorithms are guaranteed to be loop-free if: 1. Each router sees the
+    exact same cost for every link. 2. Every router uses the same algorithm
+    (e.g., Dijkstra) to compute the best path.</p>
+  <h3 id="dijkstras-algorithm">3.2 Dijkstra’s Algorithm</h3>
+  <p>Dijkstra’s algorithm is an iterative process that computes the
+    least-cost path from a single source node to all other nodes in the
+    network.</p>
+  <h4 id="notation">Notation</h4>
+  <ul>
+    <li><span class="math inline">\(c(x, y)\)</span>: Direct cost from node
+      <span class="math inline">\(x\)</span> to <span class="math inline">\(y\)</span> (<span
+        class="math inline">\(\infty\)</span> if not neighbors).
+    </li>
+    <li><span class="math inline">\(D(v)\)</span>: Current estimate of the
+      cost of the least-cost path from source to <span class="math inline">\(v\)</span>.</li>
+    <li><span class="math inline">\(p(v)\)</span>: Predecessor node along
+      the path from source to <span class="math inline">\(v\)</span>.</li>
+    <li><span class="math inline">\(N&#39;\)</span>: Set of nodes whose
+      least-cost path is definitively known.</li>
+  </ul>
+  <h4 id="algorithm-steps">Algorithm Steps</h4>
+  <ol type="1">
+    <li><strong>Initialization:</strong>
+      <ul>
+        <li><span class="math inline">\(N&#39; = \{\text{source node }
+            u\}\)</span></li>
+        <li>For all other nodes <span class="math inline">\(v\)</span>:
+          <ul>
+            <li>If <span class="math inline">\(v\)</span> is a neighbor of <span class="math inline">\(u\)</span>, <span
+                class="math inline">\(D(v) =
+                c(u, v)\)</span> and <span class="math inline">\(p(v) = u\)</span>.</li>
+            <li>Else, <span class="math inline">\(D(v) = \infty\)</span>.</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><strong>Loop:</strong>
+      <ul>
+        <li>Find a node <span class="math inline">\(w\)</span> <strong>not
+            in</strong> <span class="math inline">\(N&#39;\)</span> such that <span class="math inline">\(D(w)\)</span>
+          is the minimum.</li>
+        <li>Add <span class="math inline">\(w\)</span> to <span class="math inline">\(N&#39;\)</span>.</li>
+        <li><strong>Update</strong> <span class="math inline">\(D(v)\)</span>
+          for all neighbors <span class="math inline">\(v\)</span> of <span class="math inline">\(w\)</span> that are
+          <strong>not in</strong> <span class="math inline">\(N&#39;\)</span>:
+          <ul>
+            <li><span class="math inline">\(D(v) = \min(D(v), D(w) + c(w,
+                v))\)</span></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><strong>Termination:</strong> Stop when all nodes are included in
+      <span class="math inline">\(N&#39;\)</span>.
+    </li>
+  </ol>
+  <h4 id="post-processing-forwarding-table-construction">Post-Processing:
+    Forwarding Table Construction</h4>
+  <p>Once Dijkstra’s algorithm completes, the router has a
+    <strong>least-cost-path tree</strong>. By tracing the predecessor nodes
+    (<span class="math inline">\(p(v)\)</span>) back to the source, the
+    router identifies the <strong>first hop</strong> on the path to every
+    destination. This first hop is then installed in the <strong>forwarding
+      table</strong>.
+  </p>
+  <ul>
+    <li><strong>Ties:</strong> If multiple paths have the same minimum cost,
+      ties can be broken arbitrarily.</li>
+  </ul>
+  <h4 id="algorithm-complexity">Algorithm Complexity</h4>
+  <ul>
+    <li><strong>Time Complexity:</strong> <span class="math inline">\(O(n^2)\)</span> comparisons for <span
+        class="math inline">\(n\)</span> nodes. In each of the <span class="math inline">\(n\)</span> iterations, the
+      algorithm must search
+      all nodes not yet in <span class="math inline">\(N&#39;\)</span>. With
+      efficient implementations (e.g., using heaps), this can be reduced to
+      <span class="math inline">\(O(n \log n)\)</span>.
+    </li>
+    <li><strong>Message Complexity:</strong> <span class="math inline">\(O(n^2)\)</span>. Each router must broadcast its
+      link state information to <span class="math inline">\(n\)</span> other
+      routers. In a network of <span class="math inline">\(n\)</span> nodes,
+      each message crosses <span class="math inline">\(O(n)\)</span> links,
+      resulting in an overall complexity of <span class="math inline">\(O(n^2)\)</span>.</li>
+  </ul>
+  <h3 id="potential-issues-oscillations">3.4 Potential Issues:
+    Oscillations</h3>
+  <p>If link costs are based on traffic volume (load-sensitive), route
+    oscillations can occur. This is particularly problematic because: * Link
+    costs are often <strong>directional</strong> and
+    <strong>volume-dependent</strong>. * As traffic shifts to a “cheaper”
+    path, that path becomes congested (more expensive), causing the
+    algorithm to shift traffic back in the next iteration, leading to an
+    unstable “ping-pong” effect.
+  </p>
+  <hr />
+  <h2 id="distance-vector-dv-routing">4. Distance Vector (DV) Routing</h2>
+  <p>Distance Vector algorithms are <strong>distributed</strong>,
+    <strong>iterative</strong>, and <strong>asynchronous</strong>.
+  </p>
+  <h3 id="basic-principles">4.1 Basic Principles</h3>
+  <ul>
+    <li><strong>Communication:</strong> A router tells its neighbors its
+      estimated distance to <strong>every</strong> other router.</li>
+    <li><strong>Bellman-Ford Equation:</strong> <span class="math inline">\(D_x(y) = \min_v \{ c(x,v) + D_v(y)
+        \}\)</span></li>
+  </ul>
+  <h3 id="link-cost-changes-and-dynamics">4.2 Link Cost Changes and
+    Dynamics</h3>
+  <ul>
+    <li><strong>“Good News Travels Fast”:</strong> If a link cost decreases,
+      the information propagates quickly through the network as nodes
+      immediately update their vectors and notify neighbors.</li>
+    <li><strong>“Bad News Travels Slow”:</strong> If a link cost increases
+      or a link fails, the network may suffer from the
+      <strong>Count-to-Infinity</strong> problem.
+    </li>
+  </ul>
+  <h3 id="algorithmic-mechanics">4.2 Algorithmic Mechanics</h3>
+  <p>The Distance Vector algorithm is characterized by three key
+    properties: 1. <strong>Distributed:</strong> Each node receives
+    information only from its directly attached neighbors, performs a
+    calculation, and distributes the results back to its neighbors. 2.
+    <strong>Iterative:</strong> The process continues until no more
+    information is exchanged between neighbors. It is
+    <strong>self-stopping</strong>—if a recomputation does not result in a
+    change to the distance vector, the node does not send an update. 3.
+    <strong>Asynchronous:</strong> Nodes do not need to operate in
+    lock-step. A local iteration is triggered only by: * A local link cost
+    change. * An update message (new distance vector) received from a
+    neighbor.
+  </p>
+  <h3 id="distance-tables-vs.-distance-vectors">4.3 Distance Tables
+    vs. Distance Vectors</h3>
+  <p>A critical distinction in DV routing is between the local storage and
+    the advertised information: * <strong>Distance Table (<span class="math inline">\(D_x(Y, Z)\)</span>):</strong> A
+    table maintained
+    by node <span class="math inline">\(x\)</span> that stores the estimated
+    cost to reach destination <span class="math inline">\(Y\)</span>
+    <strong>via</strong> neighbor <span class="math inline">\(Z\)</span>. *
+    Rows represent all possible destinations in the network. * Columns
+    represent each of node <span class="math inline">\(x\)</span>’s
+    immediate neighbors. * <strong>Distance Vector (<span class="math inline">\(D_x\)</span>):</strong> The vector of
+    the
+    <em>least-cost</em> estimates from the distance table. Node <span class="math inline">\(x\)</span> only advertises
+    this vector (the “best”
+    routes) to its neighbors, not the entire distance table.
+  </p>
+  <h3 id="state-information-diffusion">4.4 State Information
+    Diffusion</h3>
+  <p>Information in a DV network propagates hop-by-hop over time: * At
+    <strong><span class="math inline">\(t=0\)</span></strong>, a node only
+    knows the cost to its immediate neighbors. * At <strong><span class="math inline">\(t=1\)</span></strong>, a node’s
+    state information
+    has reached its 1-hop neighbors. * At <strong><span class="math inline">\(t=k\)</span></strong>, the information has
+    diffused to all nodes up to <span class="math inline">\(k\)</span> hops
+    away. * <strong>Convergence:</strong> Under stable conditions, the
+    estimates <span class="math inline">\(D_x(y)\)</span> will eventually
+    converge to the actual least-cost path <span class="math inline">\(d_x(y)\)</span> through this iterative
+    diffusion.
+  </p>
+  <h3 id="the-count-to-infinity-problem">4.5 The Count-to-Infinity
+    Problem</h3>
+  <p>This occurs when a node thinks it has a path through a neighbor, but
+    that neighbor’s path actually went back through the first node. They
+    will keep incrementing their costs indefinitely.</p>
+  <h4 id="solutions">Solutions:</h4>
+  <ul>
+    <li><strong>Split Horizon:</strong> A router never advertises a route
+      back to the neighbor it learned that route from. For example, if <span class="math inline">\(X\)</span> tells
+      <span class="math inline">\(Y\)</span> it has a path to <span class="math inline">\(Z\)</span>, <span
+        class="math inline">\(Y\)</span>
+      will not advertise a path to <span class="math inline">\(Z\)</span> back
+      to <span class="math inline">\(X\)</span>.
+    </li>
+    <li><strong>Poisoned Reverse:</strong> A more aggressive version of
+      split horizon. If <span class="math inline">\(Z\)</span> routes through
+      <span class="math inline">\(Y\)</span> to reach <span class="math inline">\(X\)</span>, <span
+        class="math inline">\(Z\)</span>
+      tells <span class="math inline">\(Y\)</span> its distance to <span class="math inline">\(X\)</span> is
+      <strong>infinity</strong>. This
+      explicitly prevents <span class="math inline">\(Y\)</span> from ever
+      trying to route back through <span class="math inline">\(Z\)</span>.
+    </li>
+    <li><strong>Limitations (The “Hack”):</strong> While these solutions
+      solve “ping-pong” loops between two adjacent nodes, they do
+      <strong>not</strong> solve loops involving three or more nodes. This is
+      because a node might eventually hear about a “good” path to the
+      destination from a third node, not realizing that the third node’s path
+      actually goes back through the first node’s original (now broken)
+      route.
+    </li>
+  </ul>
+  <h3 id="why-distance-vector-is-still-in-use">4.6 Why Distance Vector is
+    Still in Use</h3>
+  <p>Despite its drawbacks (loops, slow convergence), DV remains relevant
+    because: 1. <strong>Simplicity:</strong> It is easy to configure and
+    implement. 2. <strong>Low Overhead:</strong> It requires significantly
+    less CPU and memory compared to Link State algorithms. 3.
+    <strong>Stability:</strong> In small or static networks where topology
+    changes are rare, count-to-infinity is seldom an issue. 4.
+    <strong>Legacy Support:</strong> Many older systems and home routers
+    only support DV (specifically RIP). 5. <strong>Specialized
+      Networks:</strong> DV variants like <strong>DSDV</strong>
+    (Destination-Sequenced Distance Vector) are used in mobile ad-hoc and
+    sensor networks.
+  </p>
+  <hr />
+  <h2 id="intra-as-routing-igp">5. Intra-AS Routing (IGP)</h2>
+  <p>The Internet is divided into <strong>Autonomous Systems (AS)</strong>
+    (administrative domains). Routing within an AS is called
+    <strong>Intra-AS</strong> (or intra-domain) routing.
+  </p>
+  <h3 id="common-intra-as-protocols">5.1 Common Intra-AS Protocols</h3>
+  <ul>
+    <li><strong>RIP (Routing Information Protocol):</strong> A classic
+      Distance Vector protocol (1980s).</li>
+    <li><strong>OSPF (Open Shortest Path First):</strong> A classic Link
+      State protocol; the current industry standard.</li>
+    <li><strong>IS-IS:</strong> An ISO standard protocol, essentially
+      identical in function to OSPF.</li>
+    <li><strong>EIGRP (Enhanced Interior Gateway Routing Protocol):</strong>
+      A DV-based protocol. Unlike RIP, it uses <strong>partial, triggered
+        updates</strong> (only sending changes when they occur) rather than full
+      periodic broadcasts, making it more efficient for large networks.</li>
+  </ul>
+  <h3 id="rip-routing-information-protocol">5.2 RIP (Routing Information
+    Protocol)</h3>
+  <ul>
+    <li><strong>Context:</strong> Commonly used in home routers and small
+      business networks.</li>
+    <li><strong>Algorithm:</strong> Distance Vector.</li>
+    <li><strong>Metric:</strong> Hop count (max = 15 hops; <strong>16 is
+        infinity</strong>).</li>
+    <li><strong>Exchanges:</strong> Every 30 seconds via Response Messages
+      (advertisements).</li>
+    <li><strong>Advertisement Limit:</strong> Each message can list up to 25
+      destination networks within the AS.</li>
+    <li><strong>Failure Detection:</strong> If no advertisement is heard for
+      180 seconds, the link is declared dead, and the router invalidates
+      routes via that neighbor.</li>
+  </ul>
+  <h3 id="ospf-open-shortest-path-first">5.3 OSPF (Open Shortest Path
+    First)</h3>
+  <ul>
+    <li><strong>Algorithm:</strong> Link State.</li>
+    <li><strong>Transport:</strong> OSPF messages are sent <strong>directly
+        over IP</strong> (rather than using TCP or UDP).</li>
+    <li><strong>Features:</strong>
+      <ul>
+        <li><strong>Open:</strong> Publicly available specification.</li>
+        <li><strong>Multiple Metrics:</strong> Can use bandwidth, delay, etc.,
+          to calculate costs.</li>
+        <li><strong>Security:</strong> All messages are authenticated to prevent
+          malicious route injections.</li>
+        <li><strong>Hierarchical Support:</strong> Can scale to large networks
+          using areas.</li>
+      </ul>
+    </li>
+  </ul>
+  <h3 id="hierarchical-ospf">5.4 Hierarchical OSPF</h3>
+  <p>Hierarchical OSPF divides an AS into <strong>areas</strong> and a
+    <strong>backbone</strong>. This restricts link-state flooding to
+    specific areas, improving scalability.
+  </p>
+  <h4 id="router-roles">Router Roles:</h4>
+  <ol type="1">
+    <li><strong>Internal Routers:</strong> Flood link-state advertisements
+      only within their local area and compute routing for that area.</li>
+    <li><strong>Area Border Routers (ABR):</strong> Sit at the edge of an
+      area. They “summarize” the distances to destinations within their area
+      and advertise them to the backbone.</li>
+    <li><strong>Backbone Routers:</strong> Run OSPF limited strictly to the
+      backbone area.</li>
+    <li><strong>Boundary Routers:</strong> Connect the AS to other
+      Autonomous Systems.</li>
+  </ol>
+  <hr />
+  <h2 id="inter-as-routing-bgp-border-gateway-protocol">6. Inter-AS
+    Routing: BGP (Border Gateway Protocol)</h2>
+  <p>BGP is the de-facto inter-domain routing protocol, often called the
+    “glue that holds the Internet together.”</p>
+  <h3 id="bgp-sessions-and-connections">6.1 BGP Sessions and
+    Connections</h3>
+  <ul>
+    <li><strong>eBGP (External BGP):</strong> Used to obtain subnet
+      reachability information from neighboring ASes.</li>
+    <li><strong>iBGP (Internal BGP):</strong> Used to propagate reachability
+      information to all internal routers within an AS.</li>
+    <li><strong>Gateway Router:</strong> A router at the “edge” of an AS
+      that has links to routers in other ASes. Gateways perform both
+      intra-domain and inter-domain routing. BGP-enabled border gateways are
+      often referred to as <strong>BGP Speakers</strong>.</li>
+    <li><strong>BGP Session:</strong> Two BGP routers (peers) exchange
+      messages over a semi-permanent <strong>TCP connection</strong>.</li>
+  </ul>
+  <h3 id="bgp-message-types">6.2 BGP Message Types</h3>
+  <p>BGP routers exchange four primary types of messages over their TCP
+    connections: 1. <strong>OPEN:</strong> Opens a TCP connection to a
+    remote BGP peer and authenticates the sending router. 2.
+    <strong>UPDATE:</strong> The most critical message; used to advertise a
+    new path to a destination prefix or to withdraw a previously advertised
+    path. 3. <strong>KEEPALIVE:</strong> Sent periodically to maintain the
+    connection in the absence of UPDATE messages; also used to acknowledge
+    an OPEN request. 4. <strong>NOTIFICATION:</strong> Used to report errors
+    in a previous message or to close a connection.
+  </p>
+  <h3 id="path-attributes-and-routes">6.3 Path Attributes and Routes</h3>
+  <p>A BGP route is defined as a <strong>Network Prefix +
+      Attributes</strong>: * <strong>AS-PATH:</strong> The list of ASes
+    through which the prefix advertisement has passed. Used to detect loops.
+    * <strong>NEXT-HOP:</strong> The specific internal-AS router that should
+    receive traffic destined for that prefix.</p>
+  <h3 id="as-relationships-and-export-policies">6.4 AS Relationships and
+    Export Policies</h3>
+  <ul>
+    <li><strong>Provider-Customer:</strong> The customer pays the provider
+      for Internet access. Providers advertise all routes they know to their
+      customers to provide global connectivity.</li>
+    <li><strong>Peering:</strong> Two ASes (often of similar size) agree to
+      exchange traffic for free.
+      <ul>
+        <li><strong>Transit Rule:</strong> Peers provide transit <em>only</em>
+          for their respective customers.</li>
+        <li><strong>Restriction:</strong> A peer will <strong>not</strong>
+          provide transit between its own peers or providers. For example, if AS A
+          and AS B are peers, AS A will not carry traffic from AS B destined for
+          AS A’s other peer AS C.</li>
+      </ul>
+    </li>
+    <li><strong>Export Summary:</strong>
+      <ul>
+        <li><strong>To Customer:</strong> Advertise everything learned from
+          anyone.</li>
+        <li><strong>To Provider/Peer:</strong> Advertise ONLY your own routes
+          and your customers’ routes.</li>
+      </ul>
+    </li>
+  </ul>
+  <h3 id="bgp-policy-routing">6.5 BGP Policy Routing</h3>
+  <p>BGP is fundamentally a <strong>Policy-Based</strong> protocol. A
+    border gateway performs three main policy functions: 1. <strong>Import
+      Filtering:</strong> Deciding whether to accept or decline a route
+    advertisement from a neighbor (based on trust or path preference). 2.
+    <strong>Route Selection:</strong> Ranking multiple available routes to
+    the same destination. 3. <strong>Export Filtering:</strong> Deciding
+    which routes to advertise to specific neighbors.
+  </p>
+  <h4 id="common-policy-examples">Common Policy Examples:</h4>
+  <ul>
+    <li><strong>No-Transit Policy:</strong> Most ISPs only want to carry
+      traffic that originates from or is destined for one of their own
+      customers. They will not carry “transit” traffic between two of their
+      providers or peers because it consumes resources without generating
+      revenue.</li>
+    <li><strong>Dual-Homed Customer:</strong> A customer connected to two
+      different providers (e.g., for redundancy). To avoid becoming a transit
+      provider itself, the customer will <strong>not</strong> advertise a
+      route to Provider A through to Provider B.</li>
+  </ul>
+  <h3 id="route-selection-process">6.6 Route Selection Process</h3>
+  <p>If a router learns multiple paths to the same prefix, it selects the
+    best route using: 1. <strong>Longest Prefix Match:</strong> First, find
+    all available routes for the prefix. 2. <strong>Local
+      Preference:</strong> A policy attribute set by the local admin (highest
+    value wins). 3. <strong>AS Relationship (Rule of Thumb):</strong> Prefer
+    routes in this order: <strong>Customer &gt; Peer &gt; Provider</strong>.
+    This maximizes revenue and minimizes costs. 4. <strong>Shortest
+      AS-PATH:</strong> Among routes with the same preference, choose the one
+    with the fewest AS hops. 5. <strong>Hot Potato Routing:</strong> Choose
+    the NEXT-HOP router that is “closest” in terms of intra-AS cost (e.g.,
+    lowest OSPF cost). The goal is to get the packet out of the local AS as
+    quickly as possible, ignoring the inter-domain cost. 6.
+    <strong>Tie-Breaker:</strong> If multiple paths remain, use a
+    deterministic metric like the smallest BGP Router ID.
+  </p>
+  <h3 id="why-separate-intra-as-and-inter-as-routing">6.7 Why Separate
+    Intra-AS and Inter-AS Routing?</h3>
+  <p>The Internet uses different protocols for internal and external
+    routing due to three main factors: * <strong>Policy:</strong> Inter-AS
+    routing is dominated by policy (who pays whom, who is trusted). Intra-AS
+    routing is under a single administrative control, so policy is less
+    critical. * <strong>Scale:</strong> Hierarchical routing (Inter-AS) is
+    necessary to keep routing tables manageable and reduce update traffic
+    across the global Internet. * <strong>Performance:</strong> Intra-AS
+    protocols (like OSPF) can focus on optimizing performance (e.g.,
+    shortest delay). In Inter-AS routing, policy almost always overrides
+    performance metrics.</p>
+  <hr />
+  <h2 id="wireless-and-mobile-networks">7. Wireless and Mobile
+    Networks</h2>
+  <h3 id="elements-of-a-wireless-network">7.1 Elements of a Wireless
+    Network</h3>
+  <ul>
+    <li><strong>Wireless Hosts:</strong> Devices running applications
+      (laptops, smartphones, IoT). Wireless does <strong>not</strong> always
+      mean mobility (e.g., a stationary wireless desktop).</li>
+    <li><strong>Base Station:</strong> Typically connected to a wired
+      network. Responsible for relaying packets (e.g., 4G/5G cell towers, WiFi
+      APs).</li>
+    <li><strong>Wireless Link:</strong> Connects hosts to base
+      stations.</li>
+    <li><strong>Radios:</strong> Modern devices often have multiple radios
+      for different networks (e.g., iPhone 16 has ~11 radios for 5G, WiFi,
+      Bluetooth, Satellite, etc.).</li>
+    <li><strong>Network Modes:</strong>
+      <ul>
+        <li><strong>Infrastructure Mode:</strong> Hosts communicate via a base
+          station.</li>
+        <li><strong>Ad Hoc Mode:</strong> Hosts communicate directly without a
+          base station.</li>
+      </ul>
+    </li>
+  </ul>
+  <h3 id="wireless-link-characteristics">7.2 Wireless Link
+    Characteristics</h3>
+  <ul>
+    <li><strong>Decreased Signal Strength:</strong> Radio signals attenuate
+      through matter (Path Loss).</li>
+    <li><strong>Interference:</strong> Frequencies are shared by many
+      devices.</li>
+    <li><strong>Multipath Propagation:</strong> Signals reflect off objects,
+      arriving at slightly different times.</li>
+    <li><strong>SNR vs. BER:</strong> Larger SNR makes it easier to extract
+      signal.</li>
+    <li><strong>Dynamic Adaptation:</strong> Because SNR changes with
+      mobility, the physical layer must dynamically adapt its modulation
+      technique and transmission rate to maintain a low Bit Error Rate
+      (BER).</li>
+  </ul>
+  <h3 id="common-wireless-link-problems">7.3 Common Wireless Link
+    Problems</h3>
+  <ul>
+    <li><strong>Hidden Terminal Problem:</strong> A and C cannot hear each
+      other but both transmit to B, causing a collision at B.</li>
+    <li><strong>Exposed Terminal Problem:</strong> B hears C’s transmission
+      and mistakenly thinks it cannot transmit to A.</li>
+  </ul>
+  <h3 id="ieee-802.11-wifi">7.4 IEEE 802.11 (WiFi)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th style="text-align: left;">Standard</th>
+        <th style="text-align: left;">Year</th>
+        <th style="text-align: left;">Max Data Rate</th>
+        <th style="text-align: left;">Range</th>
+        <th style="text-align: left;">Frequency</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align: left;"><strong>802.11b</strong></td>
+        <td style="text-align: left;">1999</td>
+        <td style="text-align: left;">11 Mbps</td>
+        <td style="text-align: left;">30m</td>
+        <td style="text-align: left;">2.4 GHz</td>
+      </tr>
+      <tr>
+        <td style="text-align: left;"><strong>802.11g</strong></td>
+        <td style="text-align: left;">2003</td>
+        <td style="text-align: left;">54 Mbps</td>
+        <td style="text-align: left;">30m</td>
+        <td style="text-align: left;">2.4 GHz</td>
+      </tr>
+      <tr>
+        <td style="text-align: left;"><strong>802.11n (WiFi 4)</strong></td>
+        <td style="text-align: left;">2009</td>
+        <td style="text-align: left;">600 Mbps</td>
+        <td style="text-align: left;">70m</td>
+        <td style="text-align: left;">2.4, 5 GHz</td>
+      </tr>
+      <tr>
+        <td style="text-align: left;"><strong>802.11ac (WiFi 5)</strong></td>
+        <td style="text-align: left;">2013</td>
+        <td style="text-align: left;">3.47 Gbps</td>
+        <td style="text-align: left;">70m</td>
+        <td style="text-align: left;">5 GHz</td>
+      </tr>
+      <tr>
+        <td style="text-align: left;"><strong>802.11ax (WiFi 6)</strong></td>
+        <td style="text-align: left;">2020</td>
+        <td style="text-align: left;">14 Gbps</td>
+        <td style="text-align: left;">70m</td>
+        <td style="text-align: left;">2.4, 5 GHz</td>
+      </tr>
+      <tr>
+        <td style="text-align: left;"><strong>802.11af</strong></td>
+        <td style="text-align: left;">2014</td>
+        <td style="text-align: left;">560 Mbps</td>
+        <td style="text-align: left;">1km</td>
+        <td style="text-align: left;">TV bands (54-790 MHz)</td>
+      </tr>
+      <tr>
+        <td style="text-align: left;"><strong>802.11ah</strong></td>
+        <td style="text-align: left;">2017</td>
+        <td style="text-align: left;">347 Mbps</td>
+        <td style="text-align: left;">1km</td>
+        <td style="text-align: left;">900 MHz</td>
+      </tr>
+    </tbody>
+  </table>
+  <h4 id="association-and-scanning">Association and Scanning</h4>
+  <p>Before a host can send data, it must <strong>associate</strong> with
+    an Access Point (AP). * <strong>Passive Scanning:</strong> The AP
+    periodically broadcasts <strong>Beacon Frames</strong> containing its
+    SSID and MAC address. The host listens for these frames. *
+    <strong>Active Scanning:</strong> The host broadcasts a <strong>Probe
+      Request</strong> frame. APs in range respond with <strong>Probe
+      Response</strong> frames.
+  </p>
+  <h4 id="mac-protocol-csmaca">MAC Protocol: CSMA/CA</h4>
+  <p>Wireless uses <strong>Collision Avoidance</strong> rather than
+    detection for several reasons: 1. <strong>Signal Disparity:</strong> The
+    transmitted signal is much stronger than the received signal, making it
+    difficult for the radio to detect a collision while transmitting. 2.
+    <strong>Hidden Terminals:</strong> Even if a router could detect a local
+    collision, it might miss one occurring at the receiver (hidden terminal
+    problem). 3. <strong>Half-Duplex Nature:</strong> Most wireless NICs are
+    half-duplex to conserve power and avoid self-interference, meaning they
+    cannot transmit and receive simultaneously.
+  </p>
+  <p><strong>Protocol Mechanics:</strong> * <strong>DIFS (Distributed
+      Inter-frame Spacing):</strong> Senders wait this long after sensing an
+    idle channel before transmitting. * <strong>SIFS (Short Inter-frame
+      Spacing):</strong> Receivers wait this short time before sending an ACK.
+    <strong>DIFS &gt; SIFS</strong> ensures that ACKs have priority over new
+    data transmissions. * <strong>RTS/CTS:</strong> Small reservation
+    packets containing a duration value. Other nodes hear this and update
+    their <strong>NAV (Network Allocation Vector)</strong>, a timer that
+    tells them how long to remain silent. * <strong>Binary Exponential
+      Backoff:</strong> If no ACK is received (indicating a collision or
+    loss), the random backoff interval doubles for the next attempt####
+    802.11 Frame Addressing An 802.11 frame contains 4 address fields,
+    managed by <strong>To-AP</strong> and <strong>From-AP</strong> flags: *
+    <strong>Address 1:</strong> The MAC address of the wireless host or AP
+    intended to <strong>receive</strong> this specific frame (Receiver). *
+    <strong>Address 2:</strong> The MAC address of the wireless host or AP
+    <strong>transmitting</strong> this frame (Transmitter). *
+    <strong>Address 3:</strong> The MAC address of the <strong>original
+      source</strong> (if frame is coming from a router) or <strong>final
+      destination</strong> (if frame is heading to a router). This is crucial
+    for bridging the wireless BSS with the wired LAN. * <strong>Address
+      4:</strong> Used only in ad-hoc mode when frames are being forwarded
+    between APs.
+  </p>
+  <p><strong>Case Study: Host to Router</strong> 1. <strong>Wireless
+      Host</strong> sends frame: <code>Addr1=AP_MAC</code>,
+    <code>Addr2=Host_MAC</code>, <code>Addr3=Router_MAC</code>.
+    <code>To-AP=1</code>, <code>From-AP=0</code>. 2. <strong>AP</strong>
+    receives it, strips 802.11 header, and creates an 802.3 (Ethernet)
+    frame: <code>Dest=Router_MAC</code>, <code>Source=Host_MAC</code>.
+  </p>
+  <p><strong>Special Case: DHCP Discovery</strong> When a mobile device
+    first joins and sends a DHCP Discovery: * <strong>Address 1:</strong>
+    <code>FF:FF:FF:FF:FF:FF</code> (Broadcast). * <strong>Address
+      2:</strong> Device MAC. * <strong>Address 3:</strong>
+    <code>FF:FF:FF:FF:FF:FF</code> (Original destination is everyone).
+  </p>
+  <p><strong>Crucial Note:</strong> IP addresses in the encapsulated
+    datagram are <strong>never altered</strong>; only the MAC addresses in
+    the 802.11/802.3 headers change as the packet moves through different
+    link layers.</p>
+  <h3 id="cellular-networks-4g5g">7.5 Cellular Networks (4G/5G)</h3>
+  <h4 id="architectural-elements">Architectural Elements</h4>
+  <ul>
+    <li><strong>User Equipment (UE):</strong> The mobile device.</li>
+    <li><strong>RAN (Radio Access Network):</strong> Connects UEs to the
+      base station (<strong>gNodeB</strong> in 5G).</li>
+    <li><strong>Core Network:</strong> Situated between the RAN and the
+      Internet.
+      <ul>
+        <li><strong>CUPS:</strong> Control-Plane and User-Plane Separation.</li>
+      </ul>
+    </li>
+    <li><strong>Spectrum Bands (5G):</strong>
+      <ul>
+        <li><strong>Low-band (&lt;1 GHz):</strong> Long distance, lower speed
+          (50-250 Mbps).</li>
+        <li><strong>High-band (25-66 GHz / mmWave):</strong> Short distance
+          (&lt;1 mile), extremely high speed (up to 3 Gbps).
+          <strong>Line-of-sight</strong> is critical as these signals have poor
+          penetration.
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <h4 id="g-deployment-strategies">5G Deployment Strategies</h4>
+  <ul>
+    <li><strong>Non-Standalone (NSA):</strong> Supplement existing LTE
+      infrastructure. The control plane runs over the LTE network, while the
+      data plane uses 5G. This allows for faster deployment but doesn’t fully
+      exploit 5G-native features.</li>
+    <li><strong>Standalone (SA):</strong> No dependency on LTE. Uses a
+      native 5G Core and 5G RAN. Requires heavier infrastructure investment
+      but fully enables all 5G features (e.g., slicing, ultra-low
+      latency).</li>
+  </ul>
+  <h4 id="mmwave-signal-characteristics">mmWave Signal
+    Characteristics</h4>
+  <ul>
+    <li><strong>Obstructed By:</strong> Tinted/UV-coated glass, walls, and
+      the human body.</li>
+    <li><strong>Passes Through:</strong> Clear glass, backpacks, cardboard
+      boxes.</li>
+    <li><strong>Multipath:</strong> In outdoor environments, concrete
+      buildings can effectively reflect mmWave signals, allowing connections
+      to persist even if the direct line-of-sight is blocked (NLOS).</li>
+  </ul>
+  <h4 id="resource-management">Resource Management</h4>
+  <ul>
+    <li><strong>Resource Element (RE):</strong> The smallest unit of
+      transmission, holding one OFDMA symbol on one subcarrier frequency for
+      one time minislot.</li>
+    <li><strong>Resource Block (RB):</strong> A bundle of neighboring (time,
+      frequency) Resource Elements. For example, in 4G, an RB is 12
+      subcarriers by 7 minislots.</li>
+    <li><strong>Scheduling:</strong> The RB is the smallest unit that can be
+      scheduled for a specific source/destination.</li>
+  </ul>
+  <h4 id="g-physical-channels">5G Physical Channels</h4>
+  <p>Data and control info are carried on specific physical channels: *
+    <strong>Downlink (BS to UE):</strong> * <strong>PDSCH:</strong> Shared
+    channel for user data. * <strong>PDCCH:</strong> Control channel for
+    scheduling info. * <strong>PBCH:</strong> Broadcast channel for system
+    info. * <strong>Uplink (UE to BS):</strong> * <strong>PUSCH:</strong>
+    Shared channel for user data. * <strong>PUCCH:</strong> Control channel
+    for radio feedback. * <strong>PRACH:</strong> Random access channel for
+    initial connection.
+  </p>
+  <h4 id="ran-protocol-stack-processing-pipeline">RAN Protocol Stack
+    (Processing Pipeline)</h4>
+  <ol type="1">
+    <li><strong>RRC (Radio Resource Control):</strong> Manages the
+      <strong>Control Plane</strong>. Handles connection setup, mobility, and
+      coarse-grained policy decisions (scheduling priority, security). Does
+      not process user data.
+    </li>
+    <li><strong>SDAP (Service Data Adaptation Protocol):</strong> Maps IP
+      flows to specific QoS (Quality of Service) levels.</li>
+    <li><strong>PDCP (Packet Data Convergence Protocol):</strong>
+      Compresses/decompresses IP headers, handles ciphering, and provides
+      integrity protection.</li>
+    <li><strong>RLC (Radio Link Control):</strong> Handles link-layer
+      segmentation, reassembly, and reliable data transfer using
+      <strong>ARQ</strong> (Automatic Repeat Request).
+    </li>
+    <li><strong>MAC (Media Access Control):</strong> Manages buffering,
+      multiplexing, and makes real-time scheduling decisions (typically on a
+      1ms loop).</li>
+    <li><strong>PHY (Physical Layer):</strong> Handles modulation, coding,
+      and signal transmission.</li>
+  </ol>
+  <h4 id="power-management-coordinated-drx">Power Management: Coordinated
+    DRX</h4>
+  <p>To save battery, devices use <strong>DRX (Discontinuous
+      Reception)</strong> cycles to sleep and wake up: 1. <strong>Active
+      State:</strong> Radio is fully on for transmission/reception. 2.
+    <strong>Inactivity Timer:</strong> After activity ends, the device waits
+    for this timer. If it expires with no new data, the device enters sleep.
+    3. <strong>Short DRX Cycle:</strong> Periodic quick wake-ups to check
+    for incoming traffic. 4. <strong>Long DRX Cycle:</strong> If no traffic
+    is found in short cycles, the device enters a deeper sleep with longer
+    intervals between check-ins to save more power. *
+    <strong>Tradeoff:</strong> Longer sleep saves more energy but increases
+    the latency for incoming packets (which must be buffered at the BS).
+  </p>
+  <h3 id="mobility">7.6 Mobility</h3>
+  <p>Mobility can be categorized into a spectrum based on the network’s
+    involvement: 1. <strong>No Mobility:</strong> Stationary device. 2.
+    <strong>Low Mobility:</strong> Device moves between networks but powers
+    down during the transition (e.g., closing a laptop in one building and
+    opening it in another). 3. <strong>Mid Mobility:</strong> Device moves
+    within the same provider’s WLAN or RAN. 4. <strong>High
+      Mobility:</strong> Device moves across multiple provider networks while
+    maintaining <strong>ongoing, seamless connections</strong>.
+  </p>
+  <h4 id="wifi-mobility-ess">WiFi Mobility (ESS)</h4>
+  <ul>
+    <li><strong>ESS (Extended Service Set):</strong> A collection of BSSs
+      (Basic Service Sets) in the same layer-3 subnet, all sharing the same
+      SSID.</li>
+    <li><strong>Mechanism:</strong> When a mobile device moves between APs
+      in an ESS, it can perform fast re-authentication to maintain its session
+      at the link layer.</li>
+  </ul>
+  <h4 id="g-handover-process">5G Handover Process</h4>
+  <p>Handover occurs when a device (UE) moves its point of attachment from
+    a <strong>Source BS</strong> (source gNodeB) to a <strong>Target
+      BS</strong>. 1. <strong>Trigger:</strong> Source BS decides to handover
+    based on signal strength or load balancing. 2.
+    <strong>Preparation:</strong> Source BS sends a <strong>Handover
+      Request</strong> to the Target BS. 3. <strong>Allocation:</strong>
+    Target BS pre-allocates radio time slots and sends an ACK with
+    connection info for the mobile device. 4. <strong>Execution:</strong>
+    Source BS informs the UE of the change. The UE can now send/receive via
+    the Target BS. 5. <strong>Forwarding:</strong> Source BS stops sending
+    datagrams to the UE and instead forwards any incoming buffered datagrams
+    to the Target BS. 6. <strong>Path Update:</strong> Target BS informs the
+    <strong>AMF</strong> (Access and Mobility Management) and
+    <strong>SMF</strong> (Session Management) that it is the new attachment
+    point. 7. <strong>UPF Instruction:</strong> SMF instructs the
+    <strong>UPF</strong> (User Plane Function) to change the tunnel endpoint
+    to the new Target BS. 8. <strong>Completion:</strong> Target BS ACKs
+    back to the Source BS; the handover is complete, and the Source BS can
+    release its local resources. Traffic now flows through the new
+    tunnel.
+  </p>
+  <hr />
+  <h2 id="integrated-network-operations-a-day-in-the-life">8. Integrated
+    Network Operations: “A Day in the Life”</h2>
+  <p>To understand how a network functions as a whole, consider a host
+    (Host A) sending a packet to a server (Web Server W) through a campus
+    LAN with switches and an AP.</p>
+  <h3 id="switch-self-learning">8.1 Switch Self-Learning</h3>
+  <p>Ethernet switches (like S1, S2, S3) maintain <strong>forwarding
+      tables</strong> that map MAC addresses to specific physical ports. *
+    <strong>Learning:</strong> When a switch receives a frame on port <span class="math inline">\(X\)</span> from source
+    MAC <span class="math inline">\(A\)</span>, it creates an entry:
+    <code>MAC A -&gt; Port X</code>. * <strong>Forwarding:</strong> When a
+    frame arrives destined for MAC <span class="math inline">\(B\)</span>: *
+    If <code>MAC B</code> is in the table, the switch forwards it to the
+    specified port. * If <code>MAC B</code> is not in the table, the switch
+    <strong>floods</strong> the frame (sends it out on all ports except the
+    one it arrived on).
+  </p>
+  <h3 id="the-ap-as-a-bridge">8.2 The AP as a Bridge</h3>
+  <p>An Access Point acts as a link-layer bridge between the 802.11
+    wireless medium and the 802.3 wired Ethernet medium. * It maintains its
+    own forwarding table to track which hosts are associated with its
+    wireless interface vs. which are reachable via its wired Ethernet
+    interface.</p>
+  <h3 id="synthesis-scenario-dns-query">8.3 Synthesis Scenario: DNS
+    Query</h3>
+  <ol type="1">
+    <li><strong>Host B</strong> wants the IP for <code>web.com</code>. It
+      generates a DNS query (UDP).</li>
+    <li><strong>Encapsulation:</strong> Host B creates an IP datagram
+      (<code>Dest=DNS_Server_IP</code>) and an Ethernet frame
+      (<code>Dest=DNS_Server_MAC</code>).</li>
+    <li><strong>Switching:</strong>
+      <ul>
+        <li><strong>Switch S1</strong> receives the frame, looks up
+          <code>DNS_Server_MAC</code>, and forwards it toward Switch S2.
+        </li>
+        <li><strong>Switch S2</strong> receives it and forwards it directly to
+          the DNS Server <span class="math inline">\(N\)</span> (assuming it has
+          learned its port).</li>
+      </ul>
+    </li>
+    <li><strong>Wireless Interaction:</strong> If the destination was a
+      wireless laptop (Laptop L), Switch S2 would forward the frame to the
+      <strong>AP</strong>. The AP would then translate the Ethernet frame into
+      an 802.11 frame (<code>Addr1=LaptopL_MAC</code>,
+      <code>Addr2=AP_MAC</code>, <code>Addr3=Source_MAC</code>).
+    </li>
+  </ol>
+  <hr />
+  <h2 id="impact-on-higher-layers">9. Impact on Higher Layers</h2>
+  <p>Wireless and mobility can negatively impact performance: *
+    <strong>Packet Loss:</strong> Interpreted by TCP as congestion, leading
+    to unnecessary window reduction. * <strong>Latency:</strong> Handover
+    events and link-layer retransmissions increase delay, affecting
+    real-time applications. * <strong>Bandwidth:</strong> A scarce resource
+    compared to wired links.
+  </p>
+  <hr />
+  <h2 id="routing-algorithm-comparisons">10. Routing Algorithm
+    Comparisons</h2>
+  <h3 id="link-state-ls-vs.-distance-vector-dv">10.1 Link State (LS)
+    vs. Distance Vector (DV)</h3>
+  <table>
+    <colgroup>
+      <col style="width: 33%" />
+      <col style="width: 33%" />
+      <col style="width: 33%" />
+    </colgroup>
+    <thead>
+      <tr>
+        <th style="text-align: left;">Feature</th>
+        <th style="text-align: left;">Link State (LS)</th>
+        <th style="text-align: left;">Distance Vector (DV)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align: left;"><strong>Knowledge</strong></td>
+        <td style="text-align: left;">Global: Every router knows full
+          topology.</td>
+        <td style="text-align: left;">Local: Routers know neighbors only.</td>
+      </tr>
+      <tr>
+        <td style="text-align: left;"><strong>Convergence</strong></td>
+        <td style="text-align: left;">Fast, but may oscillate.</td>
+        <td style="text-align: left;">Varies; slow with “bad news”.</td>
+      </tr>
+      <tr>
+        <td style="text-align: left;"><strong>Robustness</strong></td>
+        <td style="text-align: left;"><strong>Better</strong>: A router can only
+          advertise its own links. Errors are isolated as each router computes its
+          own table.</td>
+        <td style="text-align: left;"><strong>Worse</strong>: A router can
+          advertise incorrect <em>path</em> costs (e.g., black-holing). Errors
+          propagate because routers use each other’s tables.</td>
+      </tr>
+      <tr>
+        <td style="text-align: left;"><strong>Complexity</strong></td>
+        <td style="text-align: left;"><span class="math inline">\(O(n^2)\)</span> messages; <span
+            class="math inline">\(O(n^2)\)</span> compute.</td>
+        <td style="text-align: left;">Exchange between neighbors; varies.</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="ethernet-802.3-vs.-wifi-802.11">9.2 Ethernet (802.3) vs. WiFi
+    (802.11)</h3>
+  <table>
+    <colgroup>
+      <col style="width: 33%" />
+      <col style="width: 33%" />
+      <col style="width: 33%" />
+    </colgroup>
+    <thead>
+      <tr>
+        <th style="text-align: left;">Feature</th>
+        <th style="text-align: left;">Ethernet (802.3)</th>
+        <th style="text-align: left;">WiFi (802.11)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align: left;"><strong>Duplex</strong></td>
+        <td style="text-align: left;">Full Duplex (Modern)</td>
+        <td style="text-align: left;">Semi-Duplex (Half)</td>
+      </tr>
+      <tr>
+        <td style="text-align: left;"><strong>Multiple Access</strong></td>
+        <td style="text-align: left;">CSMA/CD (Collision Detection)</td>
+        <td style="text-align: left;">CSMA/CA (Collision Avoidance)</td>
+      </tr>
+      <tr>
+        <td style="text-align: left;"><strong>Reliability</strong></td>
+        <td style="text-align: left;">High</td>
+        <td style="text-align: left;">Low (Interference, Fading)</td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+
+</html>

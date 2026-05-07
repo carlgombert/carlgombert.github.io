@@ -1,0 +1,692 @@
+{
+  "exam": {
+    "title": "Computer Networking — Practice Exam",
+    "subtitle": "Network Layer Data Plane: Forwarding, IP, ARP, NAT, Fragmentation, SDN, Switches & IPv6",
+    "pre_exam_analysis": {
+      "highest_priority_topics": [
+        "Longest prefix matching: multi-entry forwarding table lookup with overlapping prefixes",
+        "IP fragmentation: ID, MF flag, fragment offset arithmetic (8-byte units), partial-loss behavior",
+        "ARP: broadcast query → unicast reply, soft-state timeouts, cross-subnet ARP behavior",
+        "IP + MAC header mutation across hops: IPs stay constant, MACs change every hop",
+        "DHCP DORA: precise order, broadcast vs unicast mechanics, what each message contains",
+        "NAT translation table: outgoing rewrite, incoming demux, port reuse, P2P traversal failure",
+        "IPv6 vs IPv4: what was removed, why, and what hosts must do instead (Path MTU Discovery)",
+        "HOL blocking and crossbar fabric: why input queueing causes HOL, how crossbar mitigates it",
+        "SDN match+action: flow table priority, wildcard matching, what action types replace which middleboxes",
+        "STP: why broadcast storms occur, how STP breaks loops, what link disabling costs",
+        "ICMP: traceroute TTL mechanics, Port Unreachable stopping criterion, Type 3 Code 4 for Path MTU",
+        "Subnet mask arithmetic: AND operation for local vs remote determination, usable host count"
+      ],
+      "common_misconceptions_targeted": [
+        "Thinking the destination IP changes when a packet crosses a router (it never does — only MAC changes)",
+        "Confusing ARP broadcast scope with IP broadcast: ARP is link-local, not routed",
+        "Thinking fragmentation can be reassembled at intermediate routers (only at destination host)",
+        "Assuming NAT is transparent to TCP: it breaks P2P and end-to-end applications silently",
+        "Thinking IPv6 routers fragment packets (they drop and send ICMPv6 Packet Too Big instead)",
+        "Confusing the fragment offset unit (8 bytes) with byte offsets: causes arithmetic errors",
+        "Believing a switch has a MAC address on its switching interfaces (it does not — it is transparent)",
+        "Thinking DHCP Discover is sent unicast to the DHCP server (it is broadcast; client has no IP yet)",
+        "Assuming HOL blocking occurs only at output ports (it specifically occurs at input ports on shared fabric)",
+        "Thinking SDN requires a completely new hardware switch (match+action is a generalization of existing forwarding)"
+      ]
+    },
+    "sections": [
+      {
+        "id": "section_1",
+        "title": "True / False",
+        "instructions": "State TRUE or FALSE, then write 2–3 sentences justifying your answer. No credit for the answer alone.",
+        "questions": [
+          {
+            "id": "Q1",
+            "number": 1,
+            "type": "true_false",
+            "topic": "IP Header Immutability Across Hops",
+            "difficulty": "Medium",
+            "prompt": "When a packet travels from Host A through two routers to reach Host B, the destination IP address in the IP header is overwritten at each router with the IP address of the next-hop router.",
+            "answer": {
+              "verdict": "FALSE",
+              "explanation": "The destination IP address is set to Host B's IP at the source and remains unchanged for the entire journey. Routers use the destination IP only to look up the next hop in their forwarding table — they do not modify it. What changes at every hop is the Ethernet frame's destination MAC address, which is rewritten to the MAC of the next-hop device (router interface or final host). The invariance of IP addresses is what allows end-to-end communication; modifying them is the job of NAT, not normal routing.",
+              "common_mistake": "Students conflate the MAC address mutation (which is visible in Wireshark captures) with the IP address. The hop-by-hop view of the network makes it feel like the packet is being 'handed off', leading to the false belief that IP addresses are updated too.",
+              "deeper_concept": "The fundamental separation between network-layer addressing (end-to-end, invariant) and link-layer addressing (hop-by-hop, mutable)"
+            }
+          },
+          {
+            "id": "Q2",
+            "number": 2,
+            "type": "true_false",
+            "topic": "IPv6 Fragmentation",
+            "difficulty": "Hard",
+            "prompt": "An IPv6 router that receives a packet larger than the outgoing link's MTU will fragment the packet into smaller pieces and forward them, just as an IPv4 router would.",
+            "answer": {
+              "verdict": "FALSE",
+              "explanation": "IPv6 explicitly removed the fragmentation capability from routers. If an IPv6 router cannot forward a packet because it exceeds the outgoing link's MTU, it drops the packet and returns an ICMPv6 'Packet Too Big' message to the source host. The source is then responsible for reducing its packet size. This design requires end hosts to perform Path MTU Discovery before sending large payloads. The rationale is that fragmenting at intermediate routers adds state and complexity; pushing this responsibility to hosts keeps the network core fast and stateless.",
+              "common_mistake": "Students apply IPv4 rules to IPv6 without accounting for the deliberate 'fast forwarding' design philosophy of IPv6, which removed checksum, options, and fragmentation from the router's job description.",
+              "deeper_concept": "End-to-end principle applied at the network layer: IPv6 pushes complexity (fragmentation, error handling) to endpoints, keeping the forwarding core minimal"
+            }
+          },
+          {
+            "id": "Q3",
+            "number": 3,
+            "type": "true_false",
+            "topic": "ARP Scope",
+            "difficulty": "Medium",
+            "prompt": "When Host A sends an ARP Request to find the MAC address of Host B on a different subnet, the ARP Request is forwarded by the router until it reaches Host B's subnet.",
+            "answer": {
+              "verdict": "FALSE",
+              "explanation": "ARP is a link-layer protocol and operates only within a single subnet. ARP Requests are sent to the broadcast MAC address (FF-FF-FF-FF-FF-FF), and routers do not forward link-layer broadcasts — they terminate at the router's interface. If Host B is on a different subnet, Host A's ARP request will never reach it. Instead, Host A uses its subnet mask to determine that B is remote, and it sends an ARP Request for its default gateway's MAC address, not Host B's. The router then handles forwarding the IP datagram from there.",
+              "common_mistake": "Students assume ARP works like DNS or DHCP, which can reach servers across subnets. ARP is strictly local — it resolves IPs to MACs only within the broadcast domain.",
+              "deeper_concept": "The boundary between link-layer and network-layer addressing; how routers partition broadcast domains and why inter-subnet communication requires a different resolution strategy"
+            }
+          },
+          {
+            "id": "Q4",
+            "number": 4,
+            "type": "true_false",
+            "topic": "IP Fragmentation Reassembly Location",
+            "difficulty": "Easy",
+            "prompt": "A router in the middle of a network path may reassemble fragmented IP datagrams before forwarding them to the next link, as long as all fragments have arrived.",
+            "answer": {
+              "verdict": "FALSE",
+              "explanation": "IP specifies that reassembly is performed only at the final destination host, never at intermediate routers. This is an intentional design decision: requiring routers to hold and reassemble fragments would force them to maintain per-flow state, slowing down forwarding and creating vulnerability to resource exhaustion attacks. Routers simply forward each fragment independently using the IP header's destination address and forwarding table. A fragment may even take a different path than other fragments of the same datagram.",
+              "common_mistake": "Students assume that since a router does 'smart' things like buffering and queuing, it must also handle reassembly. The principle of keeping the network core fast and stateless argues against this.",
+              "deeper_concept": "Stateless forwarding at the network core; end-to-end principle — routers forward, endpoints process"
+            }
+          },
+          {
+            "id": "Q5",
+            "number": 5,
+            "type": "true_false",
+            "topic": "Switch Self-Learning and Flooding",
+            "difficulty": "Medium",
+            "prompt": "An Ethernet switch that has learned the MAC address of every host on its network will never flood a frame — it will always forward frames to a single specific port.",
+            "answer": {
+              "verdict": "FALSE",
+              "explanation": "Even a fully populated switch table must still flood frames destined for broadcast addresses (such as FF-FF-FF-FF-FF-FF, used by ARP) and multicast addresses. Flooding is the correct behavior for broadcasts — it is not a fallback for unknown destinations alone. Additionally, if a learned MAC address entry has expired from the switch table (entries have a TTL), the switch will flood again for that destination until it relearns the mapping. Finally, a single failed/changed entry can cause flooding even in an otherwise complete table.",
+              "common_mistake": "Students think the switch's self-learning algorithm eventually eliminates all flooding once the table is full. Broadcasts and multicast traffic ensure flooding is a permanent feature of Ethernet switching.",
+              "deeper_concept": "The distinction between flooding as a failure-mode fallback vs. flooding as intentional correct behavior for broadcast/multicast traffic"
+            }
+          }
+        ]
+      },
+      {
+        "id": "section_2",
+        "title": "Packet Flow Tracing",
+        "instructions": "Trace the complete packet transformation step by step. Specify IP source/destination, Ethernet source/destination MAC, and any protocol-specific fields at each stage. Show your reasoning.",
+        "questions": [
+          {
+            "id": "Q6",
+            "number": 6,
+            "type": "packet_flow",
+            "topic": "Cross-Subnet Communication: ARP + IP Forwarding + MAC Rewriting",
+            "difficulty": "Hard",
+            "scenario": {
+              "topology": "Host A (IP: 10.1.1.5, MAC: AA:AA:AA:AA:AA:AA) is on subnet 10.1.1.0/24. Router R has two interfaces: eth0 facing A's subnet (IP: 10.1.1.1, MAC: RR:00:00:00:00:01) and eth1 facing B's subnet (IP: 10.2.2.1, MAC: RR:00:00:00:00:02). Host B (IP: 10.2.2.8, MAC: BB:BB:BB:BB:BB:BB) is on subnet 10.2.2.0/24. All ARP tables are initially empty.",
+              "task": "Host A wants to send an HTTP request (TCP SYN) to Host B. Trace every frame/packet from the moment A's application initiates the connection until the TCP SYN arrives at B. Include all ARP exchanges required."
+            },
+            "answer": {
+              "steps": [
+                {
+                  "step": 1,
+                  "event": "A determines B is on a different subnet",
+                  "detail": "A ANDs B's IP (10.2.2.8) with its own mask (255.255.255.0) → 10.2.2.0. A's own network is 10.1.1.0. These differ, so B is remote. A must send to its default gateway: 10.1.1.1."
+                },
+                {
+                  "step": 2,
+                  "event": "A sends ARP Request for Router R's MAC (10.1.1.1)",
+                  "frame": {
+                    "ethernet_src": "AA:AA:AA:AA:AA:AA",
+                    "ethernet_dst": "FF:FF:FF:FF:FF:FF (broadcast)",
+                    "arp_operation": "Request (1)",
+                    "arp_sender_ip": "10.1.1.5",
+                    "arp_sender_mac": "AA:AA:AA:AA:AA:AA",
+                    "arp_target_ip": "10.1.1.1",
+                    "arp_target_mac": "00:00:00:00:00:00 (unknown)"
+                  }
+                },
+                {
+                  "step": 3,
+                  "event": "Router R replies to ARP Request",
+                  "frame": {
+                    "ethernet_src": "RR:00:00:00:00:01",
+                    "ethernet_dst": "AA:AA:AA:AA:AA:AA (unicast)",
+                    "arp_operation": "Reply (2)",
+                    "arp_sender_ip": "10.1.1.1",
+                    "arp_sender_mac": "RR:00:00:00:00:01",
+                    "arp_target_ip": "10.1.1.5",
+                    "arp_target_mac": "AA:AA:AA:AA:AA:AA"
+                  },
+                  "note": "A updates its ARP table: 10.1.1.1 → RR:00:00:00:00:01"
+                },
+                {
+                  "step": 4,
+                  "event": "A sends TCP SYN to B via Router R",
+                  "frame": {
+                    "ethernet_src": "AA:AA:AA:AA:AA:AA",
+                    "ethernet_dst": "RR:00:00:00:00:01 (Router R eth0 MAC)",
+                    "ip_src": "10.1.1.5",
+                    "ip_dst": "10.2.2.8",
+                    "transport": "TCP SYN, destination port 80"
+                  }
+                },
+                {
+                  "step": 5,
+                  "event": "Router R receives frame, strips Ethernet header, consults forwarding table",
+                  "detail": "R sees IP destination 10.2.2.8. Forwarding table entry: 10.2.2.0/24 → outgoing interface eth1. R must find B's MAC on its eth1 subnet. ARP table is empty for B."
+                },
+                {
+                  "step": 6,
+                  "event": "Router R sends ARP Request for B's MAC (10.2.2.8) on eth1 subnet",
+                  "frame": {
+                    "ethernet_src": "RR:00:00:00:00:02",
+                    "ethernet_dst": "FF:FF:FF:FF:FF:FF (broadcast on 10.2.2.0/24 subnet)",
+                    "arp_operation": "Request (1)",
+                    "arp_sender_ip": "10.2.2.1",
+                    "arp_sender_mac": "RR:00:00:00:00:02",
+                    "arp_target_ip": "10.2.2.8"
+                  }
+                },
+                {
+                  "step": 7,
+                  "event": "Host B replies to Router R's ARP",
+                  "frame": {
+                    "ethernet_src": "BB:BB:BB:BB:BB:BB",
+                    "ethernet_dst": "RR:00:00:00:00:02 (unicast)",
+                    "arp_operation": "Reply (2)",
+                    "arp_sender_ip": "10.2.2.8",
+                    "arp_sender_mac": "BB:BB:BB:BB:BB:BB"
+                  }
+                },
+                {
+                  "step": 8,
+                  "event": "Router R forwards the buffered TCP SYN to B",
+                  "frame": {
+                    "ethernet_src": "RR:00:00:00:00:02 (R's eth1 MAC)",
+                    "ethernet_dst": "BB:BB:BB:BB:BB:BB",
+                    "ip_src": "10.1.1.5 (UNCHANGED)",
+                    "ip_dst": "10.2.2.8 (UNCHANGED)",
+                    "transport": "TCP SYN, destination port 80"
+                  }
+                }
+              ],
+              "key_observations": [
+                "IP addresses never changed across any hop — only MACs changed",
+                "Two separate ARP exchanges were needed: one on each subnet",
+                "Router R's ARP Request on the B-side uses its eth1 IP (10.2.2.1) as the sender — not A's IP",
+                "The router buffers the TCP SYN while waiting for B's ARP reply"
+              ],
+              "common_mistake": "Students often show only one ARP exchange (for the router). They forget the router itself needs to ARP for the destination on the outgoing subnet. Some also incorrectly show A's IP appearing in R's ARP request.",
+              "deeper_concept": "The full interplay between ARP, IP forwarding, and MAC rewriting; understanding that every hop is an independent link-layer transaction"
+            }
+          },
+          {
+            "id": "Q7",
+            "number": 7,
+            "type": "packet_flow",
+            "topic": "IP Fragmentation Arithmetic",
+            "difficulty": "Hard",
+            "scenario": {
+              "setup": "A router receives an IP datagram with the following properties: Total Length = 3980 bytes, IP Header = 20 bytes, Identification = 0x1A2B, DF = 0, MF = 0, Fragment Offset = 0. The outgoing link has MTU = 1500 bytes.",
+              "task": "The router must fragment this datagram. Determine: (A) How many fragments are created? (B) For each fragment, specify: Total Length, Fragment Offset (in 8-byte units), and the MF flag value. (C) If fragment 2 is lost in transit, what happens at the destination?"
+            },
+            "answer": {
+              "parts": {
+                "A": {
+                  "calculation": "Payload = 3980 - 20 = 3960 bytes. Max payload per fragment = MTU - IP header = 1500 - 20 = 1480 bytes. But 1480 must be a multiple of 8: 1480 / 8 = 185 exactly, so 1480 bytes is valid for non-last fragments. Number of fragments = ceiling(3960 / 1480) = ceiling(2.676) = 3 fragments.",
+                  "answer": "3 fragments"
+                },
+                "B": {
+                  "fragments": [
+                    {
+                      "fragment": 1,
+                      "payload_bytes": 1480,
+                      "total_length": 1500,
+                      "offset_bytes": 0,
+                      "offset_units": 0,
+                      "mf_flag": 1,
+                      "id": "0x1A2B"
+                    },
+                    {
+                      "fragment": 2,
+                      "payload_bytes": 1480,
+                      "total_length": 1500,
+                      "offset_bytes": 1480,
+                      "offset_units": 185,
+                      "mf_flag": 1,
+                      "id": "0x1A2B"
+                    },
+                    {
+                      "fragment": 3,
+                      "payload_bytes": 1000,
+                      "total_length": 1020,
+                      "offset_bytes": 2960,
+                      "offset_units": 370,
+                      "mf_flag": 0,
+                      "id": "0x1A2B",
+                      "note": "3960 - 1480 - 1480 = 1000 bytes remaining. MF=0 because this is the last fragment."
+                    }
+                  ]
+                },
+                "C": {
+                  "answer": "The destination host receives fragments 1 and 3 but not fragment 2. The reassembly timer starts when the first fragment arrives. When the timer expires (or at reassembly time), the destination detects the gap (offset 370 follows immediately after fragment 1's last byte at offset 185+185=370... but fragment 2 covering bytes 1480–2959 is missing). The entire original datagram is discarded. The destination does NOT send any error or NACK — it silently drops what it has. Recovery (retransmission) is the responsibility of the transport layer (e.g., TCP will retransmit the segment that maps to this datagram)."
+                }
+              },
+              "common_mistake": "Students get the offset unit wrong — they give byte offsets instead of dividing by 8. A second common error is setting MF=1 on the last fragment (it should be 0). Students also sometimes say the router sends ICMP if a fragment is lost — it does not; the destination host silently discards.",
+              "deeper_concept": "Fragmentation arithmetic and the 8-byte alignment constraint; the interaction between IP's best-effort model (silent drop of incomplete datagrams) and TCP's reliability layer above it"
+            }
+          }
+        ]
+      },
+      {
+        "id": "section_3",
+        "title": "Short Answer — Conceptual",
+        "instructions": "Answer in 3–6 sentences. Focus on explaining the 'why', not just the 'what'. Partial credit is awarded for correct reasoning even if the conclusion is incomplete.",
+        "questions": [
+          {
+            "id": "Q8",
+            "number": 8,
+            "type": "short_answer",
+            "topic": "HOL Blocking and Crossbar Fabric",
+            "difficulty": "Hard",
+            "prompt": "A router uses a shared-memory switching fabric with input queues. Packets destined for output port 3 and output port 7 arrive simultaneously at two different input ports, and there is already one packet at the head of each input queue destined for the same (currently busy) output port. Explain precisely what Head-of-Line (HOL) blocking is, why it occurs in this scenario, and how a crossbar interconnection network eliminates it.",
+            "answer": {
+              "explanation": "HOL blocking occurs when a packet at the head of an input queue is waiting for an output port that is currently busy, and this blocked packet physically prevents other packets behind it in the same queue from advancing — even if those trailing packets are destined for output ports that are idle and ready to accept traffic. In a shared-memory or shared-bus fabric, only one packet per input port can be processed at a time (the head-of-line packet), so the blocked front packet holds the entire queue hostage. In the scenario described, even if the packets behind the stuck head-of-line packet could move to output ports 3 and 7 immediately, they cannot because the shared fabric only processes the queue front.",
+              "crossbar_solution": "A crossbar fabric uses a grid of switching elements — one for each (input, output) port pair — allowing multiple packets to transfer simultaneously as long as they are destined for different output ports. In the same scenario, the packets for ports 3 and 7 can transfer in parallel in a single time slot because there is a dedicated physical path for each pair. The blocked head-of-line packets for the busy output no longer hold back traffic destined for free outputs, because the crossbar provides independent paths.",
+              "common_mistake": "Students often say HOL blocking affects output queues, when it is specifically an input-queue phenomenon caused by the non-blocking constraint of the switching fabric. Output queueing causes congestion and drops, but not HOL blocking.",
+              "deeper_concept": "The interaction between queueing architecture and switching fabric design; why fabric parallelism is essential for high-performance routers"
+            }
+          },
+          {
+            "id": "Q9",
+            "number": 9,
+            "type": "short_answer",
+            "topic": "NAT and End-to-End Principle",
+            "difficulty": "Medium",
+            "prompt": "A gaming server at IP 203.0.113.55 needs to initiate a connection to a gaming client sitting behind a NAT router (the client's private IP is 192.168.1.42). The NAT router's public IP is 198.51.100.10. Explain precisely why this connection attempt fails, and describe one common technique used to work around this limitation.",
+            "answer": {
+              "failure_explanation": "The NAT router maintains a translation table populated only by outbound connections from internal hosts. An entry is created when an internal host sends a packet outward (the NAT assigns an external port and records the mapping). When the external server at 203.0.113.55 initiates a connection to 198.51.100.10 on some destination port, the NAT router looks up the incoming destination port in its translation table. Since no outbound connection from 192.168.1.42 has been established to this server, there is no translation table entry. The NAT router has no way to know which internal host should receive the incoming packet — it silently drops it.",
+              "workaround": "A common workaround is NAT traversal via a rendezvous/STUN server. The client behind NAT first makes an outbound connection to a known public rendezvous server, which creates a NAT translation entry and informs the gaming server of the client's NAT-assigned external port. The server then connects to that specific external (NAT public IP, port) pair, which the NAT recognizes and forwards correctly. Another technique is port forwarding (static NAT), where an administrator manually configures the NAT router to always forward traffic arriving on a specific external port to a specific internal host and port.",
+              "common_mistake": "Students say 'the server can't find the client because private IPs aren't routable' — while true, this misses the deeper issue: even with port forwarding or a public address, the fundamental problem is the asymmetry of NAT state. The correct answer centers on the translation table and the requirement for inside-out connection initiation.",
+              "deeper_concept": "NAT as a stateful middlebox that breaks the Internet's end-to-end principle; the asymmetry between inside-initiated and outside-initiated connections"
+            }
+          },
+          {
+            "id": "Q10",
+            "number": 10,
+            "type": "short_answer",
+            "topic": "DHCP Broadcast Mechanics",
+            "difficulty": "Medium",
+            "prompt": "A newly connected laptop sends a DHCP Discover message. (A) Why must the Discover be sent as a broadcast rather than unicast? (B) What source IP does the laptop use in the IP header, and why? (C) If there are two DHCP servers on the same subnet, what happens?",
+            "answer": {
+              "parts": {
+                "A": "The laptop has no IP address yet and does not know the IP address of any DHCP server on the network. Unicast requires a known destination IP — since neither is available, broadcast (destination 255.255.255.255) is the only option that will reach all devices on the local link, including any DHCP server that may be present.",
+                "B": "The source IP is 0.0.0.0, the 'this host' address defined for use when a host does not yet have an IP. A host cannot put a real IP in the source field before DHCP has assigned one. The 0.0.0.0 source tells receiving devices that the sender has no IP address and is in the process of obtaining one.",
+                "C": "Both DHCP servers will receive the broadcast Discover and each will respond with a DHCP Offer, proposing different IP addresses. The client receives both offers (or whichever arrives first) and selects one — typically the first received. It then broadcasts a DHCP Request identifying which server's offer it accepted (by including that server's IP). The unselected server sees this broadcast, realizes its offer was declined, and returns its offered IP to its pool. The selected server then sends a DHCP ACK to finalize the assignment."
+              },
+              "common_mistake": "Students say the client sends the Request directly to the chosen server (unicast) — it is still broadcast at the Request stage, specifically to allow the rejected server to see and reclaim its offered address.",
+              "deeper_concept": "The elegant role of broadcast in the DORA sequence; how the protocol handles multiple servers without a prior coordination mechanism"
+            }
+          },
+          {
+            "id": "Q11",
+            "number": 11,
+            "type": "short_answer",
+            "topic": "Longest Prefix Match",
+            "difficulty": "Hard",
+            "prompt": "A router has the following forwarding table entries (in no particular order):\n  (1) 172.16.0.0/12 → Port A\n  (2) 172.16.0.0/16 → Port B\n  (3) 172.16.32.0/20 → Port C\n  (4) 0.0.0.0/0 → Port D (default)\nFor each destination IP below, state which port the packet is forwarded to and explain why:\n  (a) 172.16.47.200\n  (b) 172.16.33.1\n  (c) 172.25.100.4\n  (d) 172.16.0.5",
+            "answer": {
+              "parts": {
+                "a": {
+                  "ip": "172.16.47.200",
+                  "matching_prefixes": [
+                    "172.16.0.0/12 — 172.16.47.x falls within 172.16.0.0 – 172.31.255.255 (12 bits match)",
+                    "172.16.0.0/16 — 172.16.47.x falls within 172.16.0.0 – 172.16.255.255 (16 bits match)",
+                    "172.16.32.0/20 — 172.16.32.0/20 covers 172.16.32.0 – 172.16.47.255. 47 decimal = 0b00101111. The /20 covers the range where the 5th octet's high nibble is 0010 or 0011, i.e., 32–47. 47.200 is within this range (20 bits match)"
+                  ],
+                  "longest_match": "Entry (3): 172.16.32.0/20 has prefix length 20 → Port C",
+                  "note": "All three non-default entries match. Longest prefix (most specific) wins."
+                },
+                "b": {
+                  "ip": "172.16.33.1",
+                  "matching_prefixes": [
+                    "172.16.0.0/12 — matches (12 bits)",
+                    "172.16.0.0/16 — matches (16 bits)",
+                    "172.16.32.0/20 — 172.16.32.0/20 covers 172.16.32.0–172.16.47.255. 33.1 is within this range (20 bits match)"
+                  ],
+                  "longest_match": "Entry (3): 172.16.32.0/20 → Port C"
+                },
+                "c": {
+                  "ip": "172.25.100.4",
+                  "matching_prefixes": [
+                    "172.16.0.0/12 — /12 covers 172.16.0.0–172.31.255.255. 172.25.x is within range (12 bits match)",
+                    "172.16.0.0/16 — Does NOT match: 172.25 ≠ 172.16",
+                    "172.16.32.0/20 — Does NOT match"
+                  ],
+                  "longest_match": "Entry (1): 172.16.0.0/12 → Port A"
+                },
+                "d": {
+                  "ip": "172.16.0.5",
+                  "matching_prefixes": [
+                    "172.16.0.0/12 — matches (12 bits)",
+                    "172.16.0.0/16 — matches (16 bits)",
+                    "172.16.32.0/20 — Does NOT match: 172.16.0.x is below 172.16.32.0"
+                  ],
+                  "longest_match": "Entry (2): 172.16.0.0/16 → Port B"
+                }
+              },
+              "common_mistake": "Students frequently apply /12 and assume it means only the first 12 bits of the first two octets. The key error is not converting to binary to check whether a candidate IP falls within the prefix range. Also, students often pick the first matching entry instead of the longest matching entry.",
+              "deeper_concept": "Longest prefix matching as hierarchical policy enforcement; understanding that a more specific prefix 'overrides' a broader one for the addresses it covers"
+            }
+          }
+        ]
+      },
+      {
+        "id": "section_4",
+        "title": "Troubleshooting Scenarios",
+        "instructions": "Read each scenario carefully. Diagnose the root cause, identify what is happening at the protocol level, and prescribe a fix or explain the expected behavior.",
+        "questions": [
+          {
+            "id": "Q12",
+            "number": 12,
+            "type": "troubleshooting",
+            "topic": "Traceroute Mechanics + ICMP Types",
+            "difficulty": "Hard",
+            "scenario": "An engineer runs traceroute to a destination at 8.8.8.8 and observes the following output:\n  1. 192.168.1.1     2 ms\n  2. 10.0.0.1        8 ms\n  3. * * *\n  4. 203.0.113.1    45 ms\n  5. 8.8.8.8        52 ms\n\nThe engineer is puzzled by hop 3 showing '* * *'. They also notice the final response from 8.8.8.8 is an ICMP Port Unreachable (Type 3, Code 3) rather than an Echo Reply (Type 0, Code 0). They conclude: 'The path is broken at hop 3, and 8.8.8.8 is refusing connections.' Identify all errors in the engineer's conclusions and explain the correct interpretation.",
+            "answer": {
+              "error_1": {
+                "claim": "The path is broken at hop 3",
+                "correction": "The '* * *' at hop 3 does not indicate a broken hop. It means the router at hop 3 is configured to not send ICMP Time Exceeded messages in response to traceroute probes — a common security practice to hide internal router topology. The fact that hop 4 and hop 5 respond confirms the path is fully intact. Traffic is passing through hop 3; that router is simply silent from a traceroute perspective."
+              },
+              "error_2": {
+                "claim": "8.8.8.8 is refusing connections",
+                "correction": "ICMP Port Unreachable (Type 3, Code 3) from the destination is actually the expected and correct stopping condition for UDP-based traceroute. Traceroute sends UDP probes to a very high, unlikely-to-be-open destination port (e.g., 33434+). When the probe finally reaches the destination with TTL > 0, the destination's IP stack passes the UDP segment up, finds no application listening on that port, and returns Port Unreachable — which traceroute interprets as 'I reached the destination.' This is not a refusal; it is the designed stopping mechanism. If traceroute were ICMP-based (as on Windows), the stopping signal would be an Echo Reply instead."
+              },
+              "additional_note": "The engineer is conflating two separate ICMP mechanics: TTL Expired (Type 11, Code 0) used to identify each intermediate hop, and Port Unreachable (Type 3, Code 3) used as the termination signal by the destination.",
+              "common_mistake": "Students learn 'ping uses ICMP Echo' and incorrectly assume traceroute also uses Echo throughout. The two-phase ICMP behavior (Type 11 from hops, Type 3/3 from destination) is a subtle but important distinction. The silent hop interpretation is also commonly missed.",
+              "deeper_concept": "Traceroute's dual-ICMP-type design; router ICMP rate-limiting as a security/operational policy; distinguishing packet forwarding from ICMP response generation"
+            }
+          },
+          {
+            "id": "Q13",
+            "number": 13,
+            "type": "troubleshooting",
+            "topic": "Path MTU Discovery + DF Flag + ICMP Type 3 Code 4",
+            "difficulty": "Hard",
+            "scenario": "A developer reports that large file uploads over HTTPS to a remote server always succeed from their home network but consistently stall/timeout when using a corporate VPN. Packet captures on the client show a large TCP segment sent with DF=1, followed by silence — no response from the server and no ICMP error visible in the capture. The VPN tunnel uses an MTU of 1300 bytes (lower than standard Ethernet's 1500 bytes, due to encapsulation overhead).\n\n(A) Explain the exact sequence of events causing the stall.\n(B) Why doesn't the ICMP error appear in the client's packet capture?\n(C) What is this failure mode called, and what is the long-term fix?",
+            "answer": {
+              "parts": {
+                "A": "The client and server establish a TCP connection and negotiate an MSS during the three-way handshake. If MSS clamping is not configured, the MSS is based on the standard 1500 MTU (MSS ≈ 1460 bytes). When the client sends a large data segment (say, 1460-byte TCP payload → ~1500-byte IP datagram) with DF=1 (Don't Fragment), the datagram reaches the VPN gateway or a router in the path where the MTU is only 1300 bytes. The router cannot fragment it (DF=1) and must drop it. The router should generate an ICMP Type 3, Code 4 ('Fragmentation Needed, DF Set') message back to the client with the next-hop MTU (1300) in the response.",
+                "B": "The ICMP error is generated and sent toward the client's IP, but many corporate firewalls are configured to block inbound ICMP messages as a security policy — particularly ICMP Type 3 (Destination Unreachable). This is a misconfiguration known as 'ICMP blackholing.' The client's TCP stack never receives the PMTUD signal telling it to reduce its segment size, so it retransmits the same oversized segment repeatedly. From the client's perspective, the server has gone silent — there is no error in the capture because the ICMP packets are blocked before they reach the client.",
+                "C": "This failure mode is called a 'black hole' or more specifically a 'PMTUD black hole.' The data plane correctly drops the packet, but the control-plane feedback mechanism (ICMP) is suppressed, leaving TCP blind to the MTU constraint. The long-term fixes include: (1) fixing the firewall to permit ICMP Type 3, Code 4 messages (the correct solution), (2) configuring MSS clamping on the VPN gateway to automatically reduce TCP MSS for connections traversing the tunnel, or (3) using PLPMTUD (Packetization Layer Path MTU Discovery), defined in RFC 4821, which probes MTU without relying on ICMP."
+              },
+              "common_mistake": "Students stop at 'the packet is dropped because DF=1' and don't reason about why the client never recovers. The key insight is the interaction between DF, ICMP feedback, and firewall policy — a multi-layer failure that requires understanding each component.",
+              "deeper_concept": "PMTUD as a cross-layer mechanism (IP + ICMP + TCP); how firewall misconfiguration can silently break higher-layer protocols; the danger of blocking ICMP wholesale"
+            }
+          }
+        ]
+      },
+      {
+        "id": "section_5",
+        "title": "Protocol Behavior and What Happens Next",
+        "instructions": "For each scenario, describe precisely what happens next in the protocol sequence — include all messages sent, decisions made, and state changes. Your answer must be specific about protocol mechanics.",
+        "questions": [
+          {
+            "id": "Q14",
+            "number": 14,
+            "type": "what_happens_next",
+            "topic": "ARP Cache Timeout and Stale State",
+            "difficulty": "Medium",
+            "scenario": "Host X has been successfully communicating with Host Y for several hours. Host Y's entry in X's ARP cache is about to time out (the 20-minute TTL is expiring). At the exact moment the ARP entry expires, X's application sends a new data packet destined for Y. Describe exactly what happens at the network level from this moment forward.",
+            "answer": {
+              "sequence": [
+                "When X's application sends data, the OS checks the ARP cache for Y's MAC address.",
+                "The cache entry for Y has expired and been deleted. X has no MAC address for Y.",
+                "X buffers the outgoing IP datagram and queues an ARP Request. The ARP Request is sent broadcast on X's local subnet: 'Who has [Y's IP]? Tell [X's IP].'",
+                "Y (assuming it is still present and has not changed its IP) receives the ARP broadcast, recognizes its own IP, and sends an ARP Reply unicast to X: '[Y's IP] is at [Y's MAC].'",
+                "X receives the reply, updates its ARP cache with the fresh entry (timer reset to 20 minutes), and sends the buffered IP datagram using Y's MAC address.",
+                "From the application's perspective, there may be a slight delay (the round-trip time of the ARP exchange), but the packet is delivered successfully."
+              ],
+              "edge_case": "If Y is no longer reachable (e.g., it has been shut down or moved), the ARP Request will receive no reply. After a platform-specific number of retries (typically 3 attempts with short timeouts), X's OS will return a 'Host unreachable' error to the sending application. This is how ARP's soft-state design self-heals: stale entries simply expire and are re-validated on demand.",
+              "common_mistake": "Students think the ARP timeout causes the packet to be dropped with no recovery. In reality, ARP re-queries transparently before forwarding. The soft-state design means the system is always eventually consistent, not broken by expiration.",
+              "deeper_concept": "Soft-state design pattern: timeouts as implicit cleanup without explicit teardown; demand-driven cache refresh as a scalable alternative to explicit keep-alives"
+            }
+          },
+          {
+            "id": "Q15",
+            "number": 15,
+            "type": "what_happens_next",
+            "topic": "SDN Match+Action — Packet-In and Controller Interaction",
+            "difficulty": "Hard",
+            "scenario": "A network is running a POX-based SDN controller with an L2 learning module. An OpenFlow switch has an empty flow table (just installed, no entries). Host A (MAC: AA:AA:AA:AA:AA:AA) sends an Ethernet frame destined for Host B (MAC: BB:BB:BB:BB:BB:BB).\n\n(A) What does the switch do upon receiving this frame?\n(B) What does the controller do upon receiving the Packet-In message?\n(C) What happens when B responds back to A? Does the switch send another Packet-In to the controller?",
+            "answer": {
+              "parts": {
+                "A": "The switch receives the frame and looks it up in its flow table. Finding no matching entry, it encapsulates the entire frame in an OpenFlow Packet-In message and sends it to the controller over the established TCP control channel. This is the 'send to controller' action that triggers when no flow rule matches.",
+                "B": "The controller (L2 learning module) receives the Packet-In. It performs two actions: First, it learns A's location: 'MAC AA:AA:AA:AA:AA:AA is reachable via this switch, on the port the frame arrived from.' It records this in its network-wide MAC table. Second, since it does not yet know which port B is on, it instructs the switch to flood the frame out all ports (except the incoming one) using a Packet-Out message with action=FLOOD. The controller may or may not install a permanent flow rule yet, depending on implementation — some L2 learning modules flood first and install the rule only after learning B's location.",
+                "C": "When B responds, its frame arrives at the switch with source=BB:BB:BB:BB:BB:BB, destination=AA:AA:AA:AA:AA:AA. The flow table may still be empty (if no rule was installed for the A→B flow). Another Packet-In is sent to the controller. The controller now learns B's port. At this point it knows both A's port and B's port. The controller installs two flow table rules: one for A→B traffic (forward to B's port) and one for B→A traffic (forward to A's port). All subsequent traffic between A and B is handled at wire speed by the switch with no further controller involvement."
+              },
+              "common_mistake": "Students think the controller installs a flow rule immediately on the first Packet-In and the frame is delivered directly. The actual process requires the controller to learn B's location before it can install a useful forwarding rule — which only happens when B responds.",
+              "deeper_concept": "SDN reactive flow installation vs. proactive; the two-phase learning required before a bidirectional flow can be handled without the controller; the control plane overhead of the initial flow miss"
+            }
+          }
+        ]
+      },
+      {
+        "id": "section_6",
+        "title": "Multi-Concept Synthesis",
+        "instructions": "These questions require integrating multiple protocols or concepts. Full credit requires addressing every component.",
+        "questions": [
+          {
+            "id": "Q16",
+            "number": 16,
+            "type": "synthesis",
+            "topic": "Cold Boot: Full Protocol Stack from Power-On to Web Page",
+            "difficulty": "Hard",
+            "scenario": "A laptop with no cached state (cleared ARP tables, DNS cache, DHCP lease) connects to a home network and navigates to www.example.com for the first time. List, in precise order, every distinct network protocol message or event that must occur from the moment the laptop's NIC is active to the moment the HTTP response begins arriving. For each step, state the protocol used, the source and destination addresses, and its purpose.",
+            "answer": {
+              "steps": [
+                {
+                  "step": 1,
+                  "protocol": "DHCP",
+                  "message": "DHCP Discover",
+                  "src_ip": "0.0.0.0",
+                  "dst_ip": "255.255.255.255",
+                  "src_mac": "Laptop MAC",
+                  "dst_mac": "FF:FF:FF:FF:FF:FF",
+                  "purpose": "Laptop has no IP; broadcasts to find a DHCP server"
+                },
+                {
+                  "step": 2,
+                  "protocol": "DHCP",
+                  "message": "DHCP Offer",
+                  "src_ip": "Router/Server IP",
+                  "dst_ip": "255.255.255.255 (or laptop MAC unicast)",
+                  "purpose": "DHCP server proposes an IP address, subnet mask, default gateway, and DNS server IP"
+                },
+                {
+                  "step": 3,
+                  "protocol": "DHCP",
+                  "message": "DHCP Request",
+                  "src_ip": "0.0.0.0",
+                  "dst_ip": "255.255.255.255",
+                  "purpose": "Laptop accepts the offered IP and broadcasts its selection (so other DHCP servers can reclaim their offers)"
+                },
+                {
+                  "step": 4,
+                  "protocol": "DHCP",
+                  "message": "DHCP ACK",
+                  "purpose": "Server confirms the lease; laptop now has IP, mask, gateway, DNS server"
+                },
+                {
+                  "step": 5,
+                  "protocol": "ARP",
+                  "message": "ARP Request (for default gateway MAC)",
+                  "src_ip": "Laptop IP",
+                  "dst_mac": "FF:FF:FF:FF:FF:FF (broadcast)",
+                  "purpose": "Laptop must ARP for the default gateway's MAC to send any off-subnet traffic"
+                },
+                {
+                  "step": 6,
+                  "protocol": "ARP",
+                  "message": "ARP Reply (from gateway)",
+                  "purpose": "Gateway provides its MAC; laptop updates its ARP cache"
+                },
+                {
+                  "step": 7,
+                  "protocol": "DNS",
+                  "message": "DNS Query (A record for www.example.com)",
+                  "src_ip": "Laptop IP",
+                  "dst_ip": "DNS Server IP (provided by DHCP)",
+                  "transport": "UDP, destination port 53",
+                  "purpose": "Laptop needs the IP of www.example.com before it can connect"
+                },
+                {
+                  "step": 8,
+                  "protocol": "DNS",
+                  "message": "DNS Response",
+                  "purpose": "DNS server returns the A record (IP address) for www.example.com"
+                },
+                {
+                  "step": 9,
+                  "protocol": "TCP",
+                  "message": "TCP SYN",
+                  "src_ip": "Laptop IP",
+                  "dst_ip": "www.example.com IP",
+                  "dst_port": 443,
+                  "purpose": "Initiate TCP connection to the web server (HTTPS)"
+                },
+                {
+                  "step": 10,
+                  "protocol": "TCP",
+                  "message": "TCP SYN-ACK",
+                  "purpose": "Server acknowledges and completes the three-way handshake"
+                },
+                {
+                  "step": 11,
+                  "protocol": "TCP",
+                  "message": "TCP ACK",
+                  "purpose": "Laptop completes three-way handshake; TCP connection established"
+                },
+                {
+                  "step": 12,
+                  "protocol": "TLS",
+                  "message": "TLS ClientHello",
+                  "purpose": "Laptop initiates TLS handshake (cipher suites, random nonce)"
+                },
+                {
+                  "step": 13,
+                  "protocol": "TLS",
+                  "message": "TLS ServerHello + Certificate + ServerHelloDone",
+                  "purpose": "Server responds with chosen cipher, its certificate for authentication"
+                },
+                {
+                  "step": 14,
+                  "protocol": "TLS",
+                  "message": "TLS key exchange + ChangeCipherSpec + Finished",
+                  "purpose": "Keys exchanged; both sides confirm encrypted channel is ready"
+                },
+                {
+                  "step": 15,
+                  "protocol": "HTTP/HTTPS",
+                  "message": "HTTP GET /",
+                  "purpose": "Laptop sends the actual HTTP request inside the encrypted TLS channel"
+                },
+                {
+                  "step": 16,
+                  "protocol": "HTTP/HTTPS",
+                  "message": "HTTP Response (200 OK)",
+                  "purpose": "Server begins sending the web page content"
+                }
+              ],
+              "common_mistake": "Students omit ARP for the gateway (step 5-6) — they jump straight from DHCP to DNS. They also often omit TLS, showing HTTP over plain TCP for an HTTPS connection. Some forget that DNS itself requires the gateway MAC (via ARP) if the DNS server is off-subnet.",
+              "deeper_concept": "The full dependency chain of protocol bootstrapping: you cannot do X until you have completed Y; the layered yet interdependent nature of the protocol stack in practice"
+            }
+          },
+          {
+            "id": "Q17",
+            "number": 17,
+            "type": "synthesis",
+            "topic": "Spanning Tree Protocol: Broadcast Storm Mechanics and Cost",
+            "difficulty": "Hard",
+            "scenario": "A network administrator connects three Ethernet switches (S1, S2, S3) in a triangle (S1↔S2, S2↔S3, S1↔S3) for redundancy, without any special configuration. Host A is connected to S1 and broadcasts an ARP Request.\n\n(A) Trace what happens to A's ARP broadcast frame — explain why this creates a broadcast storm.\n(B) Spanning Tree Protocol is then enabled. One of the three inter-switch links is disabled by STP. What does this cost the network, and why does the network accept this cost?\n(C) STP later detects that the previously disabled link is now the only active path (the other two links failed). What happens?",
+            "answer": {
+              "parts": {
+                "A": "S1 receives A's broadcast and floods it out both of its other ports: to S2 and to S3. S2 receives the copy from S1 and floods it to S3. S3 receives the copy from S1 and also the copy from S2, and floods each back out. Now S1 receives two copies (from S2 and S3) and floods each again. The number of frames in the network doubles on every forwarding cycle. Within milliseconds, the switches are overwhelmed with exponentially multiplying copies of the same broadcast frame — CPU and memory are consumed, the network saturates, and switches crash. No convergence or natural stopping condition exists because broadcasts are always flooded and switches have no memory of having already forwarded a frame.",
+                "B": "By disabling one inter-switch link, STP eliminates the loop while keeping the remaining two paths active. The cost is loss of the physical redundancy that the administrator intended — if one of the two remaining links fails, STP can re-enable the blocked port to restore connectivity, but until STP reconverges, there is a brief interruption. The network accepts this cost because a loop-free topology with one path is infinitely better than a storm-saturated topology with zero effective throughput.",
+                "C": "STP uses Bridge Protocol Data Units (BPDUs) to detect topology changes. When the two active links fail, the remaining switches (or the root bridge) detect the loss of BPDUs on those ports. STP then transitions the previously blocked port through the Listening → Learning → Forwarding states (a process that takes approximately 30–50 seconds by default in classic STP). During this convergence period, traffic is interrupted. Once the blocked port reaches Forwarding state, the network is restored using the previously disabled link. Modern Rapid STP (RSTP) reduces this convergence time significantly."
+              },
+              "common_mistake": "Students often describe STP as simply 'blocking ports' without explaining why convergence after topology change takes time. They also miss that the original disabled link being re-enabled does not happen instantly — the state machine must complete its transitions.",
+              "deeper_concept": "STP as a distributed algorithm for loop prevention; the fundamental tradeoff between redundancy (performance/resilience) and loop freedom (correctness); convergence time as a real cost of distributed topology management"
+            }
+          }
+        ]
+      },
+      {
+        "id": "section_7",
+        "title": "Edge Cases and Trick Questions",
+        "instructions": "These questions are designed to expose subtle misconceptions. Read carefully before answering.",
+        "questions": [
+          {
+            "id": "Q18",
+            "number": 18,
+            "type": "edge_case",
+            "topic": "NAT Translation Table Port Exhaustion + ICMP",
+            "difficulty": "Hard",
+            "prompt": "A company has 60,000 employees, all behind a single NAT router with one public IP address. A network engineer claims: 'We can handle up to 65,535 simultaneous outbound connections because we have that many port numbers.' Identify two flaws in this reasoning.",
+            "answer": {
+              "flaw_1": {
+                "title": "Reserved and well-known ports are unavailable",
+                "explanation": "Port numbers 0–1023 are well-known/reserved ports typically not used for NAT source port assignment. Additionally, port 0 is not usable. This reduces the practical range to approximately 64,511 ports at best."
+              },
+              "flaw_2": {
+                "title": "ICMP and other non-TCP/UDP protocols cannot use ports",
+                "explanation": "The NAT port scheme works for TCP and UDP, which have port number fields. ICMP does not use ports — NAT must use the ICMP Query ID field as a demultiplexing key instead, and this is a 16-bit field with separate namespace from TCP/UDP ports. More importantly, a connection is defined by the 5-tuple (protocol, src IP, src port, dst IP, dst port). The 65,535 port limit is per destination (IP, port) pair — a host can reuse the same source port number for connections to different destinations. The engineer is wrong to treat 65,535 as a hard ceiling on simultaneous connections without specifying destinations."
+              },
+              "bonus_flaw": {
+                "title": "Simultaneous connections vs simultaneous active translations",
+                "explanation": "NAT tables have finite memory. Even if ports were unlimited, the NAT device hardware/software limits the number of table entries. High-end enterprise NATs support millions of entries; cheap home routers may saturate at tens of thousands."
+              },
+              "common_mistake": "Students accept the port-number-as-ceiling argument without questioning the implicit assumption that each port maps to exactly one connection regardless of destination. The 5-tuple nature of connections is the key overlooked concept.",
+              "deeper_concept": "NAT connection tracking semantics; the 5-tuple definition of a TCP connection and how it multiplies port reuse capacity beyond the naive 16-bit interpretation"
+            }
+          },
+          {
+            "id": "Q19",
+            "number": 19,
+            "type": "edge_case",
+            "topic": "IPv6 Header Design Tradeoffs",
+            "difficulty": "Medium",
+            "prompt": "IPv6 removed the checksum from the IP header, whereas IPv4 included one. A student argues: 'This makes IPv6 less reliable than IPv4 — errors in the IPv6 header will go undetected.' Evaluate this argument. Is the student correct? What does IPv6 rely on instead?",
+            "answer": {
+              "verdict": "The student's conclusion is wrong, but the concern is understandable.",
+              "explanation": "IPv4's header checksum only protected the IP header itself, not the payload. It was also recomputed at every hop (since TTL decrements by 1 each hop, changing the header). This per-hop recomputation added latency and CPU overhead at every router — for large-scale backbone routers processing millions of packets per second, this was significant. IPv6 eliminated the header checksum for two reasons: (1) link-layer protocols like Ethernet already perform CRC on the entire frame (including IP header) at every hop, providing hop-by-hop error detection, and (2) transport-layer checksums (TCP and UDP) cover the payload plus a pseudo-header that includes source and destination IP addresses, providing end-to-end error detection for what matters: the data. The IPv4 header checksum was redundant and expensive. The student is correct that a corrupted IPv6 header with no link-layer error detection might go unnoticed, but in practice the Ethernet CRC at every hop catches virtually all such errors before they propagate.",
+              "common_mistake": "Students assume that removing a checksum is always a degradation in reliability. The question is whether the removed protection was actually providing unique, unreplicated coverage — in IPv4's case, the header checksum was largely redundant.",
+              "deeper_concept": "Layered error detection and the efficiency principle: don't duplicate protection already provided by other layers; IPv6's design philosophy of pushing complexity to endpoints and removing per-hop overhead from the core"
+            }
+          }
+        ]
+      }
+    ],
+    "post_exam_critique": {
+      "strongest_questions": ["Q6", "Q7", "Q13", "Q16", "Q17"],
+      "rationale": "Q6 requires constructing two separate ARP exchanges with correct MAC/IP fields for all 8 frame/packet events. Q7 demands fragmentation arithmetic with MF flag precision and a non-obvious loss scenario. Q13 is a real-world multi-layer failure (DF + ICMP blackholing) that requires understanding PMTUD, firewall policy, and TCP behavior simultaneously. Q16 tests whether students understand the full protocol dependency chain from cold boot — a question that is nearly impossible to answer correctly from memorization alone. Q17 requires students to trace the broadcast storm propagation, articulate the STP cost tradeoff, and explain BPDU-based reconvergence.",
+      "questions_to_strengthen": [
+        {
+          "id": "Q4",
+          "note": "True/False on reassembly location is too close to a definition lookup. A stronger version would present a specific fragmentation scenario where a 'smart' intermediate router attempts reassembly and ask students to predict the failure mode (state exhaustion, out-of-order arrival across paths, increased latency)."
+        },
+        {
+          "id": "Q10",
+          "note": "DHCP mechanics are well-covered but Part C (two servers) is slightly predictable. A harder variant would ask what happens if the DHCP ACK is lost after the Request — does the client have the IP? Does the server think it's assigned? Testing the lease state machine under partial failure is harder."
+        }
+      ],
+      "under_tested_concepts": [
+        "ICMP Redirect (Type 5): when a router knows a better path exists on the same subnet and tells the host directly",
+        "Subnetting the host count formula and the edge case of /31 and /32 prefixes (point-to-point links)",
+        "ECN (Explicit Congestion Notification) vs. tail drop: the difference between proactive and reactive congestion signaling",
+        "Data center multipath load balancing: ECMP and why traditional longest-prefix match cannot exploit multiple equal-cost paths",
+        "OpenFlow rule priority and wildcard conflicts: what happens when two flow table rules match the same packet",
+        "ARP gratuitous requests: why a host ARPs for its own IP after DHCP assignment and how this detects address conflicts",
+        "IPv6 dual-stack vs. tunneling: which mechanism is used when and the additional header overhead cost of tunneling"
+      ]
+    }
+  }
+}

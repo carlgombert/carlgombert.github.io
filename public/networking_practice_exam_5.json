@@ -1,0 +1,933 @@
+{
+  "exam": {
+    "title": "Computer Networking — Practice Exam",
+    "subtitle": "Network Layer Control Plane: Routing Algorithms, BGP, Wireless & Mobility",
+    "pre_exam_analysis": {
+      "highest_priority_topics": [
+        "Dijkstra's algorithm: execution, forwarding table construction, oscillation problem",
+        "Distance Vector: Bellman-Ford, count-to-infinity, split horizon, poisoned reverse and their limits",
+        "LS vs DV: convergence speed, robustness, message complexity, error propagation",
+        "BGP: eBGP vs iBGP, AS-PATH, NEXT-HOP, route selection order, import/export policy",
+        "BGP economic relationships: customer-provider, peering, no-transit policy",
+        "Hot potato routing and why intra-AS cost drives egress point selection",
+        "IEEE 802.11 CSMA/CA: DIFS/SIFS priority, RTS/CTS, binary exponential backoff",
+        "802.11 four-address frame fields and their roles in BSS-to-wired bridging",
+        "5G handover process: step-by-step from trigger to UPF path update",
+        "SDN match-action generalized forwarding vs traditional per-router control",
+        "Hidden terminal problem and why CD is replaced by CA in wireless"
+      ],
+      "common_misconceptions_targeted": [
+        "Thinking split horizon or poisoned reverse fully solves count-to-infinity for 3+ node loops",
+        "Confusing eBGP (between ASes) with iBGP (within an AS)",
+        "Thinking BGP picks routes purely on shortest AS-PATH — policy (local preference) comes first",
+        "Assuming hot potato routing optimizes global end-to-end performance — it only optimizes local AS cost",
+        "Thinking Dijkstra works with distributed/partial information like DV does",
+        "Confusing Address 3 in 802.11 frames with IP — it is the MAC of the router, not IP",
+        "Believing wireless packet loss always means congestion (TCP interprets it that way incorrectly)",
+        "Thinking RTS/CTS eliminates all collisions in 802.11 (it only helps with hidden terminal, data collisions still occur)",
+        "Assuming OSPF uses TCP or UDP as transport (it runs directly over IP)",
+        "Confusing the forwarding table (data plane) with the routing table (control plane output)"
+      ]
+    },
+    "sections": [
+      {
+        "id": "section_1",
+        "title": "True / False",
+        "instructions": "State TRUE or FALSE, then write 2–3 sentences justifying your answer. No credit for the answer alone.",
+        "questions": [
+          {
+            "id": "Q1",
+            "number": 1,
+            "type": "true_false",
+            "topic": "Distance Vector — Poisoned Reverse Completeness",
+            "difficulty": "Hard",
+            "prompt": "Poisoned reverse completely eliminates the count-to-infinity problem in all Distance Vector networks.",
+            "answer": {
+              "verdict": "FALSE",
+              "explanation": "Poisoned reverse solves ping-pong loops between exactly two adjacent nodes by having a node advertise infinity back to the neighbor it learned a route from. However, it fails in topologies involving three or more nodes. A node may still hear a falsely 'good' route from a third node that itself routes back through the original broken link — poisoned reverse has no visibility into multi-hop loops. The count-to-infinity problem is only definitively solved by link-state protocols or by setting a finite maximum metric (like RIP's 16 = infinity).",
+              "common_mistake": "Students learn 'poisoned reverse fixes count-to-infinity' as a fact and stop there, not knowing it is a partial fix with a well-known failure mode.",
+              "deeper_concept": "The fundamental limitation of local-information fixes (split horizon, poisoned reverse) for a network-wide consistency problem"
+            }
+          },
+          {
+            "id": "Q2",
+            "number": 2,
+            "type": "true_false",
+            "topic": "BGP Route Selection — AS-PATH Priority",
+            "difficulty": "Hard",
+            "prompt": "In BGP, a router always prefers the route with the shortest AS-PATH, regardless of other attributes.",
+            "answer": {
+              "verdict": "FALSE",
+              "explanation": "AS-PATH length is only step 4 in the BGP route selection process. Local Preference is evaluated first (step 2) and is controlled by the local administrator — a longer AS-PATH route with a higher local preference will be chosen over a shorter one with lower preference. Customer routes are preferred over peer or provider routes (step 3) before AS-PATH is even considered. AS-PATH is a tiebreaker among routes of equal policy standing, not the primary criterion.",
+              "common_mistake": "Students import the intuition from link-state routing (shortest path wins) into BGP without accounting for the policy-first nature of inter-domain routing.",
+              "deeper_concept": "BGP as a policy protocol first, shortest-path protocol second — the ordered multi-attribute decision process"
+            }
+          },
+          {
+            "id": "Q3",
+            "number": 3,
+            "type": "true_false",
+            "topic": "OSPF Transport",
+            "difficulty": "Medium",
+            "prompt": "OSPF routing messages are encapsulated in UDP datagrams for transport across the network.",
+            "answer": {
+              "verdict": "FALSE",
+              "explanation": "OSPF messages are carried directly over IP — they use their own IP protocol number (89) and bypass both TCP and UDP entirely. This design choice avoids the overhead and complexity of a transport layer for what are essentially short, periodic control messages. It also means OSPF itself must implement its own reliability mechanisms (e.g., LSA acknowledgment) rather than relying on TCP's.",
+              "common_mistake": "Students assume all application or control protocols sit on top of TCP or UDP. OSPF, along with protocols like ICMP and IGMP, runs directly over IP.",
+              "deeper_concept": "Layer flexibility in the IP stack — not all protocols use TCP/UDP; some speak directly to IP"
+            }
+          },
+          {
+            "id": "Q4",
+            "number": 4,
+            "type": "true_false",
+            "topic": "802.11 CSMA/CA vs CSMA/CD",
+            "difficulty": "Medium",
+            "prompt": "WiFi uses CSMA/CD (Collision Detection) instead of CSMA/CA (Collision Avoidance) because detecting collisions is simpler than avoiding them.",
+            "answer": {
+              "verdict": "FALSE",
+              "explanation": "WiFi uses CSMA/CA, and it does so precisely because collision detection is impractical in wireless environments. A wireless transmitter's own signal drowns out any incoming signal it might be trying to receive, making simultaneous transmit-and-listen impossible. Additionally, the hidden terminal problem means a node may cause collisions at the receiver it cannot locally detect. Finally, half-duplex radios (common to save power) physically cannot transmit and receive at the same time. Avoidance is the only viable option.",
+              "common_mistake": "Students think CA is a design choice for performance; it is actually a necessity driven by physical constraints of wireless media.",
+              "deeper_concept": "Why physical layer properties (half-duplex, signal disparity, hidden terminals) force protocol design decisions at the MAC layer"
+            }
+          },
+          {
+            "id": "Q5",
+            "number": 5,
+            "type": "true_false",
+            "topic": "Link State Robustness vs Distance Vector",
+            "difficulty": "Medium",
+            "prompt": "A Distance Vector router that advertises an incorrect (too-low) cost to a destination will only affect its immediate neighbors' routing decisions.",
+            "answer": {
+              "verdict": "FALSE",
+              "explanation": "In Distance Vector routing, each router uses its neighbors' advertised vectors as inputs to compute its own vector, and then advertises its own vector onward. A single router advertising an incorrect path cost causes every downstream router that relies on that route to compute incorrect paths as well — the error propagates transitively across the entire network. This is a fundamental robustness weakness of DV: a single misbehaving or misconfigured router can corrupt routing state network-wide. In Link State, a router can only advertise its own local link costs; a bad advertisement is isolated to one link and each router independently recomputes paths.",
+              "common_mistake": "Underestimating the propagation scope of DV errors because 'it only tells neighbors.' The critical insight is that neighbors tell their neighbors, and so on.",
+              "deeper_concept": "LS vs DV robustness: the difference between advertising local link state (LS) and advertising computed path costs (DV) in error propagation scope"
+            }
+          }
+        ]
+      },
+      {
+        "id": "section_2",
+        "title": "Algorithm Execution Problems",
+        "instructions": "Show all work. Partial credit is awarded for correct methodology.",
+        "questions": [
+          {
+            "id": "Q6",
+            "number": 6,
+            "type": "calculation",
+            "topic": "Dijkstra's Algorithm — Execution and Forwarding Table",
+            "difficulty": "Hard",
+            "scenario": {
+              "description": "Run Dijkstra's algorithm from source node A on the following network.",
+              "nodes": ["A", "B", "C", "D", "E", "F"],
+              "edges": [
+                { "from": "A", "to": "B", "cost": 3 },
+                { "from": "A", "to": "C", "cost": 1 },
+                { "from": "B", "to": "D", "cost": 2 },
+                { "from": "B", "to": "E", "cost": 5 },
+                { "from": "C", "to": "B", "cost": 1 },
+                { "from": "C", "to": "D", "cost": 6 },
+                { "from": "D", "to": "E", "cost": 1 },
+                { "from": "D", "to": "F", "cost": 2 },
+                { "from": "E", "to": "F", "cost": 3 }
+              ]
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "Execute Dijkstra's algorithm. Show the state of N', D(B), D(C), D(D), D(E), D(F), and p(v) after each iteration."
+              },
+              {
+                "label": "B",
+                "prompt": "Construct A's forwarding table. For each destination, specify the next hop and total cost."
+              },
+              {
+                "label": "C",
+                "prompt": "Link A-C's cost suddenly increases from 1 to 8. Without re-running the full algorithm, which destinations in A's forwarding table are definitely affected, and which are definitely unaffected? Explain your reasoning."
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "iterations": [
+                    {
+                      "step": "Init",
+                      "N_prime": ["A"],
+                      "D_B": { "cost": 3, "pred": "A" },
+                      "D_C": { "cost": 1, "pred": "A" },
+                      "D_D": { "cost": "inf", "pred": null },
+                      "D_E": { "cost": "inf", "pred": null },
+                      "D_F": { "cost": "inf", "pred": null }
+                    },
+                    {
+                      "step": 1,
+                      "add_node": "C",
+                      "N_prime": ["A", "C"],
+                      "D_B": {
+                        "cost": 2,
+                        "pred": "C",
+                        "note": "min(3, 1+1=2) = 2"
+                      },
+                      "D_C": { "cost": 1, "pred": "A", "note": "finalized" },
+                      "D_D": { "cost": 7, "pred": "C", "note": "1+6=7" },
+                      "D_E": { "cost": "inf", "pred": null },
+                      "D_F": { "cost": "inf", "pred": null }
+                    },
+                    {
+                      "step": 2,
+                      "add_node": "B",
+                      "N_prime": ["A", "C", "B"],
+                      "D_B": { "cost": 2, "pred": "C", "note": "finalized" },
+                      "D_D": {
+                        "cost": 4,
+                        "pred": "B",
+                        "note": "min(7, 2+2=4) = 4"
+                      },
+                      "D_E": { "cost": 7, "pred": "B", "note": "2+5=7" },
+                      "D_F": { "cost": "inf", "pred": null }
+                    },
+                    {
+                      "step": 3,
+                      "add_node": "D",
+                      "N_prime": ["A", "C", "B", "D"],
+                      "D_D": { "cost": 4, "pred": "B", "note": "finalized" },
+                      "D_E": {
+                        "cost": 5,
+                        "pred": "D",
+                        "note": "min(7, 4+1=5) = 5"
+                      },
+                      "D_F": { "cost": 6, "pred": "D", "note": "4+2=6" }
+                    },
+                    {
+                      "step": 4,
+                      "add_node": "E",
+                      "N_prime": ["A", "C", "B", "D", "E"],
+                      "D_E": { "cost": 5, "pred": "D", "note": "finalized" },
+                      "D_F": {
+                        "cost": 6,
+                        "pred": "D",
+                        "note": "min(6, 5+3=8) = 6, unchanged"
+                      }
+                    },
+                    {
+                      "step": 5,
+                      "add_node": "F",
+                      "N_prime": ["A", "C", "B", "D", "E", "F"],
+                      "D_F": { "cost": 6, "pred": "D", "note": "finalized" }
+                    }
+                  ]
+                },
+                {
+                  "label": "B",
+                  "forwarding_table": [
+                    {
+                      "destination": "B",
+                      "next_hop": "C",
+                      "cost": 2,
+                      "full_path": "A→C→B"
+                    },
+                    {
+                      "destination": "C",
+                      "next_hop": "C",
+                      "cost": 1,
+                      "full_path": "A→C"
+                    },
+                    {
+                      "destination": "D",
+                      "next_hop": "C",
+                      "cost": 4,
+                      "full_path": "A→C→B→D"
+                    },
+                    {
+                      "destination": "E",
+                      "next_hop": "C",
+                      "cost": 5,
+                      "full_path": "A→C→B→D→E"
+                    },
+                    {
+                      "destination": "F",
+                      "next_hop": "C",
+                      "cost": 6,
+                      "full_path": "A→C→B→D→F"
+                    }
+                  ],
+                  "note": "All destinations route via C as first hop because A-C (cost 1) dominates A-B (cost 3)."
+                },
+                {
+                  "label": "C",
+                  "affected_destinations": ["B", "C", "D", "E", "F"],
+                  "unaffected_destinations": [],
+                  "reasoning": "Every destination currently routes through C as the first hop. If the A-C link cost rises to 8, the path A→C alone costs 8 — more than the direct A→B link (cost 3). All routes that previously used A→C as their first hop must be recomputed. In this case, every single destination is potentially affected. C itself may now be best reached via A→B→C (cost 3+1=4 < 8). The entire forwarding table must be recomputed."
+                }
+              ],
+              "common_mistake": "Students often make predecessor errors at step 1, failing to update D(B) from 3 to 2 when C is added (forgetting to check C's neighbors). Also common: listing the full path as the forwarding table entry rather than only the next hop.",
+              "deeper_concept": "Dijkstra builds a shortest-path tree, and forwarding tables install only the first hop — the router has no direct knowledge of the full path beyond its immediate next hop"
+            }
+          },
+          {
+            "id": "Q7",
+            "number": 7,
+            "type": "calculation",
+            "topic": "Distance Vector — Bellman-Ford and Count-to-Infinity",
+            "difficulty": "Hard",
+            "scenario": {
+              "description": "Three nodes X, Y, Z in a line: X—Y—Z. Link costs: X-Y = 2, Y-Z = 3. All nodes have converged distance vectors.",
+              "converged_vectors": {
+                "X": { "to_X": 0, "to_Y": 2, "to_Z": 5 },
+                "Y": { "to_X": 2, "to_Y": 0, "to_Z": 3 },
+                "Z": { "to_X": 5, "to_Y": 3, "to_Z": 0 }
+              },
+              "event": "Link X-Y fails (cost becomes infinity)"
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "After the X-Y link fails, Y updates its table. What does Y believe its cost to X is after its first update, and why is this incorrect?"
+              },
+              {
+                "label": "B",
+                "prompt": "Trace the count-to-infinity loop between Y and Z step-by-step for the first four exchanges. Show the advertised cost at each step."
+              },
+              {
+                "label": "C",
+                "prompt": "How would Poisoned Reverse prevent this specific loop? Show exactly what Z would have been advertising to Y before the failure, and why that prevents Y from choosing the bad route."
+              },
+              {
+                "label": "D",
+                "prompt": "Now add a fourth node W connected only to Z (W-Z cost = 1). Does Poisoned Reverse still prevent count-to-infinity? Why or why not?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "y_belief_after_update": 8,
+                  "workings": "Y's link to X is now infinity. Y applies Bellman-Ford: D_Y(X) = min(c(Y,X) + D_X(X), c(Y,Z) + D_Z(X)) = min(inf+0, 3+5) = 8. Y believes it can reach X via Z at cost 8. This is incorrect because Z's D_Z(X) = 5 was computed through Y itself (Z→Y→X). That path no longer exists since X-Y is broken.",
+                  "why_incorrect": "Z's advertised cost of 5 to X was based on routing through Y. Y routing through Z to reach X creates a loop: Y→Z→Y→X, which is circular and non-terminating."
+                },
+                {
+                  "label": "B",
+                  "exchanges": [
+                    {
+                      "step": 1,
+                      "event": "X-Y fails",
+                      "Y_to_X": "inf (direct)",
+                      "Z_to_X_via_Y": 5,
+                      "Y_computes": "D_Y(X) = 3+5 = 8, advertises 8 to Z"
+                    },
+                    {
+                      "step": 2,
+                      "Z_receives_Y_update": true,
+                      "Z_computes": "D_Z(X) = 3+8 = 11, advertises 11 to Y"
+                    },
+                    {
+                      "step": 3,
+                      "Y_receives_Z_update": true,
+                      "Y_computes": "D_Y(X) = 3+11 = 14, advertises 14 to Z"
+                    },
+                    {
+                      "step": 4,
+                      "Z_receives_Y_update": true,
+                      "Z_computes": "D_Z(X) = 3+14 = 17, advertises 17 to Y"
+                    }
+                  ],
+                  "pattern": "Each round adds 6 (3+3) to both estimates. Continues until both reach infinity (or RIP's metric of 16)."
+                },
+                {
+                  "label": "C",
+                  "poisoned_reverse_prevention": {
+                    "z_advertisement_before_failure": "Z routes to X via Y. With poisoned reverse, Z tells Y: D_Z(X) = infinity (even though its real estimate is 5).",
+                    "effect_after_failure": "When X-Y breaks and Y looks for an alternate route to X, Y checks: c(Y,Z) + D_Z(X) = 3 + infinity = infinity. Y correctly concludes there is no path to X and immediately sets D_Y(X) = infinity. No loop forms.",
+                    "mechanism": "Poisoned reverse prevents Y from 'borrowing back' a route that Y itself provided to Z. Z is explicitly telling Y 'don't count on me to reach X — I only know X through you.'"
+                  }
+                },
+                {
+                  "label": "D",
+                  "poisoned_reverse_works": false,
+                  "explanation": "With node W (W-Z cost 1, and W knows X via W→Z→Y→X at cost 1+3+2=6), Z now has a second path to X through W (cost 1+6=7, initially). When X-Y fails: Z advertises infinity to Y (poisoned reverse). But Y can also check W's route. If W advertises D_W(X) = 7 to Y (through Z→Y, but W's path W→Z→Y is now broken too — however W may not know this yet). In a three-node loop involving Y, Z, and W, poisoned reverse on any single link does not prevent loops that form through the third node. Each pair uses poisoned reverse locally but the third node sees 'good' routes through the others. This is the documented limitation: poisoned reverse only prevents 2-node loops."
+                }
+              ],
+              "common_mistake": "Students apply the Bellman-Ford update correctly but forget that the values being used (D_Z(X)=5) were computed under a now-invalid assumption. The error is conceptual: using stale route information from a neighbor whose own path depends on you.",
+              "deeper_concept": "The information dependency cycle in DV routing: why locally rational decisions produce globally inconsistent routing state"
+            }
+          }
+        ]
+      },
+      {
+        "id": "section_3",
+        "title": "Short Answer / Conceptual",
+        "instructions": null,
+        "questions": [
+          {
+            "id": "Q8",
+            "number": 8,
+            "type": "short_answer",
+            "topic": "BGP eBGP vs iBGP and Route Propagation",
+            "difficulty": "Hard",
+            "scenario": "AS1 has three internal routers: R1 (border, connects to AS2 via eBGP), R2 (internal), and R3 (border, connects to AS3 via eBGP). R1 learns a route to prefix 200.10.0.0/16 from AS2.",
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "How does R3 learn about the prefix 200.10.0.0/16? Name the specific BGP session type used and describe the path the advertisement takes."
+              },
+              {
+                "label": "B",
+                "prompt": "R3 wants to advertise this prefix to AS3. What does R3 set as the NEXT-HOP attribute, and why is this different from what R1 received?"
+              },
+              {
+                "label": "C",
+                "prompt": "AS1 is a customer of both AS2 and AS3. AS2 and AS3 are peers of each other. Should R3 advertise the prefix 200.10.0.0/16 (learned from AS2) to AS3? Justify using BGP export policy rules."
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "mechanism": "iBGP (Internal BGP)",
+                  "path": "R1 learns the prefix from AS2 via eBGP. R1 then propagates the route to all other internal routers in AS1 — including R2 and R3 — using iBGP sessions. iBGP sessions form a logical full mesh within the AS (or use route reflectors). R3 receives the advertisement from R1 over their iBGP session."
+                },
+                {
+                  "label": "B",
+                  "next_hop": "R1's interface IP facing AS2 (the eBGP peering address)",
+                  "explanation": "When R1 received the route from AS2, the NEXT-HOP was set to R1's own border interface by AS2. When R1 propagates this via iBGP to R3, the NEXT-HOP attribute is NOT changed — it remains R1's border interface. This tells R3 'to reach this prefix, get the packet to R1 first.' R3 then uses its intra-AS routing (e.g., OSPF) to find the best path to R1. When R3 advertises to AS3 via eBGP, R3 sets NEXT-HOP to its own border interface facing AS3, replacing it."
+                },
+                {
+                  "label": "C",
+                  "should_advertise": "YES",
+                  "justification": "AS1 is a customer of both AS2 and AS3. The prefix 200.10.0.0/16 was learned from AS2 (a provider). BGP export policy: to a provider or peer, advertise ONLY your own routes and your customers' routes. However, AS1 is a customer of AS3 — meaning AS3 is AS1's provider. AS1 should advertise this route to AS3 so that AS3 can route traffic destined for 200.10.0.0/16 through AS1 to AS2. This is legitimate: AS1 is providing reachability to a prefix accessible through its network. Note: this makes AS1 a transit between AS2 and AS3, which AS1 may or may not want depending on its own policy — if AS1 does NOT want to be transit, it should not advertise this route to AS3."
+                }
+              ],
+              "common_mistake": "Students confuse eBGP and iBGP direction. eBGP crosses AS boundaries; iBGP distributes inter-AS learned routes internally. Also, many students think NEXT-HOP is always updated at each hop — it is preserved across iBGP and only changed at eBGP boundaries.",
+              "deeper_concept": "The interplay of eBGP, iBGP, and intra-AS routing (OSPF/hot potato) to route a packet from ingress to egress across an AS"
+            }
+          },
+          {
+            "id": "Q9",
+            "number": 9,
+            "type": "short_answer",
+            "topic": "Hot Potato Routing",
+            "difficulty": "Medium",
+            "scenario": "AS1 has two border routers: R-West (OSPF cost 2 to reach from the source) and R-East (OSPF cost 9 to reach from the source). Both R-West and R-East have eBGP routes to prefix 10.5.0.0/16 with identical AS-PATH length and local preference.",
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "Which egress router does AS1 choose using hot potato routing, and why?"
+              },
+              {
+                "label": "B",
+                "prompt": "A network engineer argues: 'Hot potato routing is selfish and bad for the Internet.' Is this technically accurate? What does hot potato optimize for, and what does it ignore?"
+              },
+              {
+                "label": "C",
+                "prompt": "Suppose R-West's path to 10.5.0.0/16 traverses 3 additional AS hops after leaving AS1, while R-East's path takes only 1 additional AS hop. Hot potato still selects R-West. What does this reveal about the protocol's design priority?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "choice": "R-West",
+                  "reasoning": "Hot potato routing selects the egress router with the lowest intra-AS cost (OSPF cost) from the ingress point. R-West has OSPF cost 2 vs R-East's cost 9. Since all other BGP attributes (local preference, AS-PATH) are equal, the tiebreaker is 'get the packet out of my AS as cheaply as possible.' R-West wins."
+                },
+                {
+                  "label": "B",
+                  "technically_accurate": "partially",
+                  "optimizes_for": "Minimizing the resource consumption (links, routers) within the local AS for carrying transit traffic.",
+                  "ignores": "Total end-to-end path quality, inter-AS delay, and the cost imposed on downstream ASes. Hot potato shifts the burden of carrying the packet to the next AS as early as possible.",
+                  "assessment": "The 'selfish' characterization is accurate in that hot potato benefits the local AS at the potential expense of end-to-end performance. It is a rational economic decision — AS1 doesn't pay for links in AS2 or AS3, so why use expensive internal links to exit via a 'better' egress point? The Internet's decentralized design allows each AS to make locally optimal decisions."
+                },
+                {
+                  "label": "C",
+                  "insight": "BGP's design explicitly separates intra-AS cost optimization (handled by hot potato + IGP) from inter-AS path optimization (handled by AS-PATH, local preference). Once all policy-level BGP attributes are equal, the protocol uses intra-AS cost as the final tiebreaker — reflecting that AS1 only controls and pays for its own infrastructure. The additional 2 AS hops via R-West are AS2's and AS3's problem to handle efficiently, not AS1's. This reveals that inter-domain routing is fundamentally economic and administrative, not performance-optimal."
+                }
+              ],
+              "common_mistake": "Students think hot potato is a performance optimization. It is a cost-minimization strategy for the local AS. Performance for the end user is a side effect at best.",
+              "deeper_concept": "The economic basis of inter-domain routing: why each AS acts as an independent rational agent rather than a cooperative participant in global optimization"
+            }
+          },
+          {
+            "id": "Q10",
+            "number": 10,
+            "type": "short_answer",
+            "topic": "802.11 Frame Addressing — Four Address Fields",
+            "difficulty": "Hard",
+            "scenario": "A wireless laptop (MAC: AA:AA) associated with AP (MAC: BB:BB) sends an HTTP request to a web server. The router on the wired LAN has MAC CC:CC. The web server has MAC DD:DD and is on a different subnet reachable through the router.",
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "Fill in all four address fields (Addr1–Addr4) for the 802.11 frame transmitted from the laptop to the AP. Also specify the To-AP and From-AP flag values."
+              },
+              {
+                "label": "B",
+                "prompt": "The AP converts this to an Ethernet (802.3) frame and forwards it to the router. What are the Ethernet frame's source and destination MAC addresses?"
+              },
+              {
+                "label": "C",
+                "prompt": "A student claims: 'The IP destination address changes as the frame crosses from wireless to Ethernet.' Is this correct? What does and does not change at each hop?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "addr1": {
+                    "value": "BB:BB",
+                    "role": "Receiver — the AP that will receive this wireless frame"
+                  },
+                  "addr2": {
+                    "value": "AA:AA",
+                    "role": "Transmitter — the laptop sending the frame"
+                  },
+                  "addr3": {
+                    "value": "CC:CC",
+                    "role": "Final destination MAC on the wired side — the router. This lets the AP know where to forward the Ethernet frame after bridging."
+                  },
+                  "addr4": {
+                    "value": "not used",
+                    "role": "Only used in ad-hoc (IBSS) forwarding mode"
+                  },
+                  "to_ap_flag": 1,
+                  "from_ap_flag": 0
+                },
+                {
+                  "label": "B",
+                  "ethernet_source_mac": "AA:AA",
+                  "ethernet_dest_mac": "CC:CC",
+                  "note": "The AP strips the 802.11 header and constructs an 802.3 frame. Source = original wireless sender (laptop). Destination = Addr3 from the 802.11 frame (the router). The AP acts as a transparent bridge — it does not insert its own MAC as source."
+                },
+                {
+                  "label": "C",
+                  "student_correct": false,
+                  "what_changes": "Only the link-layer (MAC) addresses change at each hop. As the frame crosses from wireless (802.11) to Ethernet (802.3), the encapsulation changes. As the packet moves from router to router across subnets, the source and destination MAC addresses in the Ethernet frames are updated at each hop to reflect the next-hop router's MAC.",
+                  "what_does_not_change": "The IP source and destination addresses (laptop's IP → web server's IP) remain unchanged end-to-end through all these link-layer hops. IP addresses identify endpoints; MAC addresses identify the immediate next-hop link-layer peer.",
+                  "key_principle": "Network-layer (IP) addresses are end-to-end; link-layer (MAC) addresses are hop-by-hop."
+                }
+              ],
+              "common_mistake": "Students often put the router's MAC (CC:CC) in Addr1, thinking the frame is 'going to the router.' The frame's immediate receiver is the AP (BB:BB); the router is the intended wired-side destination encoded in Addr3.",
+              "deeper_concept": "The 802.11 three-address frame as a bridging mechanism: Addr1/2 identify the wireless hop; Addr3 carries the wired-side endpoint to enable seamless BSS-to-LAN bridging"
+            }
+          },
+          {
+            "id": "Q11",
+            "number": 11,
+            "type": "short_answer",
+            "topic": "SDN Match-Action vs Traditional Forwarding",
+            "difficulty": "Medium",
+            "scenario": "An SDN controller manages a network carrying both VoIP (UDP) and bulk file transfer (TCP) traffic between the same source and destination IP pair.",
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "Describe a match-action rule the SDN controller could install to route VoIP traffic on a low-latency path and TCP traffic on a high-bandwidth path, even though both flows have the same source and destination IP."
+              },
+              {
+                "label": "B",
+                "prompt": "Could a traditional per-router IP forwarding table accomplish the same differentiation? Why or why not?"
+              },
+              {
+                "label": "C",
+                "prompt": "What is the key architectural difference between SDN routers and traditional routers that makes this possible? What is the tradeoff?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "rules": [
+                    {
+                      "match": "Protocol = UDP AND Src_IP = X AND Dst_IP = Y",
+                      "action": "Forward to Port 3 (low-latency path)"
+                    },
+                    {
+                      "match": "Protocol = TCP AND Src_IP = X AND Dst_IP = Y",
+                      "action": "Forward to Port 7 (high-bandwidth path)"
+                    }
+                  ],
+                  "note": "SDN match fields can include transport-layer protocol type (TCP/UDP), port numbers, and any header field, enabling per-flow forwarding decisions."
+                },
+                {
+                  "label": "B",
+                  "can_traditional_do_this": false,
+                  "explanation": "Traditional IP forwarding uses only the destination IP address (longest prefix match). All packets to destination Y — regardless of whether they are UDP or TCP — follow the same forwarding path. There is no mechanism in standard IP forwarding to differentiate based on transport protocol or port number. Quality of Service (QoS) mechanisms like DiffServ can prioritize traffic, but they do not change the path taken — only the queuing behavior at each hop."
+                },
+                {
+                  "label": "C",
+                  "key_difference": "In SDN, the control plane (route computation and policy) is separated from the data plane (packet forwarding) and centralized in a remote controller. Traditional routers tightly couple both functions in every device. SDN routers implement generalized match-action forwarding — they don't independently compute routes; they execute rules installed by the controller.",
+                  "tradeoff": "SDN gains tremendous flexibility and programmability (policy enforcement, traffic engineering, rapid reconfiguration) at the cost of a single point of failure (the controller), scalability challenges (the controller must handle all flow decisions), and potential latency for new flows that require controller consultation."
+                }
+              ],
+              "common_mistake": "Students describe SDN as 'just centralized routing' without recognizing that the fundamental difference is generalized match-action on any header field, not just destination IP. SDN decouples what to match from what action to take.",
+              "deeper_concept": "The data-plane / control-plane separation in SDN and why generalized forwarding enables policy that destination-only IP forwarding structurally cannot"
+            }
+          }
+        ]
+      },
+      {
+        "id": "section_4",
+        "title": "Scenario / Troubleshooting",
+        "instructions": null,
+        "questions": [
+          {
+            "id": "Q12",
+            "number": 12,
+            "type": "troubleshooting",
+            "topic": "802.11 CSMA/CA — Hidden Terminal and RTS/CTS",
+            "difficulty": "Hard",
+            "scenario": {
+              "description": "Three wireless stations: Node A, Node B (the AP), and Node C. A and C are out of range of each other but both in range of B. A is transmitting a large file to B. C wants to transmit to B.",
+              "topology": "A <---> B <---> C  (A and C cannot hear each other)"
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "Without RTS/CTS: C senses the channel, hears nothing (because it cannot hear A's transmission), and begins transmitting. What happens at B, and why can't standard CSMA/CD solve this?"
+              },
+              {
+                "label": "B",
+                "prompt": "With RTS/CTS enabled: Trace the full exchange from A's perspective, including what C observes and does during the exchange."
+              },
+              {
+                "label": "C",
+                "prompt": "RTS/CTS adds overhead. Under what conditions would a network engineer choose to disable it, and when would they choose to enable it? Give a concrete scenario for each."
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "what_happens": "A collision occurs at B. Both A's and C's signals arrive simultaneously at B and interfere, corrupting both transmissions. Neither A nor C receive an ACK from B. Both eventually time out and retransmit using binary exponential backoff.",
+                  "why_csma_cd_fails": "CSMA/CD requires a node to listen while it transmits and stop if it detects a collision. C cannot hear A's signal — the collision happens at B, not at C. C transmits, detects no collision at its own location, and has no idea it is causing a problem at B. Additionally, 802.11 radios are half-duplex, making simultaneous transmit-and-receive impossible regardless."
+                },
+                {
+                  "label": "B",
+                  "rts_cts_sequence": [
+                    {
+                      "step": 1,
+                      "actor": "A",
+                      "action": "Senses channel idle for DIFS, sends RTS frame to B. RTS contains duration field indicating how long A needs the channel."
+                    },
+                    {
+                      "step": 2,
+                      "actor": "B",
+                      "action": "Receives RTS. After SIFS (shorter than DIFS, so no one else can cut in), B broadcasts CTS frame. CTS is heard by everyone in B's range — including C."
+                    },
+                    {
+                      "step": 3,
+                      "actor": "C",
+                      "action": "Hears the CTS from B. Reads the duration field. Updates its NAV (Network Allocation Vector) timer — C now knows to stay silent for that duration. C defers transmission."
+                    },
+                    {
+                      "step": 4,
+                      "actor": "A",
+                      "action": "Receives CTS from B. After SIFS, A transmits its data frame."
+                    },
+                    {
+                      "step": 5,
+                      "actor": "B",
+                      "action": "Receives data frame. After SIFS, B sends ACK to A."
+                    },
+                    {
+                      "step": 6,
+                      "actor": "C",
+                      "action": "NAV timer expires. C senses channel, waits DIFS, then begins its own RTS/data exchange."
+                    }
+                  ],
+                  "key_insight": "CTS is the crucial step — B broadcasts it to all nodes in its range, effectively 'warning' C (who couldn't hear A's RTS) that the channel is reserved."
+                },
+                {
+                  "label": "C",
+                  "disable_rts_cts": {
+                    "condition": "Small frames, few competing nodes, no hidden terminal problem (e.g., all nodes in mutual range).",
+                    "scenario": "A home WiFi network with a single AP and 3 devices in the same room. RTS/CTS adds 2 extra frames per data frame, reducing throughput for small HTTP requests where the RTS/CTS overhead is comparable to the data itself."
+                  },
+                  "enable_rts_cts": {
+                    "condition": "Large frames, dense environment with many competing nodes, or confirmed hidden terminal problem.",
+                    "scenario": "A stadium WiFi deployment with hundreds of devices connected to APs with many potential hidden terminal pairs. Large video streaming payloads justify the RTS/CTS overhead because a single collision wastes far more channel time than the reservation frames cost."
+                  }
+                }
+              ],
+              "common_mistake": "Students describe RTS/CTS as 'preventing all collisions.' RTS frames themselves can collide if two nodes send them simultaneously. RTS/CTS prevents data frame collisions — which are much more expensive — not control frame collisions.",
+              "deeper_concept": "NAV as a virtual carrier sense mechanism: extending collision avoidance beyond the range of the transmitter by leveraging the AP's broadcast reach"
+            }
+          },
+          {
+            "id": "Q13",
+            "number": 13,
+            "type": "troubleshooting",
+            "topic": "5G Handover — Step-by-Step and Failure Analysis",
+            "difficulty": "Hard",
+            "scenario": {
+              "description": "A user on a video call is moving from coverage area of gNodeB-1 (source BS) to gNodeB-2 (target BS). The handover process begins.",
+              "concern": "The network engineer notices that during handover, a few video packets are delayed but none are lost."
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "Explain specifically which step in the 5G handover process is responsible for ensuring those packets are not lost, and how it works."
+              },
+              {
+                "label": "B",
+                "prompt": "At what point does the user's data path actually switch from gNodeB-1 to gNodeB-2? Name the network function that implements this switch and what instruction it receives."
+              },
+              {
+                "label": "C",
+                "prompt": "The TCP layer on the user's device interprets the increased delay during handover as a sign of network congestion and reduces its congestion window. Is this reaction appropriate? What is the underlying problem and how might it be addressed?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "step": "Forwarding / Buffering at Source BS (Step 5 in the handover sequence)",
+                  "explanation": "After the UE switches to gNodeB-2, gNodeB-1 does not immediately drop packets still in its buffer. Instead, gNodeB-1 forwards any buffered datagrams (packets that arrived at gNodeB-1 after the handover decision but before the path update completes) to gNodeB-2 via an X2 or N2 interface tunnel. gNodeB-2 then delivers these buffered packets to the UE. This forwarding window ensures in-flight packets are not lost during the brief period when the network path hasn't fully updated yet."
+                },
+                {
+                  "label": "B",
+                  "switching_point": "After gNodeB-2 informs the AMF and SMF of the new attachment point (Step 6), the SMF instructs the UPF (User Plane Function) to update the GTP tunnel endpoint from gNodeB-1 to gNodeB-2.",
+                  "function": "UPF (User Plane Function)",
+                  "instruction": "SMF sends a Tunnel Endpoint Update message to the UPF, redirecting the user's data plane tunnel to gNodeB-2's IP/TEID. From this point, all new downlink packets for the UE flow through gNodeB-2 directly."
+                },
+                {
+                  "label": "C",
+                  "appropriate": false,
+                  "problem": "TCP's congestion control interprets all packet delay and loss as network congestion. However, the delay during 5G handover is caused by link-layer retransmissions, buffering during base station switch, and path update latency — not network congestion in the router sense. Reducing cwnd is the wrong response: it throttles a connection that has perfectly good end-to-end capacity.",
+                  "solutions": [
+                    "Proxy-based approaches: a network-side proxy acknowledges packets to the sender before they reach the UE, shielding TCP from handover-induced delays.",
+                    "Split-TCP: maintain separate TCP connections for the wireless and wired segments, handling wireless losses/delays at the RLC layer without propagating them to the end-to-end TCP connection.",
+                    "ECN (Explicit Congestion Notification): signal real congestion distinctly from wireless delay, though this requires router support.",
+                    "5G RLC ARQ: the Radio Link Control layer handles local retransmissions transparently, masking wireless errors from the TCP layer — reducing (but not eliminating) the problem."
+                  ]
+                }
+              ],
+              "common_mistake": "Students describe the handover as instantaneous. The forwarding step and UPF path update take time, during which packets could be duplicated or delayed — the design explicitly handles this with buffering and forwarding at the source BS.",
+              "deeper_concept": "The mismatch between wireless mobility events and TCP's end-to-end loss/delay interpretation — a fundamental protocol layering problem in mobile networks"
+            }
+          },
+          {
+            "id": "Q14",
+            "number": 14,
+            "type": "troubleshooting",
+            "topic": "BGP Policy — No-Transit and Dual-Homed Customer",
+            "difficulty": "Hard",
+            "scenario": {
+              "description": "Company CorpNet is a customer of both ISP-Alpha and ISP-Beta (dual-homed). ISP-Alpha and ISP-Beta are peers of each other. CorpNet's network engineer notices that traffic from ISP-Alpha's other customers is being routed through CorpNet to reach ISP-Beta.",
+              "problem": "CorpNet is inadvertently acting as a transit provider."
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "Explain exactly how this situation arose — what did CorpNet's border routers advertise to cause this?"
+              },
+              {
+                "label": "B",
+                "prompt": "Write the BGP export policy rule (in plain English) that CorpNet should implement to fix this, and describe what it prevents."
+              },
+              {
+                "label": "C",
+                "prompt": "After implementing the fix, a CorpNet employee complains: 'Our Internet is slower now because we only use one ISP at a time.' Is this accurate? What does the fix actually change about traffic routing?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "cause": "CorpNet's border router connected to ISP-Alpha learned routes to ISP-Beta's prefixes (via iBGP or directly). CorpNet then advertised these routes to ISP-Alpha with CorpNet's AS in the AS-PATH. ISP-Alpha's routers saw CorpNet as a valid transit path to ISP-Beta's prefixes (shorter or equal AS-PATH to peering with ISP-Beta directly in some cases). ISP-Alpha began forwarding traffic through CorpNet to reach ISP-Beta. CorpNet should have only advertised its own prefixes to ISP-Alpha, not routes learned from ISP-Beta."
+                },
+                {
+                  "label": "B",
+                  "policy_rule": "To ISP-Alpha: advertise ONLY CorpNet's own prefixes (the IP ranges assigned to CorpNet). Do NOT advertise routes learned from ISP-Beta or any other upstream. Apply the same rule symmetrically to ISP-Beta.",
+                  "what_it_prevents": "Prevents CorpNet from appearing as a transit path in ISP-Alpha's routing table. ISP-Alpha will no longer route external traffic through CorpNet to reach ISP-Beta or any other destination. CorpNet's bandwidth is no longer consumed by other organizations' traffic."
+                },
+                {
+                  "label": "C",
+                  "employee_accurate": false,
+                  "explanation": "The fix only changes what routes CorpNet advertises to its upstream ISPs — it does not change how CorpNet routes its own outbound traffic. CorpNet can still use both ISP-Alpha and ISP-Beta simultaneously for its own traffic (load balancing via local preference or traffic engineering). Inbound traffic from the Internet may shift somewhat depending on which ISP announces CorpNet's prefixes, but CorpNet's own throughput and connectivity are unaffected. The policy change only stops CorpNet from being a free transit provider for others."
+                }
+              ],
+              "common_mistake": "Students conflate 'what routes CorpNet accepts' with 'what routes CorpNet advertises.' The transit problem is caused entirely by misconfigured export policy — CorpNet was advertising too many routes outward, not accepting too many inward.",
+              "deeper_concept": "BGP export policy as the primary tool for enforcing economic routing relationships — the no-transit rule is a business requirement, not just a performance preference"
+            }
+          }
+        ]
+      },
+      {
+        "id": "section_5",
+        "title": "Synthesis / Edge Cases",
+        "instructions": null,
+        "questions": [
+          {
+            "id": "Q15",
+            "number": 15,
+            "type": "short_answer",
+            "topic": "LS Oscillation and Load-Sensitive Routing",
+            "difficulty": "Hard",
+            "scenario": "A network uses OSPF with link costs set dynamically based on current traffic load (higher load = higher cost). The network engineer observes that traffic keeps shifting between two parallel paths every few seconds, with neither path ever staying stable.",
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "Explain the oscillation mechanism in detail. What causes traffic to shift, and why does it shift back immediately after?"
+              },
+              {
+                "label": "B",
+                "prompt": "The engineer proposes two fixes: (1) Set all link costs to static values based on bandwidth only, or (2) Add a random delay before each router recomputes its routes. Analyze the tradeoff each fix makes."
+              },
+              {
+                "label": "C",
+                "prompt": "Is this oscillation problem unique to Link State protocols, or would Distance Vector with load-sensitive costs have the same issue? Explain."
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "mechanism": "Path A currently carries all traffic → Path A becomes congested → its cost rises. Dijkstra recomputes: Path B is now cheaper. All routers shift all traffic to Path B. Path B becomes congested → its cost rises. Dijkstra recomputes again: Path A is now cheaper. All traffic shifts back. The oscillation is caused by the combination of: (1) all routers having the same global topology view and using the same algorithm, so they all make the same shift simultaneously, and (2) costs depending on load, so the 'winning' path immediately becomes the 'losing' path as soon as it wins."
+                },
+                {
+                  "label": "B",
+                  "fixes": [
+                    {
+                      "fix": "Static costs based on bandwidth",
+                      "tradeoff": "Eliminates oscillation entirely because costs never change with load. Simple and stable. However, the network cannot adapt to congestion — a congested link will keep receiving traffic even if an alternative path is available. Performance degrades gracefully but suboptimally under load."
+                    },
+                    {
+                      "fix": "Random delay before recomputation",
+                      "tradeoff": "Reduces synchronization — routers don't all shift simultaneously, so load shifts are staggered and the 'all-or-nothing' swing is dampened. Traffic spreads more naturally across paths. However, routes may temporarily be suboptimal during the delay period, and oscillation may still occur at a slower frequency. This is a pragmatic middle ground."
+                    }
+                  ]
+                },
+                {
+                  "label": "C",
+                  "unique_to_ls": false,
+                  "explanation": "Distance Vector with load-sensitive costs would exhibit the same oscillation problem, but potentially worse due to slower convergence. The oscillation is not caused by the algorithm type but by the feedback loop between traffic load and routing decisions. Any protocol that updates routes in response to changing load creates the same instability. DV would additionally suffer from count-to-infinity artifacts during the oscillation period. The core issue is using a reactive metric (load) in a routing system that responds to that metric by moving all traffic — a classic feedback loop instability problem."
+                }
+              ],
+              "common_mistake": "Students blame the Link State protocol specifically for oscillation without recognizing that any load-sensitive dynamic routing protocol is susceptible. The problem is in the metric design, not the algorithm.",
+              "deeper_concept": "The tension between adaptive routing (responding to real conditions) and routing stability — and why static metrics remain the dominant choice in production OSPF deployments"
+            }
+          },
+          {
+            "id": "Q16",
+            "number": 16,
+            "type": "short_answer",
+            "topic": "5G DRX Power vs Latency Tradeoff + TCP Impact",
+            "difficulty": "Hard",
+            "scenario": "A mobile gaming app requires sub-20ms response times. The user's 5G device is configured with a Long DRX cycle of 320ms to maximize battery life.",
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "Explain why this DRX configuration is incompatible with the app's latency requirement, tracing the path of an incoming game packet from the base station to the application."
+              },
+              {
+                "label": "B",
+                "prompt": "The device transitions from Active State → Short DRX → Long DRX during a brief pause in gameplay. A new game event triggers an incoming packet from the server 200ms into the Long DRX cycle. What happens to the packet, and how does this interact with TCP's behavior?"
+              },
+              {
+                "label": "C",
+                "prompt": "Propose a DRX configuration strategy that balances battery life with the app's latency requirement. What parameter would you adjust and why?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "incompatibility": "With a 320ms Long DRX cycle, the device's radio wakes up only once every 320ms to check for incoming data. An incoming game packet arriving at the base station when the UE is asleep must be buffered at the gNodeB. The packet sits in the BS buffer for up to 320ms until the next DRX wake-up. The base station then signals the UE to wake its radio, the UE performs receive synchronization, and the packet is delivered — total added latency can exceed 320ms from the buffer alone, far exceeding the 20ms requirement. This is entirely before any application processing or TCP acknowledgment."
+                },
+                {
+                  "label": "B",
+                  "what_happens": "The game server's packet arrives at the gNodeB 200ms into the 320ms Long DRX cycle. The packet is buffered at the gNodeB for approximately 120ms until the UE's next scheduled wake-up. The UE wakes, receives the packet, and delivers it to the TCP layer. Total delay: ~120ms buffer wait + radio sync time ≈ 130–150ms for this single packet.",
+                  "tcp_interaction": "TCP interprets the 130–150ms delay spike as either congestion or potential loss (if the delay exceeds the retransmission timer). If the timer fires, TCP retransmits — adding another RTT of delay and wasting bandwidth on a duplicate. TCP also reduces cwnd in response to the perceived congestion signal, throttling the connection just when the game needs high bandwidth for the burst of game state updates. The wireless sleep cycle is invisible to TCP, which has no mechanism to distinguish 'radio sleeping' from 'network congested.'"
+                },
+                {
+                  "label": "C",
+                  "strategy": "Use Short DRX cycle (e.g., 10–20ms) instead of Long DRX, or configure the Inactivity Timer to be very short (e.g., 5ms) so the device enters the Short DRX cycle quickly but wakes frequently enough to meet latency requirements.",
+                  "parameter": "Short DRX cycle duration (target: ≤ 20ms to meet app requirement)",
+                  "rationale": "Short DRX provides periodic wake-ups at intervals shorter than the latency requirement. A 10ms Short DRX cycle means maximum wake-up delay is 10ms — within the 20ms budget. Battery savings are reduced compared to Long DRX but significantly better than Active State. An app-aware DRX configuration (signaled by the gNodeB based on QoS requirements for the gaming traffic QoS flow) would allow the network to keep the UE in Short DRX while the game is active and transition to Long DRX only during confirmed idle periods."
+                }
+              ],
+              "common_mistake": "Students describe DRX as only a receiver-side problem without connecting it to TCP's congestion response. The key insight is that TCP's end-to-end model is blind to link-layer sleep states, so wireless power management creates ghost congestion signals.",
+              "deeper_concept": "Cross-layer interaction: wireless MAC-layer power management creating application-layer and transport-layer performance anomalies that single-layer analysis cannot diagnose"
+            }
+          },
+          {
+            "id": "Q17",
+            "number": 17,
+            "type": "short_answer",
+            "topic": "Why Separate Intra-AS and Inter-AS Routing?",
+            "difficulty": "Medium",
+            "scenario": "A student proposes: 'The Internet would be simpler and faster if we used a single global routing protocol — just run OSPF everywhere and let it compute globally optimal paths for all traffic.'",
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "Give three distinct technical or administrative reasons why this proposal is unworkable at Internet scale."
+              },
+              {
+                "label": "B",
+                "prompt": "The student refines their proposal: 'Fine, keep BGP for inter-domain routing, but remove the distinction between eBGP and iBGP — just run one BGP session type everywhere.' What breaks?"
+              },
+              {
+                "label": "C",
+                "prompt": "The current two-level hierarchy (IGP within AS, BGP between AS) introduces the hot-potato routing inefficiency. Why does the Internet tolerate this inefficiency rather than designing a globally optimal system?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "reasons": [
+                    {
+                      "reason": "Scalability",
+                      "explanation": "OSPF requires every router to maintain a complete link-state database of the entire network and run Dijkstra's algorithm. With hundreds of thousands of routers on the global Internet, memory and CPU requirements would be astronomical. OSPF's O(n²) message complexity would generate unmanageable flood traffic."
+                    },
+                    {
+                      "reason": "Policy",
+                      "explanation": "OSPF optimizes purely on cost metrics (bandwidth, delay). Inter-domain routing requires policy enforcement — an ISP will never allow its routing protocol to advertise routes through a competitor's network just because it's shorter. Policy decisions like 'no transit for non-customers' cannot be expressed in OSPF's metric-based model."
+                    },
+                    {
+                      "reason": "Administrative autonomy",
+                      "explanation": "Each AS is independently operated. ISPs will not share internal topology with competitors or allow external parties to compute paths through their networks. A global OSPF would require every AS to share complete link-state information with the entire Internet — a non-starter for competitive, security, and confidentiality reasons."
+                    }
+                  ]
+                },
+                {
+                  "label": "B",
+                  "what_breaks": "The iBGP full-mesh (or route reflector) within an AS is necessary because BGP has a loop-prevention rule: a BGP route learned via iBGP must NOT be re-advertised to another iBGP peer. This prevents routes from being bounced around inside an AS infinitely. If you collapse eBGP and iBGP into one type, routers within an AS would either (a) not propagate inter-AS routes internally (leaving internal routers with no knowledge of external destinations) or (b) re-advertise iBGP routes to other iBGP peers, creating routing loops. The eBGP/iBGP distinction exists precisely to implement this loop-prevention rule correctly across the AS boundary.",
+                  "additional_issue": "eBGP sessions typically use TTL=1 (routers must be directly connected) as a security measure. iBGP sessions use multi-hop. Collapsing them would require either relaxing the security constraint or breaking multi-hop internal sessions."
+                },
+                {
+                  "label": "C",
+                  "explanation": "Global optimization requires global coordination — every AS would need to share complete traffic and cost information and agree on a single objective function. This is infeasible because: (1) ASes are competitors and will not share internal cost/traffic data, (2) 'optimal' means different things to different parties (lowest cost? lowest latency? lowest congestion?), (3) global optimization problems of this scale are computationally intractable in real time, and (4) a globally optimal system would require a centralized authority that no AS would accept. The Internet is an economic and political system as much as a technical one. Hot potato inefficiency is the price of decentralized, autonomous operation — and in practice, the inefficiency is often small because ISPs colocate at Internet exchange points (IXPs) near each other."
+                }
+              ],
+              "common_mistake": "Students give 'scalability' as the only reason for the two-level hierarchy. Policy and administrative autonomy are equally important and are actually the primary historical reasons BGP was designed the way it was.",
+              "deeper_concept": "The Internet routing architecture as a solution to a multi-stakeholder coordination problem, not purely a technical optimization problem"
+            }
+          }
+        ]
+      }
+    ],
+    "post_exam_critique": {
+      "strongest_questions": ["Q6", "Q7", "Q10", "Q14", "Q16"],
+      "rationale": "Q6 requires full Dijkstra execution plus perturbation analysis. Q7 traces count-to-infinity step-by-step and probes poisoned reverse's limits. Q10 demands precise 802.11 four-address frame construction with bridging semantics. Q14 requires diagnosing a real-world BGP misconfiguration. Q16 cross-layers wireless DRX power management with TCP congestion behavior.",
+      "questions_to_strengthen": [
+        {
+          "id": "Q9",
+          "note": "Hot potato routing is conceptually well-covered but Part A could be stronger with a tie-breaking scenario where the 'wrong' egress by intuition is the 'correct' choice by hot potato logic — forcing students to override their instinct."
+        },
+        {
+          "id": "Q11",
+          "note": "SDN match-action is slightly introductory. A stronger version would present a specific OpenFlow-style rule table with a conflict (two rules matching the same packet) and ask students to determine which applies and why, testing priority/wildcard matching semantics."
+        }
+      ],
+      "under_tested_concepts": [
+        "Hierarchical OSPF: Area Border Router (ABR) route summarization and its effect on routing granularity",
+        "BGP AS-PATH prepending as a traffic engineering technique",
+        "RIP's 16-hop infinity and why it limits deployment to small networks",
+        "802.11 DIFS/SIFS timing arithmetic and why SIFS < DIFS guarantees ACK priority",
+        "5G CUPS (Control/User Plane Separation) and why separating them enables flexible deployment",
+        "mmWave propagation characteristics and their architectural implications for 5G small cell density",
+        "Switch self-learning: what happens when a MAC address moves to a different port (entry overwrite)"
+      ]
+    }
+  }
+}

@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>guide_1.md</title>
+	<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+	<style>
+		/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+		/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+		body {
+			font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+			font-size: var(--vscode-markdown-font-size, 14px);
+			padding: 0 26px;
+			line-height: var(--vscode-markdown-line-height, 22px);
+			word-wrap: break-word;
+		}
+
+		#code-csp-warning {
+			position: fixed;
+			top: 0;
+			right: 0;
+			color: white;
+			margin: 16px;
+			text-align: center;
+			font-size: 12px;
+			font-family: sans-serif;
+			background-color: #444444;
+			cursor: pointer;
+			padding: 6px;
+			box-shadow: 1px 1px 1px rgba(0, 0, 0, .25);
+		}
+
+		#code-csp-warning:hover {
+			text-decoration: none;
+			background-color: #007acc;
+			box-shadow: 2px 2px 2px rgba(0, 0, 0, .25);
+		}
+
+		body.scrollBeyondLastLine {
+			margin-bottom: calc(100vh - 22px);
+		}
+
+		body.showEditorSelection .code-line {
+			position: relative;
+		}
+
+		body.showEditorSelection .code-active-line:before,
+		body.showEditorSelection .code-line:hover:before {
+			content: "";
+			display: block;
+			position: absolute;
+			top: 0;
+			left: -12px;
+			height: 100%;
+		}
+
+		body.showEditorSelection li.code-active-line:before,
+		body.showEditorSelection li.code-line:hover:before {
+			left: -30px;
+		}
+
+		.vscode-light.showEditorSelection .code-active-line:before {
+			border-left: 3px solid rgba(0, 0, 0, 0.15);
+		}
+
+		.vscode-light.showEditorSelection .code-line:hover:before {
+			border-left: 3px solid rgba(0, 0, 0, 0.40);
+		}
+
+		.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+			border-left: none;
+		}
+
+		.vscode-dark.showEditorSelection .code-active-line:before {
+			border-left: 3px solid rgba(255, 255, 255, 0.4);
+		}
+
+		.vscode-dark.showEditorSelection .code-line:hover:before {
+			border-left: 3px solid rgba(255, 255, 255, 0.60);
+		}
+
+		.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+			border-left: none;
+		}
+
+		.vscode-high-contrast.showEditorSelection .code-active-line:before {
+			border-left: 3px solid rgba(255, 160, 0, 0.7);
+		}
+
+		.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+			border-left: 3px solid rgba(255, 160, 0, 1);
+		}
+
+		.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+			border-left: none;
+		}
+
+		img {
+			max-width: 100%;
+			max-height: 100%;
+		}
+
+		a {
+			text-decoration: none;
+		}
+
+		a:hover {
+			text-decoration: underline;
+		}
+
+		a:focus,
+		input:focus,
+		select:focus,
+		textarea:focus {
+			outline: 1px solid -webkit-focus-ring-color;
+			outline-offset: -1px;
+		}
+
+		hr {
+			border: 0;
+			height: 2px;
+			border-bottom: 2px solid;
+		}
+
+		h1 {
+			padding-bottom: 0.3em;
+			line-height: 1.2;
+			border-bottom-width: 1px;
+			border-bottom-style: solid;
+		}
+
+		h1,
+		h2,
+		h3 {
+			font-weight: normal;
+		}
+
+		table {
+			border-collapse: collapse;
+		}
+
+		table>thead>tr>th {
+			text-align: left;
+			border-bottom: 1px solid;
+		}
+
+		table>thead>tr>th,
+		table>thead>tr>td,
+		table>tbody>tr>th,
+		table>tbody>tr>td {
+			padding: 5px 10px;
+		}
+
+		table>tbody>tr+tr>td {
+			border-top: 1px solid;
+		}
+
+		blockquote {
+			margin: 0 7px 0 5px;
+			padding: 0 16px 0 10px;
+			border-left-width: 5px;
+			border-left-style: solid;
+		}
+
+		code {
+			font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+			font-size: 1em;
+			line-height: 1.357em;
+		}
+
+		body.wordWrap pre {
+			white-space: pre-wrap;
+		}
+
+		pre:not(.hljs),
+		pre.hljs code>div {
+			padding: 16px;
+			border-radius: 3px;
+			overflow: auto;
+		}
+
+		pre code {
+			color: var(--vscode-editor-foreground);
+			tab-size: 4;
+		}
+
+		/** Theming */
+
+		.vscode-light pre {
+			background-color: rgba(220, 220, 220, 0.4);
+		}
+
+		.vscode-dark pre {
+			background-color: rgba(10, 10, 10, 0.4);
+		}
+
+		.vscode-high-contrast pre {
+			background-color: rgb(0, 0, 0);
+		}
+
+		.vscode-high-contrast h1 {
+			border-color: rgb(0, 0, 0);
+		}
+
+		.vscode-light table>thead>tr>th {
+			border-color: rgba(0, 0, 0, 0.69);
+		}
+
+		.vscode-dark table>thead>tr>th {
+			border-color: rgba(255, 255, 255, 0.69);
+		}
+
+		.vscode-light h1,
+		.vscode-light hr,
+		.vscode-light table>tbody>tr+tr>td {
+			border-color: rgba(0, 0, 0, 0.18);
+		}
+
+		.vscode-dark h1,
+		.vscode-dark hr,
+		.vscode-dark table>tbody>tr+tr>td {
+			border-color: rgba(255, 255, 255, 0.18);
+		}
+	</style>
+
+	<style>
+		/* Tomorrow Theme */
+		/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+		/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+		/* Tomorrow Comment */
+		.hljs-comment,
+		.hljs-quote {
+			color: #8e908c;
+		}
+
+		/* Tomorrow Red */
+		.hljs-variable,
+		.hljs-template-variable,
+		.hljs-tag,
+		.hljs-name,
+		.hljs-selector-id,
+		.hljs-selector-class,
+		.hljs-regexp,
+		.hljs-deletion {
+			color: #c82829;
+		}
+
+		/* Tomorrow Orange */
+		.hljs-number,
+		.hljs-built_in,
+		.hljs-builtin-name,
+		.hljs-literal,
+		.hljs-type,
+		.hljs-params,
+		.hljs-meta,
+		.hljs-link {
+			color: #f5871f;
+		}
+
+		/* Tomorrow Yellow */
+		.hljs-attribute {
+			color: #eab700;
+		}
+
+		/* Tomorrow Green */
+		.hljs-string,
+		.hljs-symbol,
+		.hljs-bullet,
+		.hljs-addition {
+			color: #718c00;
+		}
+
+		/* Tomorrow Blue */
+		.hljs-title,
+		.hljs-section {
+			color: #4271ae;
+		}
+
+		/* Tomorrow Purple */
+		.hljs-keyword,
+		.hljs-selector-tag {
+			color: #8959a8;
+		}
+
+		.hljs {
+			display: block;
+			overflow-x: auto;
+			color: #4d4d4c;
+			padding: 0.5em;
+		}
+
+		.hljs-emphasis {
+			font-style: italic;
+		}
+
+		.hljs-strong {
+			font-weight: bold;
+		}
+	</style>
+
+	<style>
+		/*
+ * Markdown PDF CSS
+ */
+
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+			padding: 0 12px;
+		}
+
+		pre {
+			background-color: #f8f8f8;
+			border: 1px solid #cccccc;
+			border-radius: 3px;
+			overflow-x: auto;
+			white-space: pre-wrap;
+			overflow-wrap: break-word;
+		}
+
+		pre:not(.hljs) {
+			padding: 23px;
+			line-height: 19px;
+		}
+
+		blockquote {
+			background: rgba(127, 127, 127, 0.1);
+			border-color: rgba(0, 122, 204, 0.5);
+		}
+
+		.emoji {
+			height: 1.4em;
+		}
+
+		code {
+			font-size: 14px;
+			line-height: 19px;
+		}
+
+		/* for inline code */
+		:not(pre):not(.hljs)>code {
+			color: #C9AE75;
+			/* Change the old color so it seems less like an error */
+			font-size: inherit;
+		}
+
+		/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+		.page {
+			page-break-after: always;
+		}
+	</style>
+
+	<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+	<script>
+		window.MathJax = {
+			tex: { inlineMath: [['\\(', '\\)'], ['$', '$']], displayMath: [['\\[', '\\]'], ['$$', '$$']] },
+			options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
+		};
+	</script>
+	<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+
+<body>
+	<script>
+		mermaid.initialize({
+			startOnLoad: true,
+			theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+				? 'dark'
+				: 'default'
+		});
+	</script>
+	<h1 id="networking-study-reference">Networking Study Reference</h1>
+	<h2 id="1-introduction-to-the-internet">1. Introduction to the Internet</h2>
+	<p>The Internet is a global &quot;network of networks&quot; that provides an infrastructure for distributed
+		applications and services. It connects billions of computing devices, including:</p>
+	<ul>
+		<li><strong>Traditional Hosts</strong>: PCs, laptops, smartphones, servers.</li>
+		<li><strong>IoT / Embedded Devices</strong>: IP picture frames, Slingbox (remote cable control), Web-enabled
+			toasters, AR devices, sensorized mattresses, connected cars, scooters, and gaming devices.</li>
+		<li><strong>Advanced Applications</strong>: 5G/NextG Teleoperation, where command-and-control (C&amp;C) data
+			uses the downlink (DL) and vehicle sensor data (camera feeds) uses the uplink (UL).</li>
+	</ul>
+	<h3 id="11-perspectives-on-the-internet">1.1 Perspectives on the Internet</h3>
+	<ul>
+		<li><strong>Hardware/Software View</strong>: A collection of interconnected devices (hosts, routers, links) and
+			protocols (HTTP, TCP, IP, etc.) that control the sending and receiving of messages.</li>
+		<li><strong>Service View</strong>: An infrastructure that provides services to applications (Web, streaming,
+			email, social media) and provides a programming interface (&quot;hooks&quot;) for distributed applications
+			to connect.</li>
+	</ul>
+	<h3 id="12-key-components">1.2 Key Components</h3>
+	<ul>
+		<li><strong>Protocols</strong>: Protocols are everywhere. They define the format, order of messages sent and
+			received among network entities, and actions taken on message transmission or receipt. Examples include
+			HTTP, TCP, IP, WiFi, 4G/5G, and Ethernet.</li>
+		<li><strong>Internet Standards</strong>: Maintained by the <strong>IETF</strong> (Internet Engineering Task
+			Force) through <strong>RFCs</strong> (Request for Comments).</li>
+	</ul>
+	<hr>
+	<h2 id="2-network-structure">2. Network Structure</h2>
+	<p>The network is divided into three main components:</p>
+	<ol>
+		<li><strong>Network Edge</strong>: Hosts (clients and servers), often residing in data centers.</li>
+		<li><strong>Access Networks</strong>: The physical media (wired or wireless communication links) that connect
+			the edge devices to the first router (edge router).</li>
+		<li><strong>Network Core</strong>: A mesh of interconnected routers; the &quot;network of networks&quot; that
+			ties everything together (e.g., national or global ISPs, content provider networks).</li>
+	</ol>
+	<hr>
+	<h2 id="3-naming-and-addressing">3. Naming and Addressing</h2>
+	<p>Networking is more than connecting nodes; it requires a way to identify participants in a shared resource.</p>
+	<ul>
+		<li><strong>Address</strong>: A byte-string that identifies a specific node.</li>
+		<li><strong>Addressing Types</strong>:
+			<ul>
+				<li><strong>Unicast</strong>: Delivery to a single, specific node.</li>
+				<li><strong>Broadcast</strong>: Delivery to all nodes in the network.</li>
+				<li><strong>Multicast</strong>: Delivery to a specific subset of nodes in the network.</li>
+			</ul>
+		</li>
+	</ul>
+	<hr>
+	<h2 id="4-network-core-switching-and-multiplexing">4. Network Core: Switching and Multiplexing</h2>
+	<p>The network core is responsible for moving data through the mesh of routers. This is achieved through two primary
+		methods: <strong>Circuit Switching</strong> and <strong>Packet Switching</strong>.</p>
+	<h3 id="41-circuit-switching">4.1 Circuit Switching</h3>
+	<p>In circuit switching, a dedicated end-to-end connection (&quot;circuit&quot;) is established before any data is
+		sent.</p>
+	<ul>
+		<li><strong>Characteristics</strong>:
+			<ul>
+				<li><strong>Reserved Resources</strong>: Bandwidth and switch capacity are dedicated to the
+					&quot;call.&quot;</li>
+				<li><strong>Guaranteed Performance</strong>: No interference from other users (no jitter/congestion once
+					connected).</li>
+				<li><strong>Idle Resources</strong>: If the user isn't sending data, the allocated circuit remains idle
+					and cannot be used by others.</li>
+				<li><strong>Call Blocking</strong>: Occurs if all available circuits are already in use.</li>
+			</ul>
+		</li>
+		<li><strong>Analogy</strong>: The original telephone network; railroads and trains (fixed tracks).</li>
+	</ul>
+	<blockquote>
+		<p>[!IMPORTANT]
+			<strong>Is Circuit Switching ever better?</strong>
+			Yes. While packet switching is generally more efficient for &quot;bursty&quot; traffic (like web browsing),
+			circuit switching is superior for applications requiring <strong>guaranteed, constant bandwidth</strong> and
+			<strong>zero queuing delay</strong>, such as high-quality real-time video or dedicated communication lines.
+		</p>
+	</blockquote>
+	<h4 id="multiplexing-in-circuit-switching">Multiplexing in Circuit Switching</h4>
+	<p>Resources are divided into &quot;pieces&quot; using:</p>
+	<ul>
+		<li><strong>Frequency Division Multiplexing (FDM)</strong>: The total electromagnetic or optical frequency
+			spectrum is divided into narrow bands. Each call is allocated its own band.</li>
+		<li><strong>Time Division Multiplexing (TDM)</strong>: Time is divided into slots. Each call is allocated a
+			periodic time slot during which it can transmit at the maximum rate of the wider frequency band.</li>
+	</ul>
+	<h3 id="42-packet-switching">4.2 Packet Switching</h3>
+	<p>In packet switching, hosts break application-layer messages into small chunks called <strong>packets</strong>.
+		Packets from different users share network resources on demand.</p>
+	<ul>
+		<li><strong>Characteristics</strong>:
+			<ul>
+				<li><strong>Store-and-Forward</strong>: The entire packet (L bits) must arrive at a router before it can
+					be transmitted on the next link (rate R bps). Transmission delay = L/R.</li>
+				<li><strong>Statistical Multiplexing</strong>: Resources are used as needed; packets from different
+					sources are interleaved on the link.</li>
+			</ul>
+		</li>
+		<li><strong>Best-Effort Service</strong>: The network core provides a connectionless &quot;datagram&quot;
+			service that does not guarantee delivery, order, or timing. Reliability is handled by the edges.</li>
+		<li><strong>Queuing and Loss</strong>: If the arrival rate (bps) to a link exceeds its transmission rate,
+			packets will queue in the router's buffer (memory). If the buffer fills up, packets are dropped (lost).</li>
+		<li><strong>Analogy</strong>: The Internet; highways and cars (shared, dynamic routing).</li>
+	</ul>
+	<h3 id="43-packet-switching-advantage-statistical-multiplexing">4.3 Packet Switching Advantage: Statistical
+		Multiplexing</h3>
+	<p>Packet switching is often more efficient than circuit switching because it allows more users to share the same
+		resources.</p>
+	<p><strong>Example Scenario</strong>:</p>
+	<ul>
+		<li><strong>Link</strong>: 1 Mbps.</li>
+		<li><strong>Each User</strong>: Requires 100 kbps when active, but is only active 10% of the time.</li>
+		<li><strong>Circuit Switching</strong>: Can only support <strong>10 users</strong> (100 kbps each, statically
+			allocated).</li>
+		<li><strong>Packet Switching</strong>: Can support significantly more users with a very low probability of
+			congestion. If there are 35 users, the probability that more than 10 are active at the same time is
+			extremely small (approx. 0.0004).</li>
+	</ul>
+	<p><strong>Conclusion</strong>: Packet switching allows for more efficient use of network resources by exploiting
+		the &quot;bursty&quot; nature of data traffic.</p>
+	<h4 id="probability-of-congestion">Probability of Congestion</h4>
+	<p>To calculate the probability that exactly $k$ out of $n$ users are active (where each user is active with
+		probability $p$):
+		$$P(k) = \binom{n}{k} p^k (1-p)^{n-k}$$
+		<em>The probability of congestion is the sum of probabilities where $k$ exceeds the network's capacity.</em>
+	</p>
+	<h3 id="44-link-utilization">4.4 Link Utilization</h3>
+	<p><strong>Link Utilization</strong> is the percentage of a link's total capacity that is currently being used.</p>
+	<ul>
+		<li><strong>Formula</strong>: $U = (\text{Total Arrival Rate}) / (\text{Link Capacity}) \times 100%$</li>
+		<li><strong>Example</strong>: If two clients each send at 10 Mbps into a router that has a 100 Mbps output link,
+			the utilization is $(10 + 10) / 100 = 20%$.</li>
+	</ul>
+	<h3 id="45-routing-vs-forwarding">4.5 Routing vs. Forwarding</h3>
+	<p>These are the two key network-layer functions performed in the core:</p>
+	<ul>
+		<li><strong>Forwarding (Switching)</strong>: A <strong>local</strong> action. It involves moving arriving
+			packets from a router's input link to the appropriate output link based on a local forwarding table.</li>
+		<li><strong>Routing</strong>: A <strong>global</strong> action. It involves determining the end-to-end paths
+			(source-to-destination) taken by packets using routing algorithms.</li>
+	</ul>
+	<hr>
+	<h2 id="5-network-performance-metrics">5. Network Performance Metrics</h2>
+	<p>Network performance is primarily measured by how fast and reliably data moves from point A to point B.</p>
+	<h3 id="51-throughput">5.1 Throughput</h3>
+	<p><strong>Throughput</strong> is the rate (bits/time unit) at which bits are being sent from sender to receiver.
+	</p>
+	<ul>
+		<li><strong>Instantaneous Throughput</strong>: The rate at a specific point in time.</li>
+		<li><strong>Average Throughput</strong>: The rate over a longer period of time.</li>
+		<li><strong>Bottleneck Link</strong>: The link in an end-to-end path that constrains the total throughput.
+			<ul>
+				<li>If a server sends at rate $R_s$ and a client receives at rate $R_c$, the end-to-end throughput is
+					$\min(R_s, R_c)$.</li>
+				<li>In a shared backbone with capacity $R$ shared by $N$ connections, the throughput is $\min(R_s, R_c,
+					R/N)$.</li>
+			</ul>
+		</li>
+	</ul>
+	<h3 id="52-latency-delay">5.2 Latency (Delay)</h3>
+	<p>The total <strong>Nodal Delay</strong> at a single router is the sum of four components:
+		$$d_{nodal} = d_{proc} + d_{queue} + d_{trans} + d_{prop}$$</p>
+	<ol>
+		<li><strong>Processing Delay ($d_{proc}$)</strong>: Time spent checking for bit errors and determining the
+			output link. Usually microseconds.</li>
+		<li><strong>Queuing Delay ($d_{queue}$)</strong>: Time spent waiting at the output link for transmission.
+			Depends on the congestion level of the router.</li>
+		<li><strong>Transmission Delay ($d_{trans}$)</strong>: The time required to push all the packet's bits into the
+			link.
+			<ul>
+				<li>Formula: $d_{trans} = L / R$ (where $L$ is packet length in bits and $R$ is link bandwidth in bps).
+				</li>
+			</ul>
+		</li>
+		<li><strong>Propagation Delay ($d_{prop}$)</strong>: The time it takes for a bit to travel from the beginning of
+			the link to the next router.
+			<ul>
+				<li>Formula: $d_{prop} = d / s$ (where $d$ is the length of the physical link and $s$ is the propagation
+					speed in the medium, approx. $2 \times 10^8$ m/sec).</li>
+			</ul>
+		</li>
+	</ol>
+	<blockquote>
+		<p>[!TIP]
+			<strong>The Caravan Analogy</strong>
+			Think of a 10-car caravan as a <strong>packet</strong> and each car as a <strong>bit</strong>.
+		</p>
+		<ul>
+			<li><strong>Toll Booth</strong>: The communication link.</li>
+			<li><strong>Toll Service Time</strong>: Transmission delay (time to &quot;push&quot; the cars onto the
+				road).</li>
+			<li><strong>Highway Travel</strong>: Propagation delay (time for cars to travel between booths).</li>
+			<li>If the cars travel very fast (high propagation speed) but the toll booth is slow (low transmission
+				rate), cars may arrive at the next booth before the whole caravan has even left the first one.</li>
+		</ul>
+	</blockquote>
+	<h3 id="53-measuring-delay-traceroute">5.3 Measuring Delay: Traceroute</h3>
+	<p><strong>Traceroute</strong> is a diagnostic tool that provides delay measurements from a source to every router
+		along the end-to-end path.</p>
+	<ul>
+		<li>It sends three packets to each router $i$ along the path.</li>
+		<li>Each router returns the packets to the sender.</li>
+		<li>The sender measures the time interval between transmission and reply to determine the RTT (Round Trip Time).
+		</li>
+	</ul>
+	<hr>
+	<h2 id="6-protocol-layering-and-the-tcpip-stack">6. Protocol Layering and the TCP/IP Stack</h2>
+	<p>The Internet handles its immense complexity through a <strong>layered architecture</strong>. Each layer provides
+		a service to the layer above it by using the services of the layer below.</p>
+	<h3 id="61-the-5-layer-internet-stack">6.1 The 5-Layer Internet Stack</h3>
+	<ol>
+		<li><strong>Application Layer</strong>: Supports network applications (e.g., HTTP, SMTP, FTP, DNS). The data
+			unit is a <strong>Message</strong>.</li>
+		<li><strong>Transport Layer</strong>: Handles process-to-process data transfer (e.g., TCP for reliability, UDP).
+			The data unit is a <strong>Segment</strong>.</li>
+		<li><strong>Network Layer</strong>: Routes datagrams from source host to destination host (e.g., IP, routing
+			protocols). The data unit is a <strong>Datagram</strong>.</li>
+		<li><strong>Link Layer</strong>: Handles data transfer between neighboring network elements (e.g., Ethernet,
+			802.11 WiFi, PPP). The data unit is a <strong>Frame</strong>.</li>
+		<li><strong>Physical Layer</strong>: Carries the actual bits &quot;on the wire.&quot;</li>
+	</ol>
+	<h3 id="62-key-concepts-in-layering">6.2 Key Concepts in Layering</h3>
+	<ul>
+		<li><strong>Protocols vs. Services</strong>:
+			<ul>
+				<li><strong>Service</strong>: What a layer does (the functionality it provides to the layer above).</li>
+				<li><strong>Protocol</strong>: The rules/messages exchanged between peering entities (e.g., two
+					Transport layers on different hosts) to implement a service. Protocols define:</li>
+				<li><strong>Format</strong> of messages.</li>
+				<li><strong>Order</strong> of messages (e.g., a &quot;Hi-Hi&quot; <strong>Handshake</strong> before data
+					exchange).</li>
+				<li><strong>Actions</strong> taken on message transmission or receipt.</li>
+			</ul>
+		</li>
+		<li><strong>Interfaces</strong>:
+			<ul>
+				<li><strong>Service Interface</strong>: Operations to access the layer's service (used by the layer
+					above).</li>
+				<li><strong>Peer-to-Peer Interface</strong>: The protocol used for communication between peers.</li>
+			</ul>
+		</li>
+		<li><strong>PDUs vs. SDUs</strong>:
+			<ul>
+				<li><strong>SDU (Service Data Unit)</strong>: The data packet handed to a layer by the layer above.</li>
+				<li><strong>PDU (Protocol Data Unit)</strong>: The packet exchanged between peers. It consists of the
+					SDU plus a layer-specific header (e.g., $PDU = SDU + Header$).</li>
+			</ul>
+		</li>
+	</ul>
+	<h3 id="63-encapsulation-the-matryoshka-doll-model">6.3 Encapsulation (The Matryoshka Doll Model)</h3>
+	<p>As data moves down the stack at the sender:</p>
+	<ol>
+		<li><strong>Application</strong> creates a <strong>Message</strong>.</li>
+		<li><strong>Transport</strong> encapsulates it with a header ($H_t$) to create a <strong>Segment</strong>.</li>
+		<li><strong>Network</strong> encapsulates the segment with a header ($H_n$) to create a
+			<strong>Datagram</strong>.</li>
+		<li><strong>Link</strong> encapsulates the datagram with a header ($H_l$) and potentially a trailer to create a
+			<strong>Frame</strong>.
+			At the receiver, the process is reversed (<strong>Decapsulation</strong>).</li>
+	</ol>
+	<hr>
+	<h2 id="7-internet-architectural-principles">7. Internet Architectural Principles</h2>
+	<h3 id="71-the-hourglass-model">7.1 The Hourglass Model</h3>
+	<p>The Internet architecture is often described as an <strong>hourglass</strong>.</p>
+	<ul>
+		<li><strong>The Narrow Waist</strong>: IP (Internet Protocol) sits in the middle. Everything runs over IP, and
+			IP runs over everything.</li>
+		<li>This allows for diverse applications at the top and diverse physical technologies at the bottom to coexist.
+		</li>
+	</ul>
+	<h3 id="72-smart-edges-dumb-core">7.2 &quot;Smart Edges, Dumb Core&quot;</h3>
+	<p>A fundamental design principle of the Internet:</p>
+	<ul>
+		<li><strong>Dumb Core</strong>: The network core (routers) remains simple. Its primary job is
+			&quot;best-effort&quot; packet switching (addressing, routing, and forwarding).</li>
+		<li><strong>Smart Edges</strong>: Complex functionalities like error recovery, flow control, and congestion
+			control are implemented at the end systems (hosts).</li>
+	</ul>
+	<hr>
+	<h2 id="8-network-challenges-and-solutions">8. Network Challenges and Solutions</h2>
+	<h3 id="81-common-errors">8.1 Common Errors</h3>
+	<ul>
+		<li><strong>Bit-level errors</strong>: Caused by electrical interference.</li>
+		<li><strong>Frame-level errors</strong>: Collisions or contention at the link layer.</li>
+		<li><strong>Packet-level errors</strong>: Delay or loss due to congestion/buffer overflow.</li>
+		<li><strong>Out-of-order delivery</strong>: Packets taking different paths through the network.</li>
+		<li><strong>Link/Node failures</strong>: System crashes or physical cable cuts.</li>
+	</ul>
+	<h3 id="82-mitigation-mechanisms">8.2 Mitigation Mechanisms</h3>
+	<p>To &quot;fill the gap&quot; between application expectations and underlying technology, the following are used:
+	</p>
+	<ul>
+		<li><strong>Redundancy</strong>: Adding bits to detect and correct errors.</li>
+		<li><strong>Acknowledgements (ACKs) &amp; Retransmissions</strong>: Recovering lost data.</li>
+		<li><strong>Sequence Numbers</strong>: Ensuring packets are reordered correctly at the receiver.</li>
+		<li><strong>Adaptive Routing</strong>: Sensing failures and routing around them.</li>
+	</ul>
+	<hr>
+	<h2 id="10-message-segmentation-and-pipelining">10. Message Segmentation and Pipelining</h2>
+	<p>In modern networks, long application-layer messages (e.g., a 10 MB image) are broken into smaller
+		<strong>packets</strong> (segmentation) before being sent.</p>
+	<h3 id="101-the-pipelining-effect">10.1 The Pipelining Effect</h3>
+	<p>Segmentation allows for <strong>pipelining</strong>: while the first switch is forwarding packet 1 to the second
+		switch, the source host can already be sending packet 2 to the first switch. This significantly reduces total
+		end-to-end delay compared to sending the entire message as one giant block.</p>
+	<h3 id="102-delay-formulas">10.2 Delay Formulas</h3>
+	<p>For a message of size $M$ bits, segmented into $P$ packets of length $L$ bits each, sent over $N$ links of rate
+		$R$ bps:</p>
+	<ol>
+		<li>
+			<p><strong>Without Segmentation</strong>:
+				$$T_{total} = N \times (M / R)$$
+				<em>(The entire message must be stored-and-forwarded at every hop.)</em>
+			</p>
+		</li>
+		<li>
+			<p><strong>With Segmentation (General Formula)</strong>:
+				$$T_{total} = (N + P - 1) \times (L / R)$$</p>
+			<ul>
+				<li><strong>Derivation</strong>: It takes $L/R$ to push the first packet to the first switch. It takes
+					$(N-1) \times (L/R)$ for the first packet to reach the destination. Meanwhile, the remaining $(P-1)$
+					packets follow immediately behind, each arriving $L/R$ after the previous one.</li>
+				<li><strong>Note</strong>: This ignores propagation and processing delays. If included, add $N \times
+					d_{prop}$.</li>
+			</ul>
+		</li>
+	</ol>
+	<h3 id="103-pros-and-cons-of-segmentation">10.3 Pros and Cons of Segmentation</h3>
+	<table>
+		<thead>
+			<tr>
+				<th style="text-align:left"><strong>Advantages</strong></th>
+				<th style="text-align:left"><strong>Disadvantages</strong></th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td style="text-align:left"><strong>Reduced Delay</strong>: Pipelining speeds up delivery.</td>
+				<td style="text-align:left"><strong>Header Overhead</strong>: Every packet needs its own header
+					(metadata).</td>
+			</tr>
+			<tr>
+				<td style="text-align:left"><strong>Error Management</strong>: If a packet is corrupted, only that small
+					packet needs to be retransmitted, not the whole message.</td>
+				<td style="text-align:left"><strong>Reassembly Complexity</strong>: The receiver must put the packets
+					back in the correct order.</td>
+			</tr>
+			<tr>
+				<td style="text-align:left"><strong>Fairness</strong>: Prevents one large file from hogging a link for a
+					long duration.</td>
+				<td style="text-align:left"><strong>Processing Load</strong>: Routers must process many small packets
+					instead of one large one.</td>
+			</tr>
+		</tbody>
+	</table>
+
+</body>
+
+</html>

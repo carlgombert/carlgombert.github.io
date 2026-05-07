@@ -1,0 +1,835 @@
+{
+  "exam": {
+    "title": "Computer Networking — Practice Exam",
+    "subtitle": "Transport Layer: UDP, TCP, Reliability, Congestion & Flow Control, QUIC",
+    "pre_exam_analysis": {
+      "highest_priority_topics": [
+        "TCP vs UDP demultiplexing (2-tuple vs 4-tuple)",
+        "Reliable data transfer evolution: rdt2.x sequence numbers, rdt3.0 timers",
+        "Go-Back-N vs Selective Repeat: window constraints, buffering, retransmission behavior",
+        "TCP congestion control: Slow Start, Congestion Avoidance, Tahoe vs Reno reactions",
+        "TCP flow control: rwnd, SendWindow = min(cwnd, rwnd)",
+        "TCP three-way handshake and four-way teardown including TIMED_WAIT",
+        "QUIC: motivation, HOL blocking elimination, connection migration",
+        "Stop-and-Wait utilization and pipelining efficiency",
+        "RTT estimation: EstimatedRTT, DevRTT, TimeoutInterval",
+        "UDP checksum: one's complement arithmetic, wrap-around"
+      ],
+      "common_misconceptions_targeted": [
+        "Thinking Slow Start is slow — it's actually exponential growth",
+        "Confusing cwnd (network bottleneck) with rwnd (receiver bottleneck)",
+        "Assuming TCP Reno drops cwnd to 1 on triple duplicate ACKs (it does not — Tahoe does)",
+        "Thinking GBN buffers out-of-order packets (it discards them)",
+        "Confusing cumulative ACKs with individual ACKs in GBN vs SR",
+        "Assuming TIMED_WAIT is unnecessary overhead rather than a correctness mechanism",
+        "Believing QUIC eliminates all HOL blocking (it only eliminates transport-layer HOL; application-layer ordering can still block)",
+        "Thinking rdt2.0 handles packet loss (it only handles bit errors)",
+        "Forgetting that a duplicate ACK in rdt2.2/TCP signals the same thing as a NAK",
+        "Confusing window size constraint for GBN (N <= S-1) vs SR (N <= S/2)"
+      ]
+    },
+    "sections": [
+      {
+        "id": "section_1",
+        "title": "True / False",
+        "instructions": "State TRUE or FALSE, then write 2–3 sentences justifying your answer. No credit for the answer alone.",
+        "questions": [
+          {
+            "id": "Q1",
+            "number": 1,
+            "type": "true_false",
+            "topic": "TCP Congestion Control — Tahoe vs Reno",
+            "difficulty": "Hard",
+            "prompt": "When TCP Reno detects three duplicate ACKs, it sets cwnd to 1 MSS and re-enters Slow Start.",
+            "answer": {
+              "verdict": "FALSE",
+              "explanation": "That is the behavior of TCP Tahoe. TCP Reno implements Fast Recovery: on triple duplicate ACKs it sets ssthresh = cwnd / 2, then sets cwnd = ssthresh + 3 MSS, and remains in Congestion Avoidance — it does NOT drop to 1 or enter Slow Start. The reasoning is that triple duplicate ACKs indicate the network can still deliver some packets, so a catastrophic reset is unwarranted. Only a timeout — indicating more severe congestion — causes Reno to drop cwnd to 1 and enter Slow Start.",
+              "common_mistake": "Students memorize 'loss = drop cwnd' without distinguishing the two loss signals (triple dup ACK vs timeout) and the two TCP variants.",
+              "deeper_concept": "Fast Recovery as a nuanced congestion signal interpretation: not all loss events are equally severe"
+            }
+          },
+          {
+            "id": "Q2",
+            "number": 2,
+            "type": "true_false",
+            "topic": "Go-Back-N Receiver Behavior",
+            "difficulty": "Medium",
+            "prompt": "In Go-Back-N, if the receiver gets packet 7 but is expecting packet 5, it buffers packet 7 and sends ACK 4.",
+            "answer": {
+              "verdict": "FALSE",
+              "explanation": "Go-Back-N receivers do not buffer out-of-order packets — they discard them immediately. Upon receiving out-of-order packet 7, the receiver discards it and sends a cumulative ACK for the last correctly received in-order packet (ACK 4 in this case). The buffering behavior described belongs to Selective Repeat. GBN's no-buffering rule simplifies receiver design but forces the sender to retransmit potentially many packets on a single loss.",
+              "common_mistake": "Conflating GBN and SR receiver behavior. The key differentiator is whether the receiver buffers out-of-order packets.",
+              "deeper_concept": "The receiver complexity vs. retransmission efficiency tradeoff between GBN and SR"
+            }
+          },
+          {
+            "id": "Q3",
+            "number": 3,
+            "type": "true_false",
+            "topic": "Flow Control vs Congestion Control",
+            "difficulty": "Medium",
+            "prompt": "If cwnd = 64 KB and rwnd = 16 KB, the sender may transmit up to 64 KB of unacknowledged data.",
+            "answer": {
+              "verdict": "FALSE",
+              "explanation": "The sender is constrained by both the congestion window and the receiver's advertised receive window. The effective send window is always min(cwnd, rwnd). With cwnd = 64 KB and rwnd = 16 KB, the sender may only have 16 KB of unacknowledged data in flight at any time. Flow control (rwnd) and congestion control (cwnd) are independent constraints — both must be satisfied simultaneously.",
+              "common_mistake": "Students focus exclusively on cwnd for calculating send rates and forget that rwnd is an equally binding constraint imposed by the receiver.",
+              "deeper_concept": "SendWindow = min(cwnd, rwnd) as the unification of two independent throttling mechanisms"
+            }
+          },
+          {
+            "id": "Q4",
+            "number": 4,
+            "type": "true_false",
+            "topic": "rdt2.0 Limitations",
+            "difficulty": "Medium",
+            "prompt": "rdt2.0 can correctly handle scenarios where packets are lost in the network.",
+            "answer": {
+              "verdict": "FALSE",
+              "explanation": "rdt2.0 was designed only for channels with bit errors, not packet loss. Its mechanism is: send a packet, wait for ACK or NAK, retransmit on NAK. If the packet is lost entirely, no ACK or NAK ever arrives and the sender waits forever — there is no timer. Handling packet loss requires the timeout and retransmission mechanism introduced in rdt3.0.",
+              "common_mistake": "Students assume that checksum plus ACK/NAK covers all failure modes. Loss and corruption are distinct failure scenarios requiring different mechanisms.",
+              "deeper_concept": "The incremental design of reliable transfer: bit error handling (rdt2.x) is separate from loss handling (rdt3.0)"
+            }
+          },
+          {
+            "id": "Q5",
+            "number": 5,
+            "type": "true_false",
+            "topic": "QUIC Connection Migration",
+            "difficulty": "Hard",
+            "prompt": "A QUIC connection will be dropped and must be re-established if the client switches from WiFi to cellular, changing its IP address.",
+            "answer": {
+              "verdict": "FALSE",
+              "explanation": "This is precisely the scenario QUIC was designed to handle. TCP connections are identified by the 4-tuple (src IP, src port, dst IP, dst port), so an IP address change breaks the connection. QUIC uses a Connection ID — an application-layer identifier independent of the underlying IP/port — allowing the connection to persist seamlessly across network changes. This is called connection migration and is one of QUIC's key advantages for mobile users.",
+              "common_mistake": "Applying TCP's 4-tuple identity model to QUIC without accounting for the Connection ID mechanism.",
+              "deeper_concept": "Connection identity: 4-tuple addressing (TCP) vs. connection ID abstraction (QUIC) and mobile network implications"
+            }
+          }
+        ]
+      },
+      {
+        "id": "section_2",
+        "title": "Calculation Problems",
+        "instructions": "Show all work clearly. Partial credit is awarded for correct methodology even with arithmetic errors.",
+        "questions": [
+          {
+            "id": "Q6",
+            "number": 6,
+            "type": "calculation",
+            "topic": "UDP Checksum — One's Complement with Wrap-Around",
+            "difficulty": "Medium",
+            "scenario": {
+              "description": "A UDP sender must compute the checksum for three 16-bit words.",
+              "words": [
+                "1011 0010 1100 0001",
+                "0111 1001 0010 1110",
+                "1110 0001 0101 1010"
+              ]
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "Add the first two 16-bit words and apply wrap-around if necessary."
+              },
+              {
+                "label": "B",
+                "prompt": "Add the result to the third word, again applying wrap-around if necessary."
+              },
+              {
+                "label": "C",
+                "prompt": "Compute the checksum (one's complement of the final sum)."
+              },
+              {
+                "label": "D",
+                "prompt": "At the receiver, the same three words plus the checksum are summed. What result indicates no error?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "workings": [
+                    "  1011 0010 1100 0001",
+                    "+ 0111 1001 0010 1110",
+                    "= 1 0010 1011 1110 1111  (17-bit result — carry out of bit 16)",
+                    "Wrap-around: add the carry bit to LSB: 0010 1011 1110 1111 + 1 = 0010 1011 1111 0000"
+                  ],
+                  "result": "0010 1011 1111 0000"
+                },
+                {
+                  "label": "B",
+                  "workings": [
+                    "  0010 1011 1111 0000",
+                    "+ 1110 0001 0101 1010",
+                    "= 1 0000 1101 0100 1010  (carry out again)",
+                    "Wrap-around: 0000 1101 0100 1010 + 1 = 0000 1101 0100 1011"
+                  ],
+                  "result": "0000 1101 0100 1011"
+                },
+                {
+                  "label": "C",
+                  "workings": [
+                    "One's complement of 0000 1101 0100 1011 = flip all bits",
+                    "Checksum = 1111 0010 1011 0100"
+                  ],
+                  "result": "1111 0010 1011 0100"
+                },
+                {
+                  "label": "D",
+                  "result": "1111 1111 1111 1111 (all 1s). If any bit is 0, an error is detected."
+                }
+              ],
+              "common_mistake": "Forgetting wrap-around: when a 17th carry bit occurs, students drop it instead of adding it back to the LSB of the 16-bit result. This is the most common arithmetic error on checksum problems.",
+              "deeper_concept": "One's complement arithmetic and its use as a lightweight error detection mechanism in UDP and TCP headers"
+            }
+          },
+          {
+            "id": "Q7",
+            "number": 7,
+            "type": "calculation",
+            "topic": "Stop-and-Wait Utilization vs Pipelining",
+            "difficulty": "Medium",
+            "scenario": {
+              "link_speed_mbps": 100,
+              "packet_size_bits": 12000,
+              "rtt_ms": 40,
+              "propagation_delay_one_way_ms": 20
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "Calculate the sender utilization for a Stop-and-Wait protocol."
+              },
+              {
+                "label": "B",
+                "prompt": "How many packets must be pipelined (window size N) to achieve at least 90% utilization?"
+              },
+              {
+                "label": "C",
+                "prompt": "A student argues: 'If we just increase link speed to 1 Gbps, utilization will improve.' Without changing RTT, is this student correct? Calculate utilization at 1 Gbps to support your answer."
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "workings": [
+                    "L/R = 12000 bits / 100,000,000 bps = 0.00012 s = 0.12 ms",
+                    "U = (L/R) / (RTT + L/R) = 0.12 / (40 + 0.12) = 0.12 / 40.12 ≈ 0.003 = 0.3%"
+                  ],
+                  "result": "≈ 0.3% — extremely low"
+                },
+                {
+                  "label": "B",
+                  "workings": [
+                    "U = N * (L/R) / (RTT + L/R) >= 0.90",
+                    "N >= 0.90 * (40.12 / 0.12) = 0.90 * 334.3 ≈ 300.9",
+                    "N >= 301 packets"
+                  ],
+                  "result": "Window size of at least 301 packets required"
+                },
+                {
+                  "label": "C",
+                  "workings": [
+                    "At 1 Gbps: L/R = 12000 / 1,000,000,000 = 0.000012 s = 0.012 ms",
+                    "U = 0.012 / (40 + 0.012) = 0.012 / 40.012 ≈ 0.0003 = 0.03%"
+                  ],
+                  "result": "Utilization gets WORSE (0.03% vs 0.3%). The student is wrong.",
+                  "explanation": "Increasing link speed reduces transmission time but does nothing to reduce RTT (which is dominated by propagation delay). In a high-speed, high-RTT network, the bottleneck is protocol overhead, not link capacity. This is the delay-bandwidth product problem — pipelining is the correct solution, not faster links."
+                }
+              ],
+              "common_mistake": "Intuiting that a faster link always improves utilization. Students conflate throughput with utilization. In stop-and-wait, a faster link makes the problem worse because the ratio L/R becomes an even smaller fraction of RTT.",
+              "deeper_concept": "The delay-bandwidth product and why protocol design (pipelining) matters more than raw link speed in high-latency networks"
+            }
+          },
+          {
+            "id": "Q8",
+            "number": 8,
+            "type": "calculation",
+            "topic": "TCP Sequence and ACK Numbers",
+            "difficulty": "Hard",
+            "scenario": {
+              "description": "A TCP connection is established with the following three-way handshake. Then data is exchanged.",
+              "client_isn": 400,
+              "server_isn": 1200,
+              "mss_bytes": 500,
+              "data_transfers": [
+                { "direction": "client_to_server", "bytes": 1500 },
+                { "direction": "server_to_client", "bytes": 800 }
+              ]
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "Write out the SYN, SYN-ACK, and ACK segments of the three-way handshake. For each, specify: Seq#, ACK#, SYN flag, ACK flag."
+              },
+              {
+                "label": "B",
+                "prompt": "The client sends 1500 bytes of data in three equal segments (500 bytes each). What are the Seq# and ACK# of each client segment? What ACK# does the server send after receiving all three correctly?"
+              },
+              {
+                "label": "C",
+                "prompt": "The second client segment (Seq 901) is lost. The server receives segments 1 and 3. What does the server send in response to segment 3? Why?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "segments": [
+                    {
+                      "name": "SYN (Client → Server)",
+                      "seq": 400,
+                      "ack": "—",
+                      "SYN": 1,
+                      "ACK": 0,
+                      "note": "client_isn = 400, no data"
+                    },
+                    {
+                      "name": "SYN-ACK (Server → Client)",
+                      "seq": 1200,
+                      "ack": 401,
+                      "SYN": 1,
+                      "ACK": 1,
+                      "note": "server_isn = 1200, ACK = client_isn + 1"
+                    },
+                    {
+                      "name": "ACK (Client → Server)",
+                      "seq": 401,
+                      "ack": 1201,
+                      "SYN": 0,
+                      "ACK": 1,
+                      "note": "ACK = server_isn + 1, connection established"
+                    }
+                  ]
+                },
+                {
+                  "label": "B",
+                  "client_segments": [
+                    { "segment": 1, "seq": 401, "ack": 1201, "bytes": "401–900" },
+                    { "segment": 2, "seq": 901, "ack": 1201, "bytes": "901–1400" },
+                    { "segment": 3, "seq": 1401, "ack": 1201, "bytes": "1401–1900" }
+                  ],
+                  "server_ack_after_all_three": 1901,
+                  "note": "Server ACK = 1901 (next expected byte after all 1500 bytes received)"
+                },
+                {
+                  "label": "C",
+                  "server_response": "Duplicate ACK 901",
+                  "explanation": "After receiving segment 1 (Seq 401), the server sends ACK 901. When segment 3 (Seq 1401) arrives out of order — there's a gap where Seq 901–1400 should be — TCP immediately sends a duplicate ACK 901 (the next expected byte). This signals to the sender that a gap exists. If the sender receives three such duplicate ACKs, it triggers fast retransmit of the lost segment without waiting for a timeout."
+                }
+              ],
+              "common_mistake": "Students often set the first data segment's Seq# to the ISN (400) rather than ISN+1 (401). The SYN itself consumes one sequence number, so data begins at ISN+1.",
+              "deeper_concept": "TCP byte-stream sequencing: SYN and FIN each consume one sequence number; data bytes consume their byte count"
+            }
+          },
+          {
+            "id": "Q9",
+            "number": 9,
+            "type": "calculation",
+            "topic": "TCP Congestion Control State Machine",
+            "difficulty": "Hard",
+            "scenario": {
+              "mss_kb": 1,
+              "initial_cwnd_kb": 1,
+              "initial_ssthresh_kb": 16,
+              "events": [
+                { "round": 1, "event": "none" },
+                { "round": 2, "event": "none" },
+                { "round": 3, "event": "none" },
+                { "round": 4, "event": "none" },
+                { "round": 5, "event": "triple_duplicate_ack" },
+                { "round": 6, "event": "none" },
+                { "round": 7, "event": "none" },
+                { "round": 8, "event": "timeout" }
+              ]
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "Trace cwnd and ssthresh after each round for TCP Reno. Identify the phase (Slow Start or Congestion Avoidance) at each step."
+              },
+              {
+                "label": "B",
+                "prompt": "After the timeout in round 8, what are the new cwnd and ssthresh values?"
+              },
+              {
+                "label": "C",
+                "prompt": "A student says 'TCP is unfair because after a timeout it punishes the sender by resetting progress.' Is this criticism technically accurate? What is the actual design rationale?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "trace": [
+                    { "round": 1, "cwnd_kb": 1,  "ssthresh_kb": 16, "phase": "Slow Start",          "note": "Initial state" },
+                    { "round": 2, "cwnd_kb": 2,  "ssthresh_kb": 16, "phase": "Slow Start",          "note": "Doubles each RTT" },
+                    { "round": 3, "cwnd_kb": 4,  "ssthresh_kb": 16, "phase": "Slow Start",          "note": "Still below ssthresh" },
+                    { "round": 4, "cwnd_kb": 8,  "ssthresh_kb": 16, "phase": "Slow Start",          "note": "Still below ssthresh (8 < 16)" },
+                    { "round": 5, "cwnd_kb": 16, "ssthresh_kb": 16, "phase": "Congestion Avoidance","note": "cwnd reaches ssthresh, switches to CA; then triple dup ACK occurs. ssthresh = 16/2 = 8, cwnd = 8 + 3 = 11 (Fast Recovery)" },
+                    { "round": 6, "cwnd_kb": 12, "ssthresh_kb": 8,  "phase": "Congestion Avoidance","note": "CA: cwnd increases by 1 MSS per RTT" },
+                    { "round": 7, "cwnd_kb": 13, "ssthresh_kb": 8,  "phase": "Congestion Avoidance","note": "CA: +1 MSS" },
+                    { "round": 8, "cwnd_kb": 14, "ssthresh_kb": 8,  "phase": "Congestion Avoidance","note": "CA: +1 MSS; then timeout occurs" }
+                  ]
+                },
+                {
+                  "label": "B",
+                  "new_ssthresh_kb": 7,
+                  "new_cwnd_kb": 1,
+                  "phase": "Slow Start",
+                  "workings": "ssthresh = cwnd/2 = 14/2 = 7 KB; cwnd = 1 MSS = 1 KB"
+                },
+                {
+                  "label": "C",
+                  "student_accurate": "partially",
+                  "explanation": "The characterization as 'punishment' is anthropomorphic but the reset is technically accurate. The design rationale is that a timeout — unlike triple duplicate ACKs — indicates the network may be severely congested (no packets are getting through at all). Dropping to cwnd = 1 and re-entering Slow Start ensures the sender backs off aggressively and re-probes the network cautiously. The AIMD sawtooth behavior is an intentional mechanism to converge toward fair bandwidth sharing among competing TCP flows, not a punishment. Without aggressive backoff on timeout, a single greedy sender could collapse the network."
+                }
+              ],
+              "common_mistake": "Forgetting that at the boundary (cwnd == ssthresh), the protocol transitions to Congestion Avoidance before the event. Students often double cwnd at ssthresh instead of switching to linear growth.",
+              "deeper_concept": "AIMD as a distributed algorithm for network fairness and stability, not just a rate-limiting mechanism"
+            }
+          }
+        ]
+      },
+      {
+        "id": "section_3",
+        "title": "Short Answer / Conceptual",
+        "instructions": null,
+        "questions": [
+          {
+            "id": "Q10",
+            "number": 10,
+            "type": "short_answer",
+            "topic": "rdt2.2 Duplicate ACK as NAK Substitute",
+            "difficulty": "Medium",
+            "scenario": "rdt2.2 eliminates NAK messages entirely, replacing them with duplicate ACKs.",
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "Explain the exact mechanism by which a duplicate ACK conveys the same information as a NAK. Use a concrete example with sequence numbers 0 and 1."
+              },
+              {
+                "label": "B",
+                "prompt": "Why must the receiver include the sequence number of the packet being ACKed, rather than just sending 'ACK'?"
+              },
+              {
+                "label": "C",
+                "prompt": "Which real-world protocol adopted this exact approach, and where does it use duplicate ACKs in a more advanced way?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "response": "Suppose the sender just sent packet with Seq=1, and the receiver last correctly received packet Seq=0. If packet Seq=1 arrives corrupted, instead of sending NAK, the receiver re-sends ACK 0 (a duplicate of its last ACK). The sender, expecting ACK 1, receives ACK 0 — a duplicate — and interprets it as 'the other side did not successfully receive what I just sent.' It retransmits packet Seq=1. The duplicate ACK signals 'I'm still stuck at 0' without needing a separate NAK message type."
+                },
+                {
+                  "label": "B",
+                  "response": "Without the sequence number in the ACK, the sender cannot distinguish between a fresh ACK for the packet it just sent vs. a duplicate ACK for the previous packet. If the ACK only says 'ACK' with no sequence number, both outcomes look identical to the sender. The sequence number on the ACK is what makes a 'duplicate' detectable — the sender compares the ACKed sequence number against what it's currently expecting to receive acknowledgment for."
+                },
+                {
+                  "label": "C",
+                  "protocol": "TCP",
+                  "advanced_use": "TCP uses cumulative ACKs (like rdt2.2) where a duplicate ACK signals a gap in received data. More specifically, TCP's Fast Retransmit mechanism triggers retransmission after three consecutive duplicate ACKs — without waiting for a timer to expire — allowing much faster recovery from isolated packet loss."
+                }
+              ],
+              "common_mistake": "Students describe the duplicate ACK mechanism correctly but fail to explain why the sequence number on the ACK itself is necessary. They treat 'ACK' as if it implicitly carries context.",
+              "deeper_concept": "The sufficiency of ACKs alone for bidirectional error signaling — eliminating message type diversity at the cost of requiring sequence numbers in acknowledgments"
+            }
+          },
+          {
+            "id": "Q11",
+            "number": 11,
+            "type": "short_answer",
+            "topic": "Sequence Number Space Constraints: GBN vs SR",
+            "difficulty": "Hard",
+            "scenario": "A protocol uses 3-bit sequence numbers (sequence numbers 0–7, so S = 8).",
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "What is the maximum allowed window size for Go-Back-N? For Selective Repeat?"
+              },
+              {
+                "label": "B",
+                "prompt": "Explain with a concrete scenario WHY Selective Repeat requires the stricter constraint (N ≤ S/2). What goes wrong if you violate it?"
+              },
+              {
+                "label": "C",
+                "prompt": "A student proposes: 'We can use a window size of 7 for SR because GBN allows it and SR is strictly better.' What is wrong with this reasoning?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "gbn_max_window": 7,
+                  "sr_max_window": 4,
+                  "workings": "GBN: N ≤ S - 1 = 8 - 1 = 7. SR: N ≤ S/2 = 8/2 = 4."
+                },
+                {
+                  "label": "B",
+                  "response": "Suppose SR uses window size 5 (violating N ≤ 4). The sender transmits packets 0,1,2,3,4 and the receiver ACKs all of them. The sender's window slides forward to 5,6,7,0,1. Now suppose all 5 original ACKs are lost. The sender retransmits packets 0,1,2,3,4. The receiver, which has already slid its window forward, now sees packet 0 arriving — but it cannot tell if this is a retransmission of the old packet 0 or a new packet 0 from the next cycle of sequence numbers. With a window size of 5 and only 8 sequence numbers, the retransmission range [0–4] overlaps with the new receive window [5,6,7,0,1], causing the receiver to mistakenly accept a retransmission as new data. With N ≤ S/2 = 4, the retransmission range [0–3] never overlaps with the new receive window [4–7], guaranteeing unambiguous identification."
+                },
+                {
+                  "label": "C",
+                  "response": "The reasoning is flawed because 'SR is better than GBN' refers to retransmission efficiency, not sequence number capacity. The two protocols have fundamentally different window size constraints because they differ in receiver behavior: SR's receiver buffers out-of-order packets and can advance its receive window, creating an ambiguity window that GBN's receiver (which never buffers) does not have. The constraints exist for correctness, not performance. Using GBN's limit for SR would introduce packet ambiguity and data corruption."
+                }
+              ],
+              "common_mistake": "Students memorize the formulas without understanding why they differ. The GBN limit (S-1) prevents the sender from having a full window of unACKed packets whose ACKs all get lost, while the SR limit (S/2) prevents receive window overlap with retransmission range.",
+              "deeper_concept": "Sequence number space design as a correctness requirement, not a performance parameter — the window size determines what the receiver can unambiguously identify as new vs. retransmitted"
+            }
+          },
+          {
+            "id": "Q12",
+            "number": 12,
+            "type": "short_answer",
+            "topic": "TCP TIMED_WAIT State",
+            "difficulty": "Medium",
+            "scenario": "After a TCP connection closes, the client enters TIMED_WAIT for 2 * Maximum Segment Lifetime (MSL) before the port is released.",
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "Give two distinct reasons why TIMED_WAIT exists. What failure scenario does each protect against?"
+              },
+              {
+                "label": "B",
+                "prompt": "A high-throughput server operator complains that TIMED_WAIT causes port exhaustion — connections aren't being released fast enough. They propose disabling TIMED_WAIT using the SO_REUSEADDR socket option. What correctness risk does this introduce?"
+              },
+              {
+                "label": "C",
+                "prompt": "Why does TIMED_WAIT apply only to the side that sends the last ACK (typically the client), not to both sides?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "reasons": [
+                    {
+                      "reason": "Ensuring reliable delivery of the final ACK",
+                      "failure_protected": "If the client's final ACK (to the server's FIN) is lost, the server will retransmit its FIN. TIMED_WAIT keeps the client alive long enough to retransmit the ACK. Without it, the server would be stuck in FIN_WAIT and the connection would not close cleanly."
+                    },
+                    {
+                      "reason": "Preventing stale segments from poisoning new connections",
+                      "failure_protected": "Old segments from a closed connection can still be in transit in the network. If a new connection is opened with the same 4-tuple before all stale segments expire, those old segments could arrive and be misinterpreted as belonging to the new connection. Waiting 2*MSL ensures all such segments have expired from the network."
+                    }
+                  ]
+                },
+                {
+                  "label": "B",
+                  "risk": "A new connection with the same 4-tuple (src IP, src port, dst IP, dst port) could receive stale TCP segments from the previous connection. If a delayed segment from the old connection has the same sequence numbers as the new connection's expected data, the receiver might accept corrupt or replayed data. This is a data integrity and security risk, not just a performance concern."
+                },
+                {
+                  "label": "C",
+                  "response": "The last ACK sender (client) is the only party that knows the other side (server) may not have received that final ACK. The server, after sending its FIN, waits in CLOSE_WAIT and will retransmit FIN if no ACK comes — so it remains active. The client must stay alive to handle that retransmission. Once the server receives the final ACK, it closes immediately with no ambiguity. There is no symmetric reason for the server to wait: it knows its FIN was ACKed once the ACK arrives."
+                }
+              ],
+              "common_mistake": "Students describe TIMED_WAIT as 'waiting to make sure the connection is really closed' without distinguishing the two separate correctness concerns (lost ACK vs. stale segments).",
+              "deeper_concept": "The two-generals-adjacent problem in TCP teardown: reliable delivery of the final closing signal across a lossy channel"
+            }
+          },
+          {
+            "id": "Q13",
+            "number": 13,
+            "type": "short_answer",
+            "topic": "TCP RTT Estimation and Timeout",
+            "difficulty": "Hard",
+            "scenario": {
+              "current_estimated_rtt_ms": 100,
+              "current_dev_rtt_ms": 10,
+              "new_sample_rtt_ms": 140,
+              "alpha": 0.125,
+              "beta": 0.25
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "Calculate the new EstimatedRTT and DevRTT after the new SampleRTT of 140 ms is observed."
+              },
+              {
+                "label": "B",
+                "prompt": "Calculate the new TimeoutInterval."
+              },
+              {
+                "label": "C",
+                "prompt": "After a retransmission timeout fires, TCP doubles the TimeoutInterval before resetting. Why is this doubling applied to the timeout specifically, rather than simply using the formula above? What problem does it solve?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "workings": [
+                    "EstimatedRTT = (1 - 0.125) * 100 + 0.125 * 140 = 87.5 + 17.5 = 105 ms",
+                    "DevRTT = (1 - 0.25) * 10 + 0.25 * |140 - 100| = 7.5 + 0.25 * 40 = 7.5 + 10 = 17.5 ms"
+                  ],
+                  "new_estimated_rtt_ms": 105,
+                  "new_dev_rtt_ms": 17.5
+                },
+                {
+                  "label": "B",
+                  "workings": "TimeoutInterval = EstimatedRTT + 4 * DevRTT = 105 + 4 * 17.5 = 105 + 70 = 175 ms",
+                  "new_timeout_interval_ms": 175
+                },
+                {
+                  "label": "C",
+                  "response": "When a timeout fires, it typically indicates network congestion — packets are being delayed or dropped. Re-computing the timeout from the EWMA formula would use stale RTT samples that no longer reflect current network conditions, and TCP's spec prohibits taking new RTT samples on retransmitted segments (because you can't tell if an ACK is for the original or the retransmission — Karn's algorithm). Doubling the timeout provides a crude but effective exponential backoff: if the network is congested, each successive retransmission waits longer, giving the network more time to recover without flooding it with redundant retransmissions."
+                }
+              ],
+              "common_mistake": "Students compute EstimatedRTT correctly but forget that DevRTT uses the absolute deviation |SampleRTT - EstimatedRTT| from the *old* EstimatedRTT, not the new one.",
+              "deeper_concept": "EWMA as a noise-filtering mechanism, and Karn's algorithm / exponential backoff as the response to measurement ambiguity during retransmission"
+            }
+          }
+        ]
+      },
+      {
+        "id": "section_4",
+        "title": "Scenario / Troubleshooting",
+        "instructions": null,
+        "questions": [
+          {
+            "id": "Q14",
+            "number": 14,
+            "type": "troubleshooting",
+            "topic": "GBN vs SR — Wireshark Trace Analysis",
+            "difficulty": "Hard",
+            "scenario": {
+              "description": "A network engineer captures the following packet trace. Window size = 4, sequence numbers 0–7. Packets sent: 0,1,2,3. Packet 1 is lost.",
+              "trace": [
+                { "event": "Sender transmits", "packets": [0, 1, 2, 3] },
+                { "event": "Receiver receives", "packets": [0, 2, 3], "note": "Packet 1 lost" },
+                { "event": "Receiver sends ACKs", "acks": ["ACK 0", "ACK 0", "ACK 0"] },
+                { "event": "Timeout on packet 1 fires" },
+                { "event": "Sender retransmits", "packets": [1, 2, 3] }
+              ]
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "Which protocol — GBN or SR — does this trace describe? Justify your answer using three specific observable behaviors in the trace."
+              },
+              {
+                "label": "B",
+                "prompt": "How would the receiver's ACK sequence differ if the other protocol were being used instead?"
+              },
+              {
+                "label": "C",
+                "prompt": "The sender retransmits packets 1, 2, and 3 even though the receiver already has 2 and 3. What is the total number of packet transmissions in this scenario, and what would it have been with the alternative protocol?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "protocol": "Go-Back-N",
+                  "evidence": [
+                    "The receiver sends ACK 0 three times in response to out-of-order packets 2 and 3 — GBN receivers send cumulative ACK for the last in-order received packet, not individual ACKs for out-of-order arrivals.",
+                    "Packets 2 and 3 are not buffered at the receiver (they are discarded) — evidenced by the fact that the sender must retransmit them even though they arrived.",
+                    "On timeout, the sender retransmits ALL packets from the lost one forward (1, 2, 3) — GBN's 'go back N' behavior. SR would retransmit only packet 1."
+                  ]
+                },
+                {
+                  "label": "B",
+                  "sr_ack_sequence": "With SR: receiver sends ACK 0 (for packet 0), then individual ACK 2 (for packet 2), then individual ACK 3 (for packet 3). Packets 2 and 3 are buffered. On timeout, only packet 1 is retransmitted. After receiving packet 1, the receiver delivers 0,1,2,3 in order and sends ACK 1."
+                },
+                {
+                  "label": "C",
+                  "gbn_transmissions": 7,
+                  "gbn_workings": "Initial: 4 packets (0,1,2,3). Retransmit: 3 packets (1,2,3). Total = 7.",
+                  "sr_transmissions": 5,
+                  "sr_workings": "Initial: 4 packets (0,1,2,3). Retransmit: 1 packet (1). Total = 5.",
+                  "difference": "GBN requires 2 extra transmissions due to unnecessary retransmission of already-received packets."
+                }
+              ],
+              "common_mistake": "Students identify the protocol correctly but can't articulate three distinct observable differences. They often point to the retransmission behavior only and miss the ACK pattern and the lack of buffering as additional evidence.",
+              "deeper_concept": "Protocol identification from observable network behavior — the ACK pattern and retransmission scope together uniquely fingerprint GBN vs SR"
+            }
+          },
+          {
+            "id": "Q15",
+            "number": 15,
+            "type": "troubleshooting",
+            "topic": "TCP Congestion + Flow Control Interaction",
+            "difficulty": "Hard",
+            "scenario": {
+              "description": "A TCP sender has cwnd = 32 KB and ssthresh = 20 KB. The receiver advertises rwnd = 10 KB. The application has 50 KB of data ready to send.",
+              "mss_kb": 1
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "How much data can the sender actually transmit right now? Show your reasoning."
+              },
+              {
+                "label": "B",
+                "prompt": "After the receiver's application reads 8 KB from the receive buffer, the receiver sends an updated ACK advertising rwnd = 18 KB. The sender is now in Congestion Avoidance. What is the new effective send window?"
+              },
+              {
+                "label": "C",
+                "prompt": "The receiver's application stalls entirely and stops reading from the buffer. rwnd drops to 0. Describe what happens next — specifically, how does TCP prevent a permanent deadlock?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "send_window_kb": 10,
+                  "workings": "SendWindow = min(cwnd, rwnd) = min(32, 10) = 10 KB. Despite having 50 KB ready and a cwnd of 32 KB, the receiver's buffer space limits transmission to 10 KB.",
+                  "note": "The sender is also in Congestion Avoidance (cwnd 32 > ssthresh 20) but this doesn't change the current send limit."
+                },
+                {
+                  "label": "B",
+                  "new_send_window_kb": 18,
+                  "workings": "cwnd is in Congestion Avoidance. After one RTT with 10 KB of data ACKed, cwnd = 32 + 1 = 33 KB (CA: +1 MSS per RTT). SendWindow = min(33, 18) = 18 KB. The bottleneck has shifted: now rwnd (18 KB) is still the binding constraint since cwnd (33 KB) > rwnd (18 KB)."
+                },
+                {
+                  "label": "C",
+                  "mechanism": "TCP Persist Timer / Zero-Window Probing",
+                  "response": "When rwnd = 0, the sender stops transmitting. If it waited indefinitely, both sides would deadlock: receiver waiting for data, sender waiting for a non-zero rwnd update that never comes (because the sender isn't sending anything to trigger a piggybacked ACK). TCP prevents this with the Persist Timer: the sender periodically sends a 1-byte probe segment even when rwnd = 0. This forces the receiver to send an ACK, which contains the current rwnd value. When the application eventually reads data and rwnd becomes nonzero, the probe response triggers the sender to resume transmission."
+                }
+              ],
+              "common_mistake": "For part C, students correctly identify that the sender stops at rwnd=0 but don't know the resolution mechanism. Many say 'the receiver will send an update' without explaining what triggers that update when the sender has gone silent.",
+              "deeper_concept": "TCP zero-window deadlock prevention: the persist timer as a liveness mechanism when flow control creates a communication stalemate"
+            }
+          },
+          {
+            "id": "Q16",
+            "number": 16,
+            "type": "troubleshooting",
+            "topic": "QUIC vs TCP: HOL Blocking and Setup Latency",
+            "difficulty": "Hard",
+            "scenario": {
+              "description": "A web application loads a page with 10 resources: 3 critical CSS files, 5 images, and 2 JavaScript files. A network engineer compares TCP+TLS vs QUIC for this load. RTT = 50 ms. The connection experiences 2% packet loss."
+            },
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "Calculate the minimum connection setup latency before any application data can be sent for: (1) TCP + TLS 1.2, and (2) QUIC. How many RTTs does each require?"
+              },
+              {
+                "label": "B",
+                "prompt": "During the transfer, a packet carrying part of a CSS file is lost. Explain what happens in TCP vs QUIC for the remaining 9 resources still in transit."
+              },
+              {
+                "label": "C",
+                "prompt": "A colleague says: 'QUIC eliminates HOL blocking entirely — if a CSS packet is lost, images and JavaScript continue rendering normally.' Is this fully accurate? What nuance is missing?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "tcp_tls12": {
+                    "rtts": 3,
+                    "latency_ms": 150,
+                    "breakdown": "TCP 3-way handshake (1 RTT) + TLS 1.2 handshake (2 RTTs) = 3 RTTs = 150 ms before first application byte"
+                  },
+                  "quic": {
+                    "rtts": 1,
+                    "latency_ms": 50,
+                    "breakdown": "QUIC combines transport + TLS 1.3 handshake into 1 RTT (0-RTT available on resumption). First application byte after 1 RTT = 50 ms."
+                  },
+                  "savings_ms": 100
+                },
+                {
+                  "label": "B",
+                  "tcp_behavior": "TCP operates on a single byte stream. A lost packet halts delivery of all subsequent data to the application — regardless of which resource it belongs to — until the lost packet is retransmitted and received. The 9 other resources' data sits buffered in the receive window, blocked behind the lost CSS data. This is transport-layer HOL blocking.",
+                  "quic_behavior": "QUIC multiplexes each resource over an independent stream. A lost packet blocks only the stream it belongs to (the CSS file's stream). The 9 other resources' streams continue delivering data to the application independently. Images and JS are unaffected at the transport layer."
+                },
+                {
+                  "label": "C",
+                  "fully_accurate": false,
+                  "nuance": "QUIC eliminates transport-layer HOL blocking. However, application-layer dependencies can still cause blocking. If the browser cannot render the page without the CSS (a render-blocking resource), the browser itself will stall rendering even though the image and JS bytes arrived. The transport delivered them, but the application chose not to use them. Additionally, if the application uses a single stream instead of per-resource streams, QUIC provides no HOL blocking benefit. The claim is accurate at the protocol level but ignores application-level ordering constraints."
+                }
+              ],
+              "common_mistake": "Students accept the QUIC-eliminates-HOL-blocking claim uncritically without recognizing that application-layer dependencies and resource criticality (render-blocking) can impose their own ordering constraints independent of transport.",
+              "deeper_concept": "The distinction between transport-layer and application-layer head-of-line blocking — eliminating one does not eliminate the other"
+            }
+          }
+        ]
+      },
+      {
+        "id": "section_5",
+        "title": "Synthesis / Edge Cases",
+        "instructions": null,
+        "questions": [
+          {
+            "id": "Q17",
+            "number": 17,
+            "type": "short_answer",
+            "topic": "UDP Header Overhead and Protocol Selection",
+            "difficulty": "Medium",
+            "scenario": "A real-time multiplayer game sends 80-byte position update packets 60 times per second per player. The engineering team debates using TCP vs UDP.",
+            "parts": [
+              {
+                "label": "A",
+                "prompt": "Calculate the header overhead percentage for TCP/IP and UDP/IP for these 80-byte payloads."
+              },
+              {
+                "label": "B",
+                "prompt": "Beyond overhead, give three specific behavioral reasons why TCP is a poor choice for this application. For each, explain the game-specific consequence."
+              },
+              {
+                "label": "C",
+                "prompt": "The team decides to implement their own reliability on top of UDP — acknowledging only the most recent position update and discarding older ones. What class of reliability mechanism is this, and why is it appropriate for this application but not for, say, a file transfer?"
+              }
+            ],
+            "answer": {
+              "parts": [
+                {
+                  "label": "A",
+                  "tcp_ip_overhead_pct": 33.3,
+                  "tcp_workings": "TCP/IP header = 40 bytes. Total packet = 40 + 80 = 120 bytes. Overhead = 40/120 = 33.3%",
+                  "udp_ip_overhead_pct": 25.9,
+                  "udp_workings": "UDP/IP header = 28 bytes. Total packet = 28 + 80 = 108 bytes. Overhead = 28/108 = 25.9%"
+                },
+                {
+                  "label": "B",
+                  "reasons": [
+                    {
+                      "reason": "Congestion control throttling",
+                      "game_consequence": "TCP's AIMD algorithm will slow transmission rate in response to congestion, introducing variable delays between position updates. A player's character may appear to teleport or stutter as updates arrive at uneven rates."
+                    },
+                    {
+                      "reason": "Retransmission of stale data",
+                      "game_consequence": "If a position update is lost, TCP retransmits it. By the time it arrives, the player has moved significantly. The game receives and processes an outdated position, causing incorrect rendering — the retransmitted stale position is actively harmful."
+                    },
+                    {
+                      "reason": "Head-of-line blocking",
+                      "game_consequence": "A lost packet blocks all subsequent updates in the TCP stream until retransmission succeeds. A single packet loss can delay all subsequent position updates by one or more RTTs, causing a visible freeze — far worse than simply missing one update."
+                    }
+                  ]
+                },
+                {
+                  "label": "C",
+                  "mechanism_class": "Application-layer selective reliability / last-writer-wins acknowledgment",
+                  "appropriate_reason": "Position data is time-sensitive and superseding — a newer position update makes all older ones irrelevant. Missing one update is acceptable if the next one arrives. This is called a 'lossy' or 'best-effort with recency preference' reliability model. For file transfer, every byte must arrive correctly and in order — no byte is 'superseded' by a later one. A missing byte in a file leaves a permanent gap; a missing position update is implicitly corrected by the next one."
+                }
+              ],
+              "common_mistake": "Students identify 'reliability' as the reason to avoid TCP without unpacking that the specific harm is retransmitting data that is now irrelevant, not that reliability itself is bad.",
+              "deeper_concept": "Application-layer reliability as a design space: not all applications need in-order, complete delivery — and TCP's model may actively harm latency-sensitive applications"
+            }
+          }
+        ]
+      }
+    ],
+    "post_exam_critique": {
+      "strongest_questions": ["Q7", "Q9", "Q11", "Q15", "Q16"],
+      "rationale": "These questions require multi-step reasoning across interacting variables (Q7: speed vs utilization paradox; Q9: full congestion state machine trace; Q11: correctness proof for window size; Q15: cwnd+rwnd interaction with deadlock; Q16: QUIC nuance with application-layer blocking).",
+      "questions_to_strengthen": [
+        {
+          "id": "Q10",
+          "note": "Part C is the strongest part; Parts A and B lean toward recall of mechanism. A stronger version would present a corrupted packet trace and ask students to reconstruct the ACK sequence from scratch."
+        }
+      ],
+      "under_tested_concepts": [
+        "TCP RST flag behavior (connection reset scenarios)",
+        "SYN flooding and TCP connection queue exhaustion (SYN cookies)",
+        "Nagle's algorithm: interaction between small writes and delayed ACKs",
+        "TCP slow start restart after idle period",
+        "ECN (Explicit Congestion Notification): network-assisted vs end-to-end comparison",
+        "QUIC 0-RTT resumption and its security implications"
+      ]
+    }
+  }
+}
