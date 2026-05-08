@@ -1,1084 +1,740 @@
-{
-"exam": {
-"title": "Computer Networking — Practice Exam",
-"subtitle": "Foundations: Switching, Delay Models, Throughput, Protocol Layering & Packet Segmentation",
-"pre_exam_analysis": {
-"highest_priority_topics": [
-"Circuit vs. packet switching: resource allocation philosophy, statistical multiplexing, when each is better",
-"The four delay components: precise formulas for transmission, propagation, queuing, and processing",
-"Transmission vs. propagation delay: the caravan analogy and why students routinely confuse them",
-"Throughput and bottleneck link: min(Rs, Rc, R/N) in shared backbone scenarios",
-"Store-and-forward semantics: entire packet must arrive before forwarding begins, and what this costs",
-"Segmentation and pipelining delay formula: (N + P - 1) × (L/R) and the intuition behind it",
-"Statistical multiplexing math: binomial probability of congestion with n users, probability p active",
-"Protocol layering: encapsulation/decapsulation, PDU vs. SDU, peer-to-peer vs. service interface",
-"The hourglass model and IP as the narrow waist: what it enables and what it constrains",
-"End-to-end principle: why complexity lives at the edges, what the dumb core must not do",
-"Routing vs. forwarding: global path computation vs. local table lookup — the distinction matters",
-"FDM vs. TDM: how each divides resources and the idle-waste problem in circuit switching"
-],
-"common_misconceptions_targeted": [
-"Confusing transmission delay (time to push bits onto link) with propagation delay (time for bits to travel the link)",
-"Thinking packet switching is always better than circuit switching — real-time constant-rate traffic favors circuits",
-"Assuming store-and-forward doubles delay for every hop — students forget pipelining overlaps hop transmissions",
-"Misapplying the bottleneck formula by ignoring the shared backbone R/N term when N connections share a link",
-"Thinking statistical multiplexing guarantees no congestion — it only makes congestion extremely unlikely",
-"Conflating routing (global algorithm) with forwarding (local lookup) — treating them as synonyms",
-"Believing the PDU passed between peers is identical to the SDU received from above — the header addition is the whole
-point",
-"Assuming the hourglass means IP is the best possible narrow waist — it is a historical lock-in, not an optimal choice",
-"Thinking segmentation always reduces total delay — the formula shows it reduces delay but adds header overhead",
-"Confusing FDM (always-on narrow band) with TDM (full-rate periodic slot) — students blend them together"
-]
-},
-"sections": [
-{
-"id": "section_1",
-"title": "True / False",
-"instructions": "State TRUE or FALSE, then write 2–3 sentences justifying your answer. No credit for the answer alone.",
-"questions": [
-{
-"id": "Q1",
-"number": 1,
-"type": "true_false",
-"topic": "Transmission Delay vs. Propagation Delay",
-"difficulty": "Medium",
-"prompt": "A network engineer doubles the bandwidth of a fiber link from 1 Gbps to 2 Gbps. This change will cut in half
-the time it takes for the first bit of a packet to arrive at the far end of the link.",
-"answer": {
-"verdict": "FALSE",
-"explanation": "Doubling the link bandwidth halves the transmission delay — the time to push all bits of a packet onto
-the link (d_trans = L/R). However, the time for the first bit to arrive at the far end is dominated by propagation delay
-(d_prop = d/s), which depends solely on the physical length of the link and the speed of light in the medium. Doubling
-the bandwidth does not change how fast bits travel through the fiber — that is a physical property of the medium. The
-first bit still takes exactly the same time to propagate across the link regardless of the link rate.",
-"common_mistake": "Students conflate bandwidth (a rate — how fast bits are pushed onto the link) with propagation speed
-(how fast a bit travels through the medium). Increasing one has zero effect on the other.",
-"deeper_concept": "The fundamental independence of transmission delay and propagation delay; why high-bandwidth
-satellite links still have high latency (propagation delay dominates across 36,000 km)"
-}
-},
-{
-"id": "Q2",
-"number": 2,
-"type": "true_false",
-"topic": "Circuit Switching — Idle Resource Waste",
-"difficulty": "Easy",
-"prompt": "In a circuit-switched network, once a call is established, the reserved bandwidth is available to other users
-if the original caller is temporarily silent (not sending data).",
-"answer": {
-"verdict": "FALSE",
-"explanation": "Circuit switching dedicates resources exclusively to a connection for its entire duration, regardless of
-whether those resources are being used. If a caller falls silent, their allocated frequency band (FDM) or time slot
-(TDM) sits idle — other users cannot reclaim it. This is the defining inefficiency of circuit switching: reserved
-resources are wasted during idle periods. This is precisely why packet switching's statistical multiplexing is more
-efficient for bursty traffic — resources are only consumed when data is actually being sent.",
-"common_mistake": "Students confuse circuit switching with something like a reservation system where unused slots can be
-reclaimed. The entire point of the reservation is exclusivity — giving it back would break the performance guarantees
-the circuit was designed to provide.",
-"deeper_concept": "The fundamental resource allocation tradeoff: guaranteed exclusivity (circuit) vs. shared efficiency
-(packet); why statistical multiplexing outperforms static allocation for bursty traffic"
-}
-},
-{
-"id": "Q3",
-"number": 3,
-"type": "true_false",
-"topic": "Store-and-Forward and Pipelining",
-"difficulty": "Hard",
-"prompt": "In a store-and-forward network, sending a 3-packet message across 4 links takes exactly 4 times as long as
-sending it across 1 link, because each router must receive all 3 packets before forwarding any of them.",
-"answer": {
-"verdict": "FALSE",
-"explanation": "Store-and-forward requires a router to receive an entire individual packet before forwarding it — but it
-does NOT require a router to receive all packets of a message before forwarding the first one. Pipelining allows Router
-1 to forward Packet 1 to Router 2 while the source is still transmitting Packet 2 to Router 1. For P packets over N
-links, total time is (N + P - 1) × (L/R), not N × P × (L/R). For 3 packets over 4 links, that is (4 + 3 - 1) = 6
-packet-transmission-times, not 12. The claim in the prompt describes a much worse scenario that does not exist.",
-"common_mistake": "Students apply store-and-forward at the message level (all packets) rather than the packet level
-(each individual packet). This leads to wildly pessimistic delay estimates and a misunderstanding of why segmentation
-helps.",
-"deeper_concept": "The distinction between store-and-forward semantics (per-packet) and the pipeline parallelism it
-still enables across multiple hops; why (N + P - 1) not N × P"
-}
-},
-{
-"id": "Q4",
-"number": 4,
-"type": "true_false",
-"topic": "Statistical Multiplexing — Congestion Guarantee",
-"difficulty": "Medium",
-"prompt": "Statistical multiplexing in packet switching guarantees that congestion will never occur as long as the
-average traffic load is below the link capacity.",
-"answer": {
-"verdict": "FALSE",
-"explanation": "Statistical multiplexing makes congestion unlikely — not impossible. Even when average load is well
-below capacity, instantaneous bursts can cause multiple users to become active simultaneously, temporarily exceeding
-capacity and causing queuing or packet loss. The binomial probability model shows that for any finite number of users
-with nonzero activity probability p, there is always some probability that more than the capacity-equivalent number of
-users are simultaneously active. Statistical multiplexing is an efficiency bet on the burstiness of traffic, not a
-guarantee. That is why routers have buffers and why packet loss is a normal part of the Internet's operation.",
-"common_mistake": "Students read 'statistical multiplexing is more efficient' and infer 'therefore congestion-free.' The
-qualifier 'statistical' itself signals that the outcome is probabilistic, not deterministic.",
-"deeper_concept": "The probabilistic nature of packet-switched network performance; why best-effort delivery and
-drop-on-overflow are fundamental design features, not flaws"
-}
-},
-{
-"id": "Q5",
-"number": 5,
-"type": "true_false",
-"topic": "Protocol Layering — PDU vs. SDU",
-"difficulty": "Medium",
-"prompt": "When the Transport layer on the sender passes a segment to the Network layer, both layers are exchanging the
-same Protocol Data Unit (PDU) — the segment. The Network layer simply forwards it unchanged.",
-"answer": {
-"verdict": "FALSE",
-"explanation": "The Transport layer's PDU (a segment) becomes the Network layer's SDU — the payload that is handed down
-as a service data unit. The Network layer then encapsulates this SDU by prepending its own header (IP header), creating
-a new PDU called a datagram. The segment is not forwarded unchanged; it is wrapped. At the receiver, the process
-reverses: the Network layer strips its header and passes the original segment up as an SDU to the Transport layer. The
-key insight is that each layer's PDU = its SDU + its own header, creating the nested 'Matryoshka doll' structure of
-encapsulation.",
-"common_mistake": "Students conflate the SDU (what is received from above) with the PDU (what is exchanged with the peer
-layer). The addition of the header is the entire mechanism by which a layer adds its own addressing and control
-information.",
-"deeper_concept": "Encapsulation as the core mechanism of layered networking; how each layer's header carries the
-information needed by its peer at the receiver to perform its function"
-}
-}
-]
-},
-{
-"id": "section_2",
-"title": "Delay and Throughput Calculations",
-"instructions": "Show all work. State which delay component(s) you are computing at each step. A correct answer with no
-supporting work receives no credit.",
-"questions": [
-{
-"id": "Q6",
-"number": 6,
-"type": "calculation",
-"topic": "Four Delay Components — Decomposition",
-"difficulty": "Hard",
-"scenario": {
-"setup": "A router connects two links. The incoming link has bandwidth 500 Mbps. The outgoing link has bandwidth 100
-Mbps and a physical length of 4000 km. The propagation speed in the medium is 2 × 10^8 m/s. A 12,000-bit packet arrives
-at the router. There are currently 5 other packets of the same size already queued at the output port. Processing delay
-at the router is 2 microseconds.",
-"task": "Compute the total nodal delay experienced by this packet at this router. Break down each of the four components
-with units."
-},
-"answer": {
-"components": {
-"processing_delay": {
-"value": "2 microseconds = 0.000002 s",
-"note": "Given directly."
-},
-"queuing_delay": {
-"formula": "5 packets ahead × (L / R_out)",
-"calculation": "5 × (12,000 bits / 100,000,000 bps) = 5 × 0.00012 s = 0.0006 s = 600 microseconds",
-"note": "The packet must wait for the 5 queued packets to finish transmitting before it can begin. The incoming link
-speed is irrelevant here — queuing delay is driven by the outgoing link rate."
-},
-"transmission_delay": {
-"formula": "L / R_out",
-"calculation": "12,000 bits / 100,000,000 bps = 0.00012 s = 120 microseconds",
-"note": "Time to push this packet's bits onto the outgoing 100 Mbps link. The incoming 500 Mbps rate does not affect
-this."
-},
-"propagation_delay": {
-"formula": "d / s",
-"calculation": "4,000,000 m / (2 × 10^8 m/s) = 0.02 s = 20,000 microseconds = 20 ms",
-"note": "Time for the last bit to travel to the next router 4000 km away. Dominates the total in this scenario."
-},
-"total": {
-"calculation": "2 + 600 + 120 + 20,000 = 20,722 microseconds ≈ 20.7 ms",
-"dominant_component": "Propagation delay (20 ms) dominates because of the 4000 km link length."
-}
-},
-"common_mistake": "Students use the incoming link rate (500 Mbps) for transmission delay instead of the outgoing rate
-(100 Mbps). The packet exits on the outgoing link — that rate determines how long it takes to transmit. Also, students
-often forget to compute queuing delay as the service time for all previously queued packets, not just a generic wait
-time.",
-"deeper_concept": "Why long-haul links are dominated by propagation delay, not transmission delay; why adding bandwidth
-to a transoceanic cable does not reduce latency; the role of each delay component in different network scenarios"
-}
-},
-{
-"id": "Q7",
-"number": 7,
-"type": "calculation",
-"topic": "Segmentation and Pipelining Delay Formula",
-"difficulty": "Hard",
-"scenario": {
-"description": "A source host wants to send a 7.2 megabit (7,200,000-bit) file to a destination host through 3
-intermediate routers (4 links total). Each link has a bandwidth of 1.2 Mbps. Ignore propagation and processing delays."
-},
-"answer": {
-"parts": {
-"A": {
-"formula": "T = N × (M / R)",
-"calculation": "N = 4 links, M = 7,200,000 bits, R = 1,200,000 bps. T = 4 × (7,200,000 / 1,200,000) = 4 × 6 s = 24
-seconds",
-"note": "Each router must receive the entire 7.2 Mb file before forwarding. No parallelism."
-},
-"B": {
-"formula": "T = (N + P - 1) × (L / R)",
-"calculation": "N = 4 links, P = 1200 packets, L = 6000 bits, R = 1,200,000 bps. L/R = 6000/1,200,000 = 0.005 s. T = (4
-+ 1200 - 1) × 0.005 = 1203 × 0.005 = 6.015 seconds",
-"speedup": "24 s vs 6.015 s — roughly 4× faster"
-},
-"C": {
-"mechanism": "Segmentation enables pipelining: while Router 1 forwards Packet 1 to Router 2, the source is
-simultaneously sending Packet 2 to Router 1, and so on. All links in the path are kept busy in parallel rather than
-sequentially. The end-to-end time collapses from N × (M/R) to approximately M/R + (N-1) × (L/R), where the second term
-is the small pipeline startup overhead.",
-"cost": "Every packet requires its own header. With 1200 packets, 1200 headers must be created, transmitted, and parsed.
-This adds bandwidth overhead (header bits / total bits) and increases per-packet processing load at every router
-compared to the single large packet."
-},
-"D": {
-"answer": "Making packets smaller to 600 bits yields 12,000 packets. The (N + P - 1) term becomes (4 + 12,000 - 1) =
-12,003 vs. 1,203 for 1200 packets. T = 12,003 × (600/1,200,000) = 12,003 × 0.0005 = 6.0015 s. This is marginally faster
-in the formula, but in practice the result would be slower or equal due to the dramatically increased header-to-payload
-ratio (12,000 headers vs. 1,200) and the router processing overhead of handling 10× more packets. The delay formula
-ignores header overhead; in a real system, very small packets are less efficient.",
-"key_insight": "The formula shows diminishing returns as P grows large — (N + P - 1) × (L/R) ≈ P × (L/R) = M/R for large
-P, which is constant. The formula approaches M/R + (N-1)×(L/R) asymptotically. Smaller packets don't meaningfully help
-delay but do meaningfully hurt overhead."
-}
-},
-"common_mistake": "For Part A, students apply the segmentation formula with P=1 instead of the simpler N × (M/R). They
-are equivalent — (N + 1 - 1) × (M/R) = N × (M/R) — but students should recognize both forms. For Part B, students drop
-the '-1' from (N + P - 1), which is a small error here but matters conceptually.",
-"deeper_concept": "Why pipelining reduces delay by converting a sequential process into a parallel one; the tradeoff
-between packet size, header overhead, and pipeline efficiency"
-},
-"parts": [
-{
-"label": "A",
-"prompt": "How long does it take to deliver the file if it is sent as a single, unsegmented packet?"
-},
-{
-"label": "B",
-"prompt": "How long does it take if the file is segmented into 1200 packets of 6000 bits each?"
-},
-{
-"label": "C",
-"prompt": "Why is Part B faster? Explain the mechanism in one or two sentences. Then identify one cost that Part B
-incurs that Part A does not."
-},
-{
-"label": "D",
-"prompt": "A network engineer proposes making packets smaller — say 600 bits each (yielding 12,000 packets). Without
-calculating the exact answer, explain whether this will be faster, slower, or the same as Part B, and why."
-}
-]
-},
-{
-"id": "Q8",
-"number": 8,
-"type": "calculation",
-"topic": "Throughput and Bottleneck Link",
-"difficulty": "Medium",
-"scenario": {
-"description": "Consider the following end-to-end path: A server with an outgoing access link of 80 Mbps connects
-through a shared backbone link of 200 Mbps to a client with an incoming access link of 30 Mbps. The backbone link is
-shared by 5 simultaneous connections (including this one)."
-},
-"answer": {
-"parts": {
-"A": {
-"formula": "Throughput = min(R_s, R_c, R/N)",
-"values": "R_s = 80 Mbps, R_c = 30 Mbps, R/N = 200/5 = 40 Mbps",
-"calculation": "min(80, 30, 40) = 30 Mbps",
-"bottleneck": "The client's access link at 30 Mbps is the bottleneck."
-},
-"B": {
-"new_values": "R_s = 160 Mbps, R_c = 30 Mbps, R/N = 40 Mbps",
-"calculation": "min(160, 30, 40) = 30 Mbps — unchanged",
-"conclusion": "The upgrade did not help at all. The bottleneck is the client's access link, not the server's. Upgrading
-a non-bottleneck link has zero effect on end-to-end throughput — a fundamental and often expensive lesson in network
-capacity planning."
-},
-"C": {
-"answer": "Upgrading the client's access link from 30 Mbps to anything above 40 Mbps would shift the bottleneck.
-Specifically, upgrading to 40+ Mbps makes the backbone share (40 Mbps) the new bottleneck. Upgrading the client link to
-40 Mbps raises throughput from 30 Mbps to 40 Mbps — a 33% improvement. Upgrading the client link further (e.g., to 80
-Mbps) doesn't help until the backbone is also upgraded or has fewer sharing connections."
-}
-},
-"common_mistake": "Students average the three rates instead of taking the minimum. They also commonly ignore the R/N
-term entirely, treating the backbone as having full 200 Mbps capacity per connection.",
-"deeper_concept": "Bottleneck identification as a prerequisite for any effective capacity upgrade; why improving
-non-bottleneck links wastes money; the min() nature of end-to-end throughput"
-},
-"parts": [
-{
-"label": "A",
-"prompt": "What is the end-to-end throughput for this connection?"
-},
-{
-"label": "B",
-"prompt": "The server upgrades its access link to 160 Mbps. What is the new end-to-end throughput? Did the upgrade
-help?"
-},
-{
-"label": "C",
-"prompt": "What single infrastructure upgrade would most improve throughput for this connection, and by how much?"
-}
-]
-}
-]
-},
-{
-"id": "section_3",
-"title": "Short Answer — Conceptual",
-"instructions": "Answer in 3–6 sentences. Explain the 'why', not just the 'what'. Vague or definition-only answers
-receive no credit.",
-"questions": [
-{
-"id": "Q9",
-"number": 9,
-"type": "short_answer",
-"topic": "Circuit vs. Packet Switching — When Circuit Wins",
-"difficulty": "Medium",
-"prompt": "A telecommunications company is designing the network infrastructure for two separate applications: (1) a
-real-time remote surgery system that transmits 4K video and haptic feedback with zero tolerance for jitter or delay
-variation, and (2) a popular video-on-demand streaming service for millions of casual viewers. Which switching
-technology — circuit or packet — is more appropriate for each application, and why? Be specific about what property of
-each technology drives your recommendation.",
-"answer": {
-"application_1": {
-"recommendation": "Circuit switching",
-"reasoning": "Remote surgery requires guaranteed constant bandwidth and zero queuing delay/jitter — a surgeon cannot
-tolerate feedback that is delayed or uneven due to network congestion. Circuit switching reserves dedicated resources
-for the duration of the connection, eliminating the possibility of queuing (no buffer contention with other users) and
-guaranteeing constant transmission timing. The cost of idle resource waste is acceptable given the life-critical
-performance guarantee needed."
-},
-"application_2": {
-"recommendation": "Packet switching",
-"reasoning": "Video-on-demand is bursty traffic at scale — millions of users watching at different rates, pausing,
-buffering, or seeking. Circuit switching would require pre-allocating bandwidth for every concurrent viewer, which would
-be astronomically wasteful since viewers are rarely sending at their maximum rate simultaneously. Packet switching
-exploits statistical multiplexing: the probability that all users demand peak bandwidth simultaneously is negligibly
-small, so the same physical infrastructure can serve far more users than circuit switching could at the same cost. Minor
-buffering at the client side absorbs any jitter."
-},
-"key_distinction": "The decision turns on traffic burstiness and tolerance for delay variation. Constant,
-latency-sensitive, low-tolerance applications favor circuits; bursty, delay-tolerant, large-scale applications favor
-packets.",
-"common_mistake": "Students say 'packet switching is always better' without acknowledging that 'better' depends entirely
-on the application's traffic profile and performance requirements. The Internet works on packet switching not because
-circuits are always inferior, but because most Internet traffic is bursty.",
-"deeper_concept": "The fundamental engineering tradeoff between guaranteed performance (circuit) and statistical
-efficiency (packet); why the Internet is packet-switched and the phone network was circuit-switched"
-}
-},
-{
-"id": "Q10",
-"number": 10,
-"type": "short_answer",
-"topic": "Routing vs. Forwarding — The Critical Distinction",
-"difficulty": "Medium",
-"prompt": "A student says: 'Routing and forwarding are the same thing — both just decide where to send a packet.'
-Explain why this is wrong, using the specific terms control plane and data plane. Describe what would break if you
-collapsed both functions into a single, slow process running on the router's main CPU.",
-"answer": {
-"correct_distinction": "Forwarding is a local, per-packet, data-plane operation: when a packet arrives, the router looks
-up its destination IP in a pre-built forwarding table and moves the packet to the correct output port. This happens in
-nanoseconds using dedicated hardware (the switching fabric) and must handle millions of packets per second. Routing is a
-global, control-plane operation: routing protocols (like OSPF or BGP) exchange topology information with other routers
-across the network, run path-computation algorithms, and build the forwarding tables that the data plane uses. This
-happens over seconds or minutes on the router's CPU.",
-"what_breaks": "If forwarding decisions were made by running the full routing algorithm on every arriving packet, the
-router's CPU — which operates in millisecond timescales — could not keep up with packet arrival rates (nanosecond
-timescales). Line-rate packet processing would be impossible. This is why modern routers maintain a pre-computed
-forwarding table (TCAM hardware for O(1) lookup) and run routing protocols asynchronously in the background. Collapsing
-the two would reduce a high-speed router to a software-switch processing a tiny fraction of its capacity.",
-"common_mistake": "Students know both terms but describe them as varying levels of the same process ('routing is more
-global, forwarding is more local') without capturing that they operate on completely different timescales and are
-implemented in completely different hardware/software components.",
-"deeper_concept": "The separation of control plane and data plane as a performance and scalability architecture; why SDN
-makes this separation even more explicit by physically moving the control plane off the router"
-}
-},
-{
-"id": "Q11",
-"number": 11,
-"type": "short_answer",
-"topic": "The Hourglass Model and IP as Narrow Waist",
-"difficulty": "Hard",
-"prompt": "The Internet's hourglass architecture places IP as the 'narrow waist.' (A) Explain what property of IP
-enables the hourglass model — what specifically does placing IP in the middle allow above and below it? (B) A network
-researcher argues: 'The hourglass is a historical accident, not an optimal design. A different narrow waist would have
-been better.' Is this a reasonable argument? What is the cost of changing the narrow waist today?",
-"answer": {
-"parts": {
-"A": "IP provides a minimal, uniform abstraction: it delivers datagrams on a best-effort basis with a standard address
-format (32-bit IPv4 or 128-bit IPv6). By requiring only that a link layer can carry IP datagrams and that an application
-can use IP's datagram service, the hourglass allows any physical technology (Ethernet, WiFi, fiber, copper, satellite —
-running over anything) to interoperate with any application (HTTP, streaming, gaming, VoIP) without either layer needing
-to know about the specifics of the other. IP acts as a translation layer: applications do not care whether the physical
-medium is fiber or WiFi, and physical networks do not care whether the application is email or video.",
-"B": "The researcher's argument is entirely reasonable as a technical matter. IP was designed in the 1970s for a much
-smaller, more homogeneous network. Modern requirements (mobility, QoS, multicast, security) are awkward fits for the
-original IP design, and many of IPv4's limitations (address exhaustion, lack of encryption, fragmentation complexity)
-stem from early design choices. However, the practical cost of replacing IP as the narrow waist is prohibitive: every
-router, every OS network stack, every application, and every piece of network hardware worldwide implements IP. The
-switching cost is not technical — it is the massive installed base (sometimes called 'ossification'). IPv6, which is a
-relatively modest evolution of IPv4, took decades to achieve partial deployment. A wholesale replacement of IP would
-require coordinated changes at billions of devices with no clear transition path."
-},
-"common_mistake": "Students treat the hourglass as an intentional, optimal design rather than an emergent property of
-IP's early success and subsequent lock-in. The distinction between 'what the hourglass enables' (technical flexibility)
-and 'why it persists' (installed base) is frequently missed.",
-"deeper_concept": "Network ossification: how successful standards become permanent fixtures regardless of technical
-merit; the difference between optimal design and deployable design in large-scale infrastructure"
-}
-}
-]
-},
-{
-"id": "section_4",
-"title": "Scenario Analysis and Protocol Behavior",
-"instructions": "Each scenario presents a realistic networking situation. Analyze the behavior step by step and address
-every part of the question.",
-"questions": [
-{
-"id": "Q12",
-"number": 12,
-"type": "scenario",
-"topic": "Statistical Multiplexing — Probability and Capacity Planning",
-"difficulty": "Hard",
-"scenario": {
-"description": "An ISP has a shared 10 Mbps uplink. Each of its residential customers requires exactly 1 Mbps when
-active, and each customer is independently active 8% of the time."
-},
-"answer": {
-"parts": {
-"A": {
-"answer": "With circuit switching, each customer requires a permanently reserved 1 Mbps slice. Total capacity = 10 Mbps.
-Maximum customers = 10 / 1 = 10 customers.",
-"note": "The 11th customer would be blocked — they would receive a busy signal or connection refused."
-},
-"B": {
-"expression": "P(congestion) = P(X > 10) = Σ_{k=11}^{80} C(80, k) × (0.08)^k × (0.92)^(80-k)",
-"qualitative_assessment": "With 80 customers each active 8% of the time, the expected number active at any moment is 80
-× 0.08 = 6.4 customers — well below the 10-customer capacity. The binomial distribution with n=80, p=0.08 has a mean of
-6.4 and standard deviation ≈ √(80 × 0.08 × 0.92) ≈ 2.43. The threshold of 10 is approximately (10 - 6.4) / 2.43 ≈ 1.48
-standard deviations above the mean. By the normal approximation, P(X > 10) ≈ P(Z > 1.48) ≈ 7% — this likely exceeds the
-1% threshold. The ISP would need to reduce customer count or accept higher congestion probability. (A value of ~120-130
-customers typically brings this below 1% for these parameters.)",
-"note": "The setup expression is what matters for exam credit; full evaluation requires a calculator."
-},
-"C": {
-"explanation_1": "Queuing delay is non-linear and increases sharply as utilization approaches capacity. Even at 50%
-average utilization, brief bursts of simultaneous activity create queues whose delay is much higher than average — the
-customer experiences these peaks as 'slowness' even though they don't observe other simultaneous users.",
-"explanation_2": "Propagation and transmission delays are always present regardless of load. A customer may be using the
-link exclusively but experiencing high latency to a distant server (propagation delay dominated by physical distance) or
-downloading a large file that fills the 10 Mbps pipe entirely — giving them 1 Mbps throughput even with no competition,
-because the bottleneck is their own share of the shared link at that instant."
-}
-},
-"common_mistake": "For Part B, students set up P(X = 10) instead of P(X > 10). Congestion occurs when demand exceeds
-capacity — the threshold is strictly greater than, not equal to. For Part C, students give only the 'other users are
-active but you can't see them' explanation and miss the fundamentally different explanation of queuing delay
-non-linearity.",
-"deeper_concept": "The gap between average-case and worst-case performance under statistical multiplexing; why link
-utilization percentages are misleading without accounting for delay variance"
-},
-"parts": [
-{
-"label": "A",
-"prompt": "How many customers can the ISP support with circuit switching?"
-},
-{
-"label": "B",
-"prompt": "With packet switching, the ISP wants the probability of more than 10 customers being simultaneously active to
-be below 1%. Using the binomial probability formula, set up (but do not fully evaluate) the expression for the
-congestion probability with 80 customers. Explain qualitatively whether 80 customers is likely to satisfy the 1%
-threshold."
-},
-{
-"label": "C",
-"prompt": "The ISP doubles its residential base to 160 customers on the same 10 Mbps link. A customer complains that
-their internet feels slower even though no one seems to be using the internet at the same time. Give two distinct
-technical explanations for why this can happen even under statistical multiplexing."
-}
-]
-},
-{
-"id": "Q13",
-"number": 13,
-"type": "scenario",
-"topic": "FDM vs. TDM — Resource Division Mechanics",
-"difficulty": "Medium",
-"scenario": {
-"description": "A circuit-switched network has a 12 Mbps link shared among 4 users."
-},
-"answer": {
-"parts": {
-"A": {
-"rate_per_user": "12 Mbps / 4 = 3 Mbps per user (each gets a dedicated 3 Mbps frequency band)",
-"idle_impact": "User 3's 3 Mbps frequency band sits idle — no other user can use it. The total effective throughput of
-the link drops from 12 Mbps to 9 Mbps while User 3 is silent, even though 3 Mbps of capacity is physically available.
-This is the core inefficiency of static resource allocation."
-},
-"B": {
-"slot_size_bits": "Total link rate = 12 Mbps. With 4 slots per frame and 8000 frames/second, each slot carries
-12,000,000 / (4 × 8000) = 12,000,000 / 32,000 = 375 bits per slot. Each user transmits at 8000 slots/second × 375 bits =
-3,000,000 bps = 3 Mbps.",
-"idle_impact": "User 3's time slots are wasted — they transmit silence (or padding). The other three users still only
-transmit in their own slots; they cannot use User 3's slots even though they are empty. Same static allocation problem
-as FDM, just in the time domain instead of frequency domain."
-},
-"C": {
-"FDM": "Under FDM, the fifth user cannot join unless the frequency spectrum is repartitioned. Each existing user's band
-must be narrowed from 3 Mbps to 2.4 Mbps (12/5), requiring reconfiguration of all five endpoints' radio hardware. In
-practice, this requires a new 'call setup' that renegotiates the frequency allocation — this is exactly the 'call
-blocking' problem: if the system is designed for exactly 4 users, the 5th user receives a busy signal.",
-"TDM": "Under TDM, adding a fifth user requires adding a 5th slot to each frame. This either increases the frame size
-(reducing the bit rate per slot if frame rate stays constant) or increases the frame rate (which may not be physically
-possible). Again, the connection is typically blocked if the system's fixed frame structure cannot accommodate more
-slots."
-}
-},
-"common_mistake": "Students confuse FDM and TDM by saying FDM is 'better' because it's continuous. Both have identical
-static allocation problems — the difference is only in the dimension being divided (frequency vs. time). Both waste
-resources when users are idle.",
-"deeper_concept": "Static resource reservation as the fundamental inefficiency of circuit switching; why both FDM and
-TDM fail to exploit idle capacity and how this motivates statistical multiplexing"
-},
-"parts": [
-{
-"label": "A",
-"prompt": "Under FDM, what transmission rate does each user get? If User 3 is idle, what happens to their allocated
-bandwidth?"
-},
-{
-"label": "B",
-"prompt": "Under TDM with 4 slots per frame and a frame rate of 8000 frames/second, what is the transmission rate per
-user? How does User 3's silence affect the other users?"
-},
-{
-"label": "C",
-"prompt": "A fifth user suddenly wants to join. What happens under FDM? What happens under TDM?"
-}
-]
-}
-]
-},
-{
-"id": "section_5",
-"title": "Troubleshooting and Failure Scenarios",
-"instructions": "Diagnose the problem at the protocol or architecture level. Identify the root cause and explain the
-correct behavior.",
-"questions": [
-{
-"id": "Q14",
-"number": 14,
-"type": "troubleshooting",
-"topic": "Delay Pathology: Low Utilization but High Latency",
-"difficulty": "Hard",
-"scenario": "A network operations engineer measures the following on a 100 Mbps router output link: average traffic load
-is 20 Mbps (20% utilization), but users are reporting latency spikes of 300–500 ms every few seconds. The engineer
-concludes: 'At only 20% utilization, there should be no queuing delay at all — this must be a routing protocol problem.'
-Identify the flaw in the engineer's reasoning and give two distinct technical explanations for why high queuing delay
-can occur at 20% average utilization.",
-"answer": {
-"flaw": "The engineer is applying average utilization to a conclusion that requires instantaneous behavior analysis.
-Queuing delay is not determined by average utilization — it is determined by whether the instantaneous arrival rate
-exceeds the service rate at any given moment. A 20% average utilization is perfectly consistent with frequent short
-bursts that saturate the link temporarily.",
-"explanation_1": {
-"cause": "Bursty traffic arrival",
-"detail": "Network traffic is notoriously bursty — arrivals cluster in time due to synchronized application behavior
-(e.g., many TCP connections entering slow-start simultaneously, scheduled batch transfers, DNS response cascades). A 20%
-average utilization can mask a traffic pattern where the link is idle 80% of the time and 100% saturated for bursts of
-20-50 ms. During saturation bursts, packets queue and experience 300+ ms delays before the burst clears. The averaging
-hides this."
-},
-"explanation_2": {
-"cause": "Buffer bloat",
-"detail": "Modern router buffers are often over-provisioned (hundreds of milliseconds of buffering capacity at the link
-rate). When a burst arrives, instead of dropping packets quickly and allowing TCP to back off, the router fills its
-large buffer. Even as the burst subsides and average utilization drops, the already-queued packets must drain through
-the buffer one by one at 100 Mbps — introducing hundreds of milliseconds of queuing delay for all subsequent packets
-that arrive while the buffer drains. This is known as 'bufferbloat.'"
-},
-"common_mistake": "Students accept the engineer's conclusion at face value, not recognizing that average statistics
-routinely hide pathological instantaneous behavior. Queuing theory (specifically the M/M/1 queue model) shows that delay
-increases non-linearly as utilization approaches 100% — and bursts temporarily push utilization to 100% regardless of
-the average.",
-"deeper_concept": "The difference between average and instantaneous utilization in network performance analysis;
-bufferbloat as a real-world pathology caused by excessive buffering; why active queue management (RED/CoDel) exists"
-}
-},
-{
-"id": "Q15",
-"number": 15,
-"type": "troubleshooting",
-"topic": "Encapsulation and the Overhead Tax",
-"difficulty": "Medium",
-"scenario": "A developer is sending 1-byte sensor readings over a WiFi network using TCP/IP. Each reading is sent as a
-separate TCP segment. They notice that even though sensor data is only 1 byte, Wireshark shows each transmission
-consuming roughly 66+ bytes on the wire. They conclude: 'The network stack is malfunctioning — it is adding 65 bytes of
-garbage to my 1-byte messages.' Correct the developer's understanding and explain what those 65+ bytes are, layer by
-layer.",
-"answer": {
-"correction": "The network stack is functioning exactly as designed. The 65+ bytes are protocol headers added by each
-layer of the stack through encapsulation — they are not garbage but necessary control information that enables
-addressing, routing, reliable delivery, and error detection.",
-"breakdown": {
-"TCP_header": "20 bytes minimum — contains source and destination port numbers, sequence number, acknowledgment number,
-flags (SYN/ACK/FIN), window size for flow control, and checksum. Required for process-to-process multiplexing and TCP's
-reliability mechanism.",
-"IP_header": "20 bytes minimum — contains source and destination IP addresses (for routing), TTL, protocol field, and
-header checksum. Required for network-layer routing from source host to destination host.",
-"Ethernet_frame_header_and_trailer": "26 bytes — 14-byte header (destination MAC 6B, source MAC 6B, EtherType 2B) plus
-4-byte CRC trailer. Required for link-layer addressing and error detection on the local segment.",
-"total_overhead": "20 + 20 + 26 = 66 bytes of headers/trailer for 1 byte of payload. Overhead ratio: 66/67 = 98.5%
-overhead."
-},
-"lesson": "This extreme overhead ratio is a direct argument against sending many tiny messages. The developer should
-batch sensor readings (e.g., send 100 readings per packet) to reduce the per-byte overhead from 66x to near 1x. This is
-a fundamental application design principle: match message granularity to the protocol overhead cost.",
-"common_mistake": "Students know encapsulation as a concept but cannot enumerate the actual headers and their sizes.
-They also often forget the Ethernet trailer (CRC) when counting overhead.",
-"deeper_concept": "Protocol overhead as a real cost that shapes application design; why small-message protocols like
-MQTT and CoAP exist for IoT; the practical consequence of the 'Matryoshka doll' encapsulation model"
-}
-}
-]
-},
-{
-"id": "section_6",
-"title": "Edge Cases and Synthesis",
-"instructions": "These questions require integrating multiple concepts or reasoning about subtle edge cases. Read
-carefully.",
-"questions": [
-{
-"id": "Q16",
-"number": 16,
-"type": "edge_case",
-"topic": "Store-and-Forward: When Does It Hurt the Most?",
-"difficulty": "Hard",
-"prompt": "Two networks are being compared. Network A uses store-and-forward packet switching with 10-hop paths and 1
-Mbps links. Network B uses cut-through switching, where a router begins forwarding a packet as soon as the header is
-received (64 bytes), rather than waiting for the entire packet. Both networks carry 1500-byte packets. Ignore
-propagation delay.\n\n(A) Calculate the end-to-end transmission delay in Network A for one packet across 10 hops.\n(B)
-Estimate the saving that cut-through switching provides per hop in Network B, and the total saving across 10 hops.\n(C)
-Under what traffic condition does the cut-through advantage nearly disappear?",
-"answer": {
-"parts": {
-"A": {
-"formula": "Store-and-forward: T = N × (L/R)",
-"calculation": "N = 10 hops, L = 1500 bytes = 12,000 bits, R = 1,000,000 bps. T = 10 × (12,000 / 1,000,000) = 10 × 0.012
-s = 0.12 s = 120 ms"
-},
-"B": {
-"cut_through_per_hop": "Router starts forwarding after receiving 64 bytes (header). Per-hop delay in cut-through ≈ 64
-bytes × 8 / 1,000,000 = 512 bits / 1 Mbps = 0.000512 s = 0.512 ms per hop (the latency to receive just the header).",
-"store_and_forward_per_hop": "1500 bytes × 8 / 1,000,000 = 12 ms per hop.",
-"saving_per_hop": "12 ms - 0.512 ms ≈ 11.5 ms saved per hop",
-"total_saving": "However, the last hop must fully transmit the packet regardless (the destination receives all bits). So
-the saving applies at N-1 = 9 intermediate hops. Total saving ≈ 9 × 11.5 ms ≈ 103.5 ms. The cut-through network delivers
-the packet in roughly 0.512 × 10 + (1500-64) bytes × 8 / 1Mbps ≈ 5.12 ms + 11.5 ms ≈ 16.6 ms vs. 120 ms — a roughly 7×
-reduction in forwarding delay.",
-"note": "Exact cut-through delay calculation: first bit arrives at destination after header-arrival-delay × 9
-intermediate hops + full packet reception at final hop. The dominant term is actually the propagation delay in real
-networks."
-},
-"C": {
-"answer": "The cut-through advantage nearly disappears when the router encounters a speed mismatch — the incoming link
-is faster than the outgoing link. In that case, cut-through cannot forward the packet faster than the outgoing link can
-absorb it, so the router is forced to buffer the full packet anyway (effectively reverting to store-and-forward
-behavior). Cut-through also cannot help when error-checking is needed: if the packet has a CRC error detected at the
-end, a cut-through router has already forwarded a corrupt packet downstream — store-and-forward catches this before
-forwarding. In error-prone environments, cut-through propagates errors through the network."
-}
-},
-"common_mistake": "Students forget that cut-through cannot save delay on the final hop — the destination must receive
-all bits before passing the packet up the stack. They also miss the error-propagation problem with cut-through in noisy
-environments.",
-"deeper_concept": "Store-and-forward vs. cut-through as a latency vs. error-propagation tradeoff; why modern high-speed
-data center switches often use cut-through for latency-sensitive workloads"
-}
-},
-{
-"id": "Q17",
-"number": 17,
-"type": "synthesis",
-"topic": "End-to-End Principle: Where Should Reliability Live?",
-"difficulty": "Hard",
-"prompt": "The Internet's 'smart edges, dumb core' design pushes reliability (retransmission, ordering, error recovery)
-to the end systems rather than building it into the network core routers.\n\n(A) Give two concrete technical benefits of
-this design for the network core.\n(B) A critic argues: 'This is wasteful — if a packet is corrupted on hop 3 of a
-10-hop path, the end-to-end design forces the sender to retransmit the entire path, wasting bandwidth on hops 1–2 and
-4–10 that worked fine.' Is this a valid criticism? How would a hop-by-hop reliability design address this, and what
-would it cost?\n(C) UDP deliberately provides no reliability — it is connectionless and unordered. Why would any
-application voluntarily use an unreliable transport protocol? Give two distinct real-world application categories and
-explain why each prefers UDP over TCP.",
-"answer": {
-"parts": {
-"A": {
-"benefit_1": "Routers remain simple and fast. A router that does not track connection state, sequence numbers, or
-retransmission timers can forward packets using only a forwarding table lookup — achievable in hardware at nanosecond
-speeds. Adding per-flow reliability to the core would require routers to maintain state for every active connection
-simultaneously, ballooning memory requirements and slowing per-packet processing.",
-"benefit_2": "Failure isolation and protocol flexibility. When reliability is in the endpoints, a router failure simply
-causes packet loss — the end systems detect this and retransmit. No mid-network connection state is lost or corrupted.
-Applications that do not need reliability (e.g., DNS, video streaming) can simply choose not to use it, rather than
-paying the overhead of network-layer reliability whether they want it or not."
-},
-"B": {
-"validity": "The criticism is technically valid as a narrow efficiency argument. Hop-by-hop reliability (like in older
-X.25 networks) would detect and retransmit a corrupted packet at hop 3 immediately, without involving the original
-sender and without wasting bandwidth on the clean hops.",
-"cost": "Hop-by-hop reliability requires every router to: (1) maintain a receive buffer and sequence number state per
-connection, (2) send acknowledgments back to the previous hop, (3) implement retransmission timers, and (4) coordinate
-state across all hops for any given connection. This reintroduces exactly the complexity that the end-to-end principle
-removed from routers. In practice, modern fiber links have extremely low bit-error rates (< 10^-12), so corruption is
-	rare — the marginal benefit of hop-by-hop repair is tiny and does not justify the massive overhead of stateful
-	routers." }, "C" : { "category_1" : { "application"
-	: "Real-time audio/video (VoIP, video conferencing, live streaming)" , "reason"
-	: "A retransmitted packet arrives too late to be played — the audio sample it contained is already past its playback deadline. TCP's retransmission mechanism would deliver an old packet that is now useless while delaying all subsequent packets in the stream (head-of-line blocking). UDP allows the application to simply skip the lost frame and continue with the current timestamp. A small glitch is preferable to a large stall."
-	}, "category_2" : { "application" : "DNS, DHCP, and other short request-response protocols" , "reason"
-	: "These protocols send tiny single-packet queries and expect single-packet replies. TCP's three-way handshake setup and teardown would triple the number of round trips required for a transaction that consists of one request and one reply. UDP's connectionless nature allows a query to be sent immediately. If no reply arrives, the application simply retransmits — implementing its own trivial reliability that is far simpler than TCP's full machinery for such short exchanges."
-	} } }, "common_mistake"
-	: "For Part C, students say 'UDP is used when speed matters' without explaining why TCP is specifically harmful for those applications. The head-of-line blocking problem (TCP holds newer data back behind a retransmit) is the specific mechanism that makes TCP worse than UDP for real-time media."
-	, "deeper_concept"
-	: "The end-to-end argument as a foundational Internet design principle; the tension between network simplicity and application diversity; why UDP's 'unreliability' is a feature, not a bug, for the right applications"
-	} } ] } ], "post_exam_critique" : { "strongest_questions" : [ "Q6" , "Q7" , "Q12" , "Q14" , "Q17" ], "rationale"
-	: "Q6 requires isolating all four delay components in a scenario with deliberate misdirection (incoming link rate vs. outgoing link rate). Q7 demands the pipelining formula from first principles across all four sub-parts, including a qualitative asymptotic argument in Part D. Q12 integrates binomial probability, capacity planning intuition, and queuing non-linearity in one scenario. Q14 attacks the most common operational misconception in networking — equating average utilization with performance — and requires two mechanistically distinct explanations. Q17 is a multi-part synthesis requiring the student to simultaneously defend, critique, and apply the end-to-end principle."
-	, "questions_to_strengthen" : [ { "id" : "Q2" , "note"
-	: "The circuit switching idle-resource T/F is conceptually important but is close to a direct definition lookup. A stronger version would present a TDM network with a specific number of slots and ask: 'User 2 has been idle for 5 minutes. User 5 arrives and wants to join. Walk through what happens' — forcing the student to apply idle-waste and call-blocking in a concrete scenario."
-	}, { "id" : "Q13" , "note"
-	: "FDM/TDM calculation is solid but Part C (fifth user joining) is somewhat predictable. A harder variant: 'Under TDM, three of the four users agree to share their slots with the idle fourth user. Design the modified frame structure and calculate the throughput each active user now receives.' This tests whether students understand that TDM slot reassignment requires renegotiation and coordination."
-	} ], "under_tested_concepts" :
-	[ "Traceroute mechanics at the intro level: how TTL-expiry produces per-hop RTT measurements and why three probes are sent"
-	, "The caravan analogy in quantitative form: a scenario where propagation speed is high but transmission rate is low and asking which packets are 'in flight' at a given moment"
-	, "IoT and NextG teleoperation as motivating examples: why C&C uses downlink and sensor data uses uplink, and the asymmetric bandwidth implications"
-	, "The difference between Internet Standards (RFCs, IETF) and de facto standards: why the Internet protocol stack is defined by rough consensus and running code, not ISO bodies"
-	, "Message segmentation overhead quantified: for a fixed total message size, at what packet size does header overhead exceed pipelining gain — the optimal packet size tradeoff"
-	, "Multicast addressing: what problem it solves that unicast cannot solve efficiently and that broadcast wastes bandwidth on"
-	] } } }{ "exam" : { "title" : "Computer Networking — Practice Exam" , "subtitle"
-	: "Foundations: Switching, Delay Models, Throughput, Protocol Layering & Packet Segmentation" , "pre_exam_analysis"
-	: { "highest_priority_topics" :
-	[ "Circuit vs. packet switching: resource allocation philosophy, statistical multiplexing, when each is better"
-	, "The four delay components: precise formulas for transmission, propagation, queuing, and processing"
-	, "Transmission vs. propagation delay: the caravan analogy and why students routinely confuse them"
-	, "Throughput and bottleneck link: min(Rs, Rc, R/N) in shared backbone scenarios"
-	, "Store-and-forward semantics: entire packet must arrive before forwarding begins, and what this costs"
-	, "Segmentation and pipelining delay formula: (N + P - 1) × (L/R) and the intuition behind it"
-	, "Statistical multiplexing math: binomial probability of congestion with n users, probability p active"
-	, "Protocol layering: encapsulation/decapsulation, PDU vs. SDU, peer-to-peer vs. service interface"
-	, "The hourglass model and IP as the narrow waist: what it enables and what it constrains"
-	, "End-to-end principle: why complexity lives at the edges, what the dumb core must not do"
-	, "Routing vs. forwarding: global path computation vs. local table lookup — the distinction matters"
-	, "FDM vs. TDM: how each divides resources and the idle-waste problem in circuit switching"
-	], "common_misconceptions_targeted" :
-	[ "Confusing transmission delay (time to push bits onto link) with propagation delay (time for bits to travel the link)"
-	, "Thinking packet switching is always better than circuit switching — real-time constant-rate traffic favors circuits"
-	, "Assuming store-and-forward doubles delay for every hop — students forget pipelining overlaps hop transmissions"
-	, "Misapplying the bottleneck formula by ignoring the shared backbone R/N term when N connections share a link"
-	, "Thinking statistical multiplexing guarantees no congestion — it only makes congestion extremely unlikely"
-	, "Conflating routing (global algorithm) with forwarding (local lookup) — treating them as synonyms"
-	, "Believing the PDU passed between peers is identical to the SDU received from above — the header addition is the whole point"
-	, "Assuming the hourglass means IP is the best possible narrow waist — it is a historical lock-in, not an optimal choice"
-	, "Thinking segmentation always reduces total delay — the formula shows it reduces delay but adds header overhead"
-	, "Confusing FDM (always-on narrow band) with TDM (full-rate periodic slot) — students blend them together" ]
-	}, "sections" : [ { "id" : "section_1" , "title" : "True / False" , "instructions"
-	: "State TRUE or FALSE, then write 2–3 sentences justifying your answer. No credit for the answer alone."
-	, "questions" : [ { "id" : "Q1" , "number" : 1, "type" : "true_false" , "topic"
-	: "Transmission Delay vs. Propagation Delay" , "difficulty" : "Medium" , "prompt"
-	: "A network engineer doubles the bandwidth of a fiber link from 1 Gbps to 2 Gbps. This change will cut in half the time it takes for the first bit of a packet to arrive at the far end of the link."
-	, "answer" : { "verdict" : "FALSE" , "explanation"
-	: "Doubling the link bandwidth halves the transmission delay — the time to push all bits of a packet onto the link (d_trans = L/R). However, the time for the first bit to arrive at the far end is dominated by propagation delay (d_prop = d/s), which depends solely on the physical length of the link and the speed of light in the medium. Doubling the bandwidth does not change how fast bits travel through the fiber — that is a physical property of the medium. The first bit still takes exactly the same time to propagate across the link regardless of the link rate."
-	, "common_mistake"
-	: "Students conflate bandwidth (a rate — how fast bits are pushed onto the link) with propagation speed (how fast a bit travels through the medium). Increasing one has zero effect on the other."
-	, "deeper_concept"
-	: "The fundamental independence of transmission delay and propagation delay; why high-bandwidth satellite links still have high latency (propagation delay dominates across 36,000 km)"
-	} }, { "id" : "Q2" , "number" : 2, "type" : "true_false" , "topic" : "Circuit Switching — Idle Resource Waste"
-	, "difficulty" : "Easy" , "prompt"
-	: "In a circuit-switched network, once a call is established, the reserved bandwidth is available to other users if the original caller is temporarily silent (not sending data)."
-	, "answer" : { "verdict" : "FALSE" , "explanation"
-	: "Circuit switching dedicates resources exclusively to a connection for its entire duration, regardless of whether those resources are being used. If a caller falls silent, their allocated frequency band (FDM) or time slot (TDM) sits idle — other users cannot reclaim it. This is the defining inefficiency of circuit switching: reserved resources are wasted during idle periods. This is precisely why packet switching's statistical multiplexing is more efficient for bursty traffic — resources are only consumed when data is actually being sent."
-	, "common_mistake"
-	: "Students confuse circuit switching with something like a reservation system where unused slots can be reclaimed. The entire point of the reservation is exclusivity — giving it back would break the performance guarantees the circuit was designed to provide."
-	, "deeper_concept"
-	: "The fundamental resource allocation tradeoff: guaranteed exclusivity (circuit) vs. shared efficiency (packet); why statistical multiplexing outperforms static allocation for bursty traffic"
-	} }, { "id" : "Q3" , "number" : 3, "type" : "true_false" , "topic" : "Store-and-Forward and Pipelining"
-	, "difficulty" : "Hard" , "prompt"
-	: "In a store-and-forward network, sending a 3-packet message across 4 links takes exactly 4 times as long as sending it across 1 link, because each router must receive all 3 packets before forwarding any of them."
-	, "answer" : { "verdict" : "FALSE" , "explanation"
-	: "Store-and-forward requires a router to receive an entire individual packet before forwarding it — but it does NOT require a router to receive all packets of a message before forwarding the first one. Pipelining allows Router 1 to forward Packet 1 to Router 2 while the source is still transmitting Packet 2 to Router 1. For P packets over N links, total time is (N + P - 1) × (L/R), not N × P × (L/R). For 3 packets over 4 links, that is (4 + 3 - 1) = 6 packet-transmission-times, not 12. The claim in the prompt describes a much worse scenario that does not exist."
-	, "common_mistake"
-	: "Students apply store-and-forward at the message level (all packets) rather than the packet level (each individual packet). This leads to wildly pessimistic delay estimates and a misunderstanding of why segmentation helps."
-	, "deeper_concept"
-	: "The distinction between store-and-forward semantics (per-packet) and the pipeline parallelism it still enables across multiple hops; why (N + P - 1) not N × P"
-	} }, { "id" : "Q4" , "number" : 4, "type" : "true_false" , "topic"
-	: "Statistical Multiplexing — Congestion Guarantee" , "difficulty" : "Medium" , "prompt"
-	: "Statistical multiplexing in packet switching guarantees that congestion will never occur as long as the average traffic load is below the link capacity."
-	, "answer" : { "verdict" : "FALSE" , "explanation"
-	: "Statistical multiplexing makes congestion unlikely — not impossible. Even when average load is well below capacity, instantaneous bursts can cause multiple users to become active simultaneously, temporarily exceeding capacity and causing queuing or packet loss. The binomial probability model shows that for any finite number of users with nonzero activity probability p, there is always some probability that more than the capacity-equivalent number of users are simultaneously active. Statistical multiplexing is an efficiency bet on the burstiness of traffic, not a guarantee. That is why routers have buffers and why packet loss is a normal part of the Internet's operation."
-	, "common_mistake"
-	: "Students read 'statistical multiplexing is more efficient' and infer 'therefore congestion-free.' The qualifier 'statistical' itself signals that the outcome is probabilistic, not deterministic."
-	, "deeper_concept"
-	: "The probabilistic nature of packet-switched network performance; why best-effort delivery and drop-on-overflow are fundamental design features, not flaws"
-	} }, { "id" : "Q5" , "number" : 5, "type" : "true_false" , "topic" : "Protocol Layering — PDU vs. SDU"
-	, "difficulty" : "Medium" , "prompt"
-	: "When the Transport layer on the sender passes a segment to the Network layer, both layers are exchanging the same Protocol Data Unit (PDU) — the segment. The Network layer simply forwards it unchanged."
-	, "answer" : { "verdict" : "FALSE" , "explanation"
-	: "The Transport layer's PDU (a segment) becomes the Network layer's SDU — the payload that is handed down as a service data unit. The Network layer then encapsulates this SDU by prepending its own header (IP header), creating a new PDU called a datagram. The segment is not forwarded unchanged; it is wrapped. At the receiver, the process reverses: the Network layer strips its header and passes the original segment up as an SDU to the Transport layer. The key insight is that each layer's PDU = its SDU + its own header, creating the nested 'Matryoshka doll' structure of encapsulation."
-	, "common_mistake"
-	: "Students conflate the SDU (what is received from above) with the PDU (what is exchanged with the peer layer). The addition of the header is the entire mechanism by which a layer adds its own addressing and control information."
-	, "deeper_concept"
-	: "Encapsulation as the core mechanism of layered networking; how each layer's header carries the information needed by its peer at the receiver to perform its function"
-	} } ] }, { "id" : "section_2" , "title" : "Delay and Throughput Calculations" , "instructions"
-	: "Show all work. State which delay component(s) you are computing at each step. A correct answer with no supporting work receives no credit."
-	, "questions" : [ { "id" : "Q6" , "number" : 6, "type" : "calculation" , "topic"
-	: "Four Delay Components — Decomposition" , "difficulty" : "Hard" , "scenario" : { "setup"
-	: "A router connects two links. The incoming link has bandwidth 500 Mbps. The outgoing link has bandwidth 100 Mbps and a physical length of 4000 km. The propagation speed in the medium is 2 × 10^8 m/s. A 12,000-bit packet arrives at the router. There are currently 5 other packets of the same size already queued at the output port. Processing delay at the router is 2 microseconds."
-	, "task"
-	: "Compute the total nodal delay experienced by this packet at this router. Break down each of the four components with units."
-	}, "answer" : { "components" : { "processing_delay" : { "value" : "2 microseconds = 0.000002 s" , "note"
-	: "Given directly." }, "queuing_delay" : { "formula" : "5 packets ahead × (L / R_out)" , "calculation"
-	: "5 × (12,000 bits / 100,000,000 bps) = 5 × 0.00012 s = 0.0006 s = 600 microseconds" , "note"
-	: "The packet must wait for the 5 queued packets to finish transmitting before it can begin. The incoming link speed is irrelevant here — queuing delay is driven by the outgoing link rate."
-	}, "transmission_delay" : { "formula" : "L / R_out" , "calculation"
-	: "12,000 bits / 100,000,000 bps = 0.00012 s = 120 microseconds" , "note"
-	: "Time to push this packet's bits onto the outgoing 100 Mbps link. The incoming 500 Mbps rate does not affect this."
-	}, "propagation_delay" : { "formula" : "d / s" , "calculation"
-	: "4,000,000 m / (2 × 10^8 m/s) = 0.02 s = 20,000 microseconds = 20 ms" , "note"
-	: "Time for the last bit to travel to the next router 4000 km away. Dominates the total in this scenario."
-	}, "total" : { "calculation" : "2 + 600 + 120 + 20,000 = 20,722 microseconds ≈ 20.7 ms" , "dominant_component"
-	: "Propagation delay (20 ms) dominates because of the 4000 km link length." } }, "common_mistake"
-	: "Students use the incoming link rate (500 Mbps) for transmission delay instead of the outgoing rate (100 Mbps). The packet exits on the outgoing link — that rate determines how long it takes to transmit. Also, students often forget to compute queuing delay as the service time for all previously queued packets, not just a generic wait time."
-	, "deeper_concept"
-	: "Why long-haul links are dominated by propagation delay, not transmission delay; why adding bandwidth to a transoceanic cable does not reduce latency; the role of each delay component in different network scenarios"
-	} }, { "id" : "Q7" , "number" : 7, "type" : "calculation" , "topic" : "Segmentation and Pipelining Delay Formula"
-	, "difficulty" : "Hard" , "scenario" : { "description"
-	: "A source host wants to send a 7.2 megabit (7,200,000-bit) file to a destination host through 3 intermediate routers (4 links total). Each link has a bandwidth of 1.2 Mbps. Ignore propagation and processing delays."
-	}, "answer" : { "parts" : { "A" : { "formula" : "T = N × (M / R)" , "calculation"
-	: "N = 4 links, M = 7,200,000 bits, R = 1,200,000 bps. T = 4 × (7,200,000 / 1,200,000) = 4 × 6 s = 24 seconds"
-	, "note" : "Each router must receive the entire 7.2 Mb file before forwarding. No parallelism." }, "B" : { "formula"
-	: "T = (N + P - 1) × (L / R)" , "calculation"
-	: "N = 4 links, P = 1200 packets, L = 6000 bits, R = 1,200,000 bps. L/R = 6000/1,200,000 = 0.005 s. T = (4 + 1200 - 1) × 0.005 = 1203 × 0.005 = 6.015 seconds"
-	, "speedup" : "24 s vs 6.015 s — roughly 4× faster" }, "C" : { "mechanism"
-	: "Segmentation enables pipelining: while Router 1 forwards Packet 1 to Router 2, the source is simultaneously sending Packet 2 to Router 1, and so on. All links in the path are kept busy in parallel rather than sequentially. The end-to-end time collapses from N × (M/R) to approximately M/R + (N-1) × (L/R), where the second term is the small pipeline startup overhead."
-	, "cost"
-	: "Every packet requires its own header. With 1200 packets, 1200 headers must be created, transmitted, and parsed. This adds bandwidth overhead (header bits / total bits) and increases per-packet processing load at every router compared to the single large packet."
-	}, "D" : { "answer"
-	: "Making packets smaller to 600 bits yields 12,000 packets. The (N + P - 1) term becomes (4 + 12,000 - 1) = 12,003 vs. 1,203 for 1200 packets. T = 12,003 × (600/1,200,000) = 12,003 × 0.0005 = 6.0015 s. This is marginally faster in the formula, but in practice the result would be slower or equal due to the dramatically increased header-to-payload ratio (12,000 headers vs. 1,200) and the router processing overhead of handling 10× more packets. The delay formula ignores header overhead; in a real system, very small packets are less efficient."
-	, "key_insight"
-	: "The formula shows diminishing returns as P grows large — (N + P - 1) × (L/R) ≈ P × (L/R) = M/R for large P, which is constant. The formula approaches M/R + (N-1)×(L/R) asymptotically. Smaller packets don't meaningfully help delay but do meaningfully hurt overhead."
-	} }, "common_mistake"
-	: "For Part A, students apply the segmentation formula with P=1 instead of the simpler N × (M/R). They are equivalent — (N + 1 - 1) × (M/R) = N × (M/R) — but students should recognize both forms. For Part B, students drop the '-1' from (N + P - 1), which is a small error here but matters conceptually."
-	, "deeper_concept"
-	: "Why pipelining reduces delay by converting a sequential process into a parallel one; the tradeoff between packet size, header overhead, and pipeline efficiency"
-	}, "parts" : [ { "label" : "A" , "prompt"
-	: "How long does it take to deliver the file if it is sent as a single, unsegmented packet?" }, { "label" : "B"
-	, "prompt" : "How long does it take if the file is segmented into 1200 packets of 6000 bits each?" }, { "label"
-	: "C" , "prompt"
-	: "Why is Part B faster? Explain the mechanism in one or two sentences. Then identify one cost that Part B incurs that Part A does not."
-	}, { "label" : "D" , "prompt"
-	: "A network engineer proposes making packets smaller — say 600 bits each (yielding 12,000 packets). Without calculating the exact answer, explain whether this will be faster, slower, or the same as Part B, and why."
-	} ] }, { "id" : "Q8" , "number" : 8, "type" : "calculation" , "topic" : "Throughput and Bottleneck Link"
-	, "difficulty" : "Medium" , "scenario" : { "description"
-	: "Consider the following end-to-end path: A server with an outgoing access link of 80 Mbps connects through a shared backbone link of 200 Mbps to a client with an incoming access link of 30 Mbps. The backbone link is shared by 5 simultaneous connections (including this one)."
-	}, "answer" : { "parts" : { "A" : { "formula" : "Throughput = min(R_s, R_c, R/N)" , "values"
-	: "R_s = 80 Mbps, R_c = 30 Mbps, R/N = 200/5 = 40 Mbps" , "calculation" : "min(80, 30, 40) = 30 Mbps" , "bottleneck"
-	: "The client's access link at 30 Mbps is the bottleneck." }, "B" : { "new_values"
-	: "R_s = 160 Mbps, R_c = 30 Mbps, R/N = 40 Mbps" , "calculation" : "min(160, 30, 40) = 30 Mbps — unchanged"
-	, "conclusion"
-	: "The upgrade did not help at all. The bottleneck is the client's access link, not the server's. Upgrading a non-bottleneck link has zero effect on end-to-end throughput — a fundamental and often expensive lesson in network capacity planning."
-	}, "C" : { "answer"
-	: "Upgrading the client's access link from 30 Mbps to anything above 40 Mbps would shift the bottleneck. Specifically, upgrading to 40+ Mbps makes the backbone share (40 Mbps) the new bottleneck. Upgrading the client link to 40 Mbps raises throughput from 30 Mbps to 40 Mbps — a 33% improvement. Upgrading the client link further (e.g., to 80 Mbps) doesn't help until the backbone is also upgraded or has fewer sharing connections."
-	} }, "common_mistake"
-	: "Students average the three rates instead of taking the minimum. They also commonly ignore the R/N term entirely, treating the backbone as having full 200 Mbps capacity per connection."
-	, "deeper_concept"
-	: "Bottleneck identification as a prerequisite for any effective capacity upgrade; why improving non-bottleneck links wastes money; the min() nature of end-to-end throughput"
-	}, "parts" : [ { "label" : "A" , "prompt" : "What is the end-to-end throughput for this connection?" }, { "label"
-	: "B" , "prompt"
-	: "The server upgrades its access link to 160 Mbps. What is the new end-to-end throughput? Did the upgrade help?" },
-	{ "label" : "C" , "prompt"
-	: "What single infrastructure upgrade would most improve throughput for this connection, and by how much?" } ] } ]
-	}, { "id" : "section_3" , "title" : "Short Answer — Conceptual" , "instructions"
-	: "Answer in 3–6 sentences. Explain the 'why', not just the 'what'. Vague or definition-only answers receive no credit."
-	, "questions" : [ { "id" : "Q9" , "number" : 9, "type" : "short_answer" , "topic"
-	: "Circuit vs. Packet Switching — When Circuit Wins" , "difficulty" : "Medium" , "prompt"
-	: "A telecommunications company is designing the network infrastructure for two separate applications: (1) a real-time remote surgery system that transmits 4K video and haptic feedback with zero tolerance for jitter or delay variation, and (2) a popular video-on-demand streaming service for millions of casual viewers. Which switching technology — circuit or packet — is more appropriate for each application, and why? Be specific about what property of each technology drives your recommendation."
-	, "answer" : { "application_1" : { "recommendation" : "Circuit switching" , "reasoning"
-	: "Remote surgery requires guaranteed constant bandwidth and zero queuing delay/jitter — a surgeon cannot tolerate feedback that is delayed or uneven due to network congestion. Circuit switching reserves dedicated resources for the duration of the connection, eliminating the possibility of queuing (no buffer contention with other users) and guaranteeing constant transmission timing. The cost of idle resource waste is acceptable given the life-critical performance guarantee needed."
-	}, "application_2" : { "recommendation" : "Packet switching" , "reasoning"
-	: "Video-on-demand is bursty traffic at scale — millions of users watching at different rates, pausing, buffering, or seeking. Circuit switching would require pre-allocating bandwidth for every concurrent viewer, which would be astronomically wasteful since viewers are rarely sending at their maximum rate simultaneously. Packet switching exploits statistical multiplexing: the probability that all users demand peak bandwidth simultaneously is negligibly small, so the same physical infrastructure can serve far more users than circuit switching could at the same cost. Minor buffering at the client side absorbs any jitter."
-	}, "key_distinction"
-	: "The decision turns on traffic burstiness and tolerance for delay variation. Constant, latency-sensitive, low-tolerance applications favor circuits; bursty, delay-tolerant, large-scale applications favor packets."
-	, "common_mistake"
-	: "Students say 'packet switching is always better' without acknowledging that 'better' depends entirely on the application's traffic profile and performance requirements. The Internet works on packet switching not because circuits are always inferior, but because most Internet traffic is bursty."
-	, "deeper_concept"
-	: "The fundamental engineering tradeoff between guaranteed performance (circuit) and statistical efficiency (packet); why the Internet is packet-switched and the phone network was circuit-switched"
-	} }, { "id" : "Q10" , "number" : 10, "type" : "short_answer" , "topic"
-	: "Routing vs. Forwarding — The Critical Distinction" , "difficulty" : "Medium" , "prompt"
-	: "A student says: 'Routing and forwarding are the same thing — both just decide where to send a packet.' Explain why this is wrong, using the specific terms control plane and data plane. Describe what would break if you collapsed both functions into a single, slow process running on the router's main CPU."
-	, "answer" : { "correct_distinction"
-	: "Forwarding is a local, per-packet, data-plane operation: when a packet arrives, the router looks up its destination IP in a pre-built forwarding table and moves the packet to the correct output port. This happens in nanoseconds using dedicated hardware (the switching fabric) and must handle millions of packets per second. Routing is a global, control-plane operation: routing protocols (like OSPF or BGP) exchange topology information with other routers across the network, run path-computation algorithms, and build the forwarding tables that the data plane uses. This happens over seconds or minutes on the router's CPU."
-	, "what_breaks"
-	: "If forwarding decisions were made by running the full routing algorithm on every arriving packet, the router's CPU — which operates in millisecond timescales — could not keep up with packet arrival rates (nanosecond timescales). Line-rate packet processing would be impossible. This is why modern routers maintain a pre-computed forwarding table (TCAM hardware for O(1) lookup) and run routing protocols asynchronously in the background. Collapsing the two would reduce a high-speed router to a software-switch processing a tiny fraction of its capacity."
-	, "common_mistake"
-	: "Students know both terms but describe them as varying levels of the same process ('routing is more global, forwarding is more local') without capturing that they operate on completely different timescales and are implemented in completely different hardware/software components."
-	, "deeper_concept"
-	: "The separation of control plane and data plane as a performance and scalability architecture; why SDN makes this separation even more explicit by physically moving the control plane off the router"
-	} }, { "id" : "Q11" , "number" : 11, "type" : "short_answer" , "topic"
-	: "The Hourglass Model and IP as Narrow Waist" , "difficulty" : "Hard" , "prompt"
-	: "The Internet's hourglass architecture places IP as the 'narrow waist.' (A) Explain what property of IP enables the hourglass model — what specifically does placing IP in the middle allow above and below it? (B) A network researcher argues: 'The hourglass is a historical accident, not an optimal design. A different narrow waist would have been better.' Is this a reasonable argument? What is the cost of changing the narrow waist today?"
-	, "answer" : { "parts" : { "A"
-	: "IP provides a minimal, uniform abstraction: it delivers datagrams on a best-effort basis with a standard address format (32-bit IPv4 or 128-bit IPv6). By requiring only that a link layer can carry IP datagrams and that an application can use IP's datagram service, the hourglass allows any physical technology (Ethernet, WiFi, fiber, copper, satellite — running over anything) to interoperate with any application (HTTP, streaming, gaming, VoIP) without either layer needing to know about the specifics of the other. IP acts as a translation layer: applications do not care whether the physical medium is fiber or WiFi, and physical networks do not care whether the application is email or video."
-	, "B"
-	: "The researcher's argument is entirely reasonable as a technical matter. IP was designed in the 1970s for a much smaller, more homogeneous network. Modern requirements (mobility, QoS, multicast, security) are awkward fits for the original IP design, and many of IPv4's limitations (address exhaustion, lack of encryption, fragmentation complexity) stem from early design choices. However, the practical cost of replacing IP as the narrow waist is prohibitive: every router, every OS network stack, every application, and every piece of network hardware worldwide implements IP. The switching cost is not technical — it is the massive installed base (sometimes called 'ossification'). IPv6, which is a relatively modest evolution of IPv4, took decades to achieve partial deployment. A wholesale replacement of IP would require coordinated changes at billions of devices with no clear transition path."
-	}, "common_mistake"
-	: "Students treat the hourglass as an intentional, optimal design rather than an emergent property of IP's early success and subsequent lock-in. The distinction between 'what the hourglass enables' (technical flexibility) and 'why it persists' (installed base) is frequently missed."
-	, "deeper_concept"
-	: "Network ossification: how successful standards become permanent fixtures regardless of technical merit; the difference between optimal design and deployable design in large-scale infrastructure"
-	} } ] }, { "id" : "section_4" , "title" : "Scenario Analysis and Protocol Behavior" , "instructions"
-	: "Each scenario presents a realistic networking situation. Analyze the behavior step by step and address every part of the question."
-	, "questions" : [ { "id" : "Q12" , "number" : 12, "type" : "scenario" , "topic"
-	: "Statistical Multiplexing — Probability and Capacity Planning" , "difficulty" : "Hard" , "scenario" :
-	{ "description"
-	: "An ISP has a shared 10 Mbps uplink. Each of its residential customers requires exactly 1 Mbps when active, and each customer is independently active 8% of the time."
-	}, "answer" : { "parts" : { "A" : { "answer"
-	: "With circuit switching, each customer requires a permanently reserved 1 Mbps slice. Total capacity = 10 Mbps. Maximum customers = 10 / 1 = 10 customers."
-	, "note" : "The 11th customer would be blocked — they would receive a busy signal or connection refused." }, "B" :
-	{ "expression" : "P(congestion) = P(X > 10) = Σ_{k=11}^{80} C(80, k) × (0.08)^k × (0.92)^(80-k)"
-	, "qualitative_assessment"
-	: "With 80 customers each active 8% of the time, the expected number active at any moment is 80 × 0.08 = 6.4 customers — well below the 10-customer capacity. The binomial distribution with n=80, p=0.08 has a mean of 6.4 and standard deviation ≈ √(80 × 0.08 × 0.92) ≈ 2.43. The threshold of 10 is approximately (10 - 6.4) / 2.43 ≈ 1.48 standard deviations above the mean. By the normal approximation, P(X > 10) ≈ P(Z > 1.48) ≈ 7% — this likely exceeds the 1% threshold. The ISP would need to reduce customer count or accept higher congestion probability. (A value of ~120-130 customers typically brings this below 1% for these parameters.)"
-	, "note" : "The setup expression is what matters for exam credit; full evaluation requires a calculator." }, "C" :
-	{ "explanation_1"
-	: "Queuing delay is non-linear and increases sharply as utilization approaches capacity. Even at 50% average utilization, brief bursts of simultaneous activity create queues whose delay is much higher than average — the customer experiences these peaks as 'slowness' even though they don't observe other simultaneous users."
-	, "explanation_2"
-	: "Propagation and transmission delays are always present regardless of load. A customer may be using the link exclusively but experiencing high latency to a distant server (propagation delay dominated by physical distance) or downloading a large file that fills the 10 Mbps pipe entirely — giving them 1 Mbps throughput even with no competition, because the bottleneck is their own share of the shared link at that instant."
-	} }, "common_mistake"
-	: "For Part B, students set up P(X = 10) instead of P(X > 10). Congestion occurs when demand exceeds capacity — the threshold is strictly greater than, not equal to. For Part C, students give only the 'other users are active but you can't see them' explanation and miss the fundamentally different explanation of queuing delay non-linearity."
-	, "deeper_concept"
-	: "The gap between average-case and worst-case performance under statistical multiplexing; why link utilization percentages are misleading without accounting for delay variance"
-	}, "parts" : [ { "label" : "A" , "prompt" : "How many customers can the ISP support with circuit switching?" },
-	{ "label" : "B" , "prompt"
-	: "With packet switching, the ISP wants the probability of more than 10 customers being simultaneously active to be below 1%. Using the binomial probability formula, set up (but do not fully evaluate) the expression for the congestion probability with 80 customers. Explain qualitatively whether 80 customers is likely to satisfy the 1% threshold."
-	}, { "label" : "C" , "prompt"
-	: "The ISP doubles its residential base to 160 customers on the same 10 Mbps link. A customer complains that their internet feels slower even though no one seems to be using the internet at the same time. Give two distinct technical explanations for why this can happen even under statistical multiplexing."
-	} ] }, { "id" : "Q13" , "number" : 13, "type" : "scenario" , "topic" : "FDM vs. TDM — Resource Division Mechanics"
-	, "difficulty" : "Medium" , "scenario" : { "description"
-	: "A circuit-switched network has a 12 Mbps link shared among 4 users." }, "answer" : { "parts" : { "A" :
-	{ "rate_per_user" : "12 Mbps / 4 = 3 Mbps per user (each gets a dedicated 3 Mbps frequency band)" , "idle_impact"
-	: "User 3's 3 Mbps frequency band sits idle — no other user can use it. The total effective throughput of the link drops from 12 Mbps to 9 Mbps while User 3 is silent, even though 3 Mbps of capacity is physically available. This is the core inefficiency of static resource allocation."
-	}, "B" : { "slot_size_bits"
-	: "Total link rate = 12 Mbps. With 4 slots per frame and 8000 frames/second, each slot carries 12,000,000 / (4 × 8000) = 12,000,000 / 32,000 = 375 bits per slot. Each user transmits at 8000 slots/second × 375 bits = 3,000,000 bps = 3 Mbps."
-	, "idle_impact"
-	: "User 3's time slots are wasted — they transmit silence (or padding). The other three users still only transmit in their own slots; they cannot use User 3's slots even though they are empty. Same static allocation problem as FDM, just in the time domain instead of frequency domain."
-	}, "C" : { "FDM"
-	: "Under FDM, the fifth user cannot join unless the frequency spectrum is repartitioned. Each existing user's band must be narrowed from 3 Mbps to 2.4 Mbps (12/5), requiring reconfiguration of all five endpoints' radio hardware. In practice, this requires a new 'call setup' that renegotiates the frequency allocation — this is exactly the 'call blocking' problem: if the system is designed for exactly 4 users, the 5th user receives a busy signal."
-	, "TDM"
-	: "Under TDM, adding a fifth user requires adding a 5th slot to each frame. This either increases the frame size (reducing the bit rate per slot if frame rate stays constant) or increases the frame rate (which may not be physically possible). Again, the connection is typically blocked if the system's fixed frame structure cannot accommodate more slots."
-	} }, "common_mistake"
-	: "Students confuse FDM and TDM by saying FDM is 'better' because it's continuous. Both have identical static allocation problems — the difference is only in the dimension being divided (frequency vs. time). Both waste resources when users are idle."
-	, "deeper_concept"
-	: "Static resource reservation as the fundamental inefficiency of circuit switching; why both FDM and TDM fail to exploit idle capacity and how this motivates statistical multiplexing"
-	}, "parts" : [ { "label" : "A" , "prompt"
-	: "Under FDM, what transmission rate does each user get? If User 3 is idle, what happens to their allocated bandwidth?"
-	}, { "label" : "B" , "prompt"
-	: "Under TDM with 4 slots per frame and a frame rate of 8000 frames/second, what is the transmission rate per user? How does User 3's silence affect the other users?"
-	}, { "label" : "C" , "prompt"
-	: "A fifth user suddenly wants to join. What happens under FDM? What happens under TDM?" } ] } ] }, { "id"
-	: "section_5" , "title" : "Troubleshooting and Failure Scenarios" , "instructions"
-	: "Diagnose the problem at the protocol or architecture level. Identify the root cause and explain the correct behavior."
-	, "questions" : [ { "id" : "Q14" , "number" : 14, "type" : "troubleshooting" , "topic"
-	: "Delay Pathology: Low Utilization but High Latency" , "difficulty" : "Hard" , "scenario"
-	: "A network operations engineer measures the following on a 100 Mbps router output link: average traffic load is 20 Mbps (20% utilization), but users are reporting latency spikes of 300–500 ms every few seconds. The engineer concludes: 'At only 20% utilization, there should be no queuing delay at all — this must be a routing protocol problem.' Identify the flaw in the engineer's reasoning and give two distinct technical explanations for why high queuing delay can occur at 20% average utilization."
-	, "answer" : { "flaw"
-	: "The engineer is applying average utilization to a conclusion that requires instantaneous behavior analysis. Queuing delay is not determined by average utilization — it is determined by whether the instantaneous arrival rate exceeds the service rate at any given moment. A 20% average utilization is perfectly consistent with frequent short bursts that saturate the link temporarily."
-	, "explanation_1" : { "cause" : "Bursty traffic arrival" , "detail"
-	: "Network traffic is notoriously bursty — arrivals cluster in time due to synchronized application behavior (e.g., many TCP connections entering slow-start simultaneously, scheduled batch transfers, DNS response cascades). A 20% average utilization can mask a traffic pattern where the link is idle 80% of the time and 100% saturated for bursts of 20-50 ms. During saturation bursts, packets queue and experience 300+ ms delays before the burst clears. The averaging hides this."
-	}, "explanation_2" : { "cause" : "Buffer bloat" , "detail"
-	: "Modern router buffers are often over-provisioned (hundreds of milliseconds of buffering capacity at the link rate). When a burst arrives, instead of dropping packets quickly and allowing TCP to back off, the router fills its large buffer. Even as the burst subsides and average utilization drops, the already-queued packets must drain through the buffer one by one at 100 Mbps — introducing hundreds of milliseconds of queuing delay for all subsequent packets that arrive while the buffer drains. This is known as 'bufferbloat.'"
-	}, "common_mistake"
-	: "Students accept the engineer's conclusion at face value, not recognizing that average statistics routinely hide pathological instantaneous behavior. Queuing theory (specifically the M/M/1 queue model) shows that delay increases non-linearly as utilization approaches 100% — and bursts temporarily push utilization to 100% regardless of the average."
-	, "deeper_concept"
-	: "The difference between average and instantaneous utilization in network performance analysis; bufferbloat as a real-world pathology caused by excessive buffering; why active queue management (RED/CoDel) exists"
-	} }, { "id" : "Q15" , "number" : 15, "type" : "troubleshooting" , "topic" : "Encapsulation and the Overhead Tax"
-	, "difficulty" : "Medium" , "scenario"
-	: "A developer is sending 1-byte sensor readings over a WiFi network using TCP/IP. Each reading is sent as a separate TCP segment. They notice that even though sensor data is only 1 byte, Wireshark shows each transmission consuming roughly 66+ bytes on the wire. They conclude: 'The network stack is malfunctioning — it is adding 65 bytes of garbage to my 1-byte messages.' Correct the developer's understanding and explain what those 65+ bytes are, layer by layer."
-	, "answer" : { "correction"
-	: "The network stack is functioning exactly as designed. The 65+ bytes are protocol headers added by each layer of the stack through encapsulation — they are not garbage but necessary control information that enables addressing, routing, reliable delivery, and error detection."
-	, "breakdown" : { "TCP_header"
-	: "20 bytes minimum — contains source and destination port numbers, sequence number, acknowledgment number, flags (SYN/ACK/FIN), window size for flow control, and checksum. Required for process-to-process multiplexing and TCP's reliability mechanism."
-	, "IP_header"
-	: "20 bytes minimum — contains source and destination IP addresses (for routing), TTL, protocol field, and header checksum. Required for network-layer routing from source host to destination host."
-	, "Ethernet_frame_header_and_trailer"
-	: "26 bytes — 14-byte header (destination MAC 6B, source MAC 6B, EtherType 2B) plus 4-byte CRC trailer. Required for link-layer addressing and error detection on the local segment."
-	, "total_overhead"
-	: "20 + 20 + 26 = 66 bytes of headers/trailer for 1 byte of payload. Overhead ratio: 66/67 = 98.5% overhead."
-	}, "lesson"
-	: "This extreme overhead ratio is a direct argument against sending many tiny messages. The developer should batch sensor readings (e.g., send 100 readings per packet) to reduce the per-byte overhead from 66x to near 1x. This is a fundamental application design principle: match message granularity to the protocol overhead cost."
-	, "common_mistake"
-	: "Students know encapsulation as a concept but cannot enumerate the actual headers and their sizes. They also often forget the Ethernet trailer (CRC) when counting overhead."
-	, "deeper_concept"
-	: "Protocol overhead as a real cost that shapes application design; why small-message protocols like MQTT and CoAP exist for IoT; the practical consequence of the 'Matryoshka doll' encapsulation model"
-	} } ] }, { "id" : "section_6" , "title" : "Edge Cases and Synthesis" , "instructions"
-	: "These questions require integrating multiple concepts or reasoning about subtle edge cases. Read carefully."
-	, "questions" : [ { "id" : "Q16" , "number" : 16, "type" : "edge_case" , "topic"
-	: "Store-and-Forward: When Does It Hurt the Most?" , "difficulty" : "Hard" , "prompt"
-	: "Two networks are being compared. Network A uses store-and-forward packet switching with 10-hop paths and 1 Mbps links. Network B uses cut-through switching, where a router begins forwarding a packet as soon as the header is received (64 bytes), rather than waiting for the entire packet. Both networks carry 1500-byte packets. Ignore propagation delay.\n\n(A) Calculate the end-to-end transmission delay in Network A for one packet across 10 hops.\n(B) Estimate the saving that cut-through switching provides per hop in Network B, and the total saving across 10 hops.\n(C) Under what traffic condition does the cut-through advantage nearly disappear?"
-	, "answer" : { "parts" : { "A" : { "formula" : "Store-and-forward: T = N × (L/R)" , "calculation"
-	: "N = 10 hops, L = 1500 bytes = 12,000 bits, R = 1,000,000 bps. T = 10 × (12,000 / 1,000,000) = 10 × 0.012 s = 0.12 s = 120 ms"
-	}, "B" : { "cut_through_per_hop"
-	: "Router starts forwarding after receiving 64 bytes (header). Per-hop delay in cut-through ≈ 64 bytes × 8 / 1,000,000 = 512 bits / 1 Mbps = 0.000512 s = 0.512 ms per hop (the latency to receive just the header)."
-	, "store_and_forward_per_hop" : "1500 bytes × 8 / 1,000,000 = 12 ms per hop." , "saving_per_hop"
-	: "12 ms - 0.512 ms ≈ 11.5 ms saved per hop" , "total_saving"
-	: "However, the last hop must fully transmit the packet regardless (the destination receives all bits). So the saving applies at N-1 = 9 intermediate hops. Total saving ≈ 9 × 11.5 ms ≈ 103.5 ms. The cut-through network delivers the packet in roughly 0.512 × 10 + (1500-64) bytes × 8 / 1Mbps ≈ 5.12 ms + 11.5 ms ≈ 16.6 ms vs. 120 ms — a roughly 7× reduction in forwarding delay."
-	, "note"
-	: "Exact cut-through delay calculation: first bit arrives at destination after header-arrival-delay × 9 intermediate hops + full packet reception at final hop. The dominant term is actually the propagation delay in real networks."
-	}, "C" : { "answer"
-	: "The cut-through advantage nearly disappears when the router encounters a speed mismatch — the incoming link is faster than the outgoing link. In that case, cut-through cannot forward the packet faster than the outgoing link can absorb it, so the router is forced to buffer the full packet anyway (effectively reverting to store-and-forward behavior). Cut-through also cannot help when error-checking is needed: if the packet has a CRC error detected at the end, a cut-through router has already forwarded a corrupt packet downstream — store-and-forward catches this before forwarding. In error-prone environments, cut-through propagates errors through the network."
-	} }, "common_mistake"
-	: "Students forget that cut-through cannot save delay on the final hop — the destination must receive all bits before passing the packet up the stack. They also miss the error-propagation problem with cut-through in noisy environments."
-	, "deeper_concept"
-	: "Store-and-forward vs. cut-through as a latency vs. error-propagation tradeoff; why modern high-speed data center switches often use cut-through for latency-sensitive workloads"
-	} }, { "id" : "Q17" , "number" : 17, "type" : "synthesis" , "topic"
-	: "End-to-End Principle: Where Should Reliability Live?" , "difficulty" : "Hard" , "prompt"
-	: "The Internet's 'smart edges, dumb core' design pushes reliability (retransmission, ordering, error recovery) to the end systems rather than building it into the network core routers.\n\n(A) Give two concrete technical benefits of this design for the network core.\n(B) A critic argues: 'This is wasteful — if a packet is corrupted on hop 3 of a 10-hop path, the end-to-end design forces the sender to retransmit the entire path, wasting bandwidth on hops 1–2 and 4–10 that worked fine.' Is this a valid criticism? How would a hop-by-hop reliability design address this, and what would it cost?\n(C) UDP deliberately provides no reliability — it is connectionless and unordered. Why would any application voluntarily use an unreliable transport protocol? Give two distinct real-world application categories and explain why each prefers UDP over TCP."
-	, "answer" : { "parts" : { "A" : { "benefit_1"
-	: "Routers remain simple and fast. A router that does not track connection state, sequence numbers, or retransmission timers can forward packets using only a forwarding table lookup — achievable in hardware at nanosecond speeds. Adding per-flow reliability to the core would require routers to maintain state for every active connection simultaneously, ballooning memory requirements and slowing per-packet processing."
-	, "benefit_2"
-	: "Failure isolation and protocol flexibility. When reliability is in the endpoints, a router failure simply causes packet loss — the end systems detect this and retransmit. No mid-network connection state is lost or corrupted. Applications that do not need reliability (e.g., DNS, video streaming) can simply choose not to use it, rather than paying the overhead of network-layer reliability whether they want it or not."
-	}, "B" : { "validity"
-	: "The criticism is technically valid as a narrow efficiency argument. Hop-by-hop reliability (like in older X.25 networks) would detect and retransmit a corrupted packet at hop 3 immediately, without involving the original sender and without wasting bandwidth on the clean hops."
-	, "cost"
-	: "Hop-by-hop reliability requires every router to: (1) maintain a receive buffer and sequence number state per connection, (2) send acknowledgments back to the previous hop, (3) implement retransmission timers, and (4) coordinate state across all hops for any given connection. This reintroduces exactly the complexity that the end-to-end principle removed from routers. In practice, modern fiber links have extremely low bit-error rates (< 10^-12), so corruption is rare — the marginal benefit of hop-by-hop repair is tiny and does not justify the massive overhead of stateful routers."
-	}, "C" : { "category_1" : { "application" : "Real-time audio/video (VoIP, video conferencing, live streaming)"
-	, "reason"
-	: "A retransmitted packet arrives too late to be played — the audio sample it contained is already past its playback deadline. TCP's retransmission mechanism would deliver an old packet that is now useless while delaying all subsequent packets in the stream (head-of-line blocking). UDP allows the application to simply skip the lost frame and continue with the current timestamp. A small glitch is preferable to a large stall."
-	}, "category_2" : { "application" : "DNS, DHCP, and other short request-response protocols" , "reason"
-	: "These protocols send tiny single-packet queries and expect single-packet replies. TCP's three-way handshake setup and teardown would triple the number of round trips required for a transaction that consists of one request and one reply. UDP's connectionless nature allows a query to be sent immediately. If no reply arrives, the application simply retransmits — implementing its own trivial reliability that is far simpler than TCP's full machinery for such short exchanges."
-	} } }, "common_mistake"
-	: "For Part C, students say 'UDP is used when speed matters' without explaining why TCP is specifically harmful for those applications. The head-of-line blocking problem (TCP holds newer data back behind a retransmit) is the specific mechanism that makes TCP worse than UDP for real-time media."
-	, "deeper_concept"
-	: "The end-to-end argument as a foundational Internet design principle; the tension between network simplicity and application diversity; why UDP's 'unreliability' is a feature, not a bug, for the right applications"
-	} } ] } ], "post_exam_critique" : { "strongest_questions" : [ "Q6" , "Q7" , "Q12" , "Q14" , "Q17" ], "rationale"
-	: "Q6 requires isolating all four delay components in a scenario with deliberate misdirection (incoming link rate vs. outgoing link rate). Q7 demands the pipelining formula from first principles across all four sub-parts, including a qualitative asymptotic argument in Part D. Q12 integrates binomial probability, capacity planning intuition, and queuing non-linearity in one scenario. Q14 attacks the most common operational misconception in networking — equating average utilization with performance — and requires two mechanistically distinct explanations. Q17 is a multi-part synthesis requiring the student to simultaneously defend, critique, and apply the end-to-end principle."
-	, "questions_to_strengthen" : [ { "id" : "Q2" , "note"
-	: "The circuit switching idle-resource T/F is conceptually important but is close to a direct definition lookup. A stronger version would present a TDM network with a specific number of slots and ask: 'User 2 has been idle for 5 minutes. User 5 arrives and wants to join. Walk through what happens' — forcing the student to apply idle-waste and call-blocking in a concrete scenario."
-	}, { "id" : "Q13" , "note"
-	: "FDM/TDM calculation is solid but Part C (fifth user joining) is somewhat predictable. A harder variant: 'Under TDM, three of the four users agree to share their slots with the idle fourth user. Design the modified frame structure and calculate the throughput each active user now receives.' This tests whether students understand that TDM slot reassignment requires renegotiation and coordination."
-	} ], "under_tested_concepts" :
-	[ "Traceroute mechanics at the intro level: how TTL-expiry produces per-hop RTT measurements and why three probes are sent"
-	, "The caravan analogy in quantitative form: a scenario where propagation speed is high but transmission rate is low and asking which packets are 'in flight' at a given moment"
-	, "IoT and NextG teleoperation as motivating examples: why C&C uses downlink and sensor data uses uplink, and the asymmetric bandwidth implications"
-	, "The difference between Internet Standards (RFCs, IETF) and de facto standards: why the Internet protocol stack is defined by rough consensus and running code, not ISO bodies"
-	, "Message segmentation overhead quantified: for a fixed total message size, at what packet size does header overhead exceed pipelining gain — the optimal packet size tradeoff"
-	, "Multicast addressing: what problem it solves that unicast cannot solve efficiently and that broadcast wastes bandwidth on"
-	] } } }
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>guide_1.md</title>
+	<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+	<style>
+		/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+		/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+		body {
+			font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+			font-size: var(--vscode-markdown-font-size, 14px);
+			padding: 0 26px;
+			line-height: var(--vscode-markdown-line-height, 22px);
+			word-wrap: break-word;
+		}
+
+		#code-csp-warning {
+			position: fixed;
+			top: 0;
+			right: 0;
+			color: white;
+			margin: 16px;
+			text-align: center;
+			font-size: 12px;
+			font-family: sans-serif;
+			background-color: #444444;
+			cursor: pointer;
+			padding: 6px;
+			box-shadow: 1px 1px 1px rgba(0, 0, 0, .25);
+		}
+
+		#code-csp-warning:hover {
+			text-decoration: none;
+			background-color: #007acc;
+			box-shadow: 2px 2px 2px rgba(0, 0, 0, .25);
+		}
+
+		body.scrollBeyondLastLine {
+			margin-bottom: calc(100vh - 22px);
+		}
+
+		body.showEditorSelection .code-line {
+			position: relative;
+		}
+
+		body.showEditorSelection .code-active-line:before,
+		body.showEditorSelection .code-line:hover:before {
+			content: "";
+			display: block;
+			position: absolute;
+			top: 0;
+			left: -12px;
+			height: 100%;
+		}
+
+		body.showEditorSelection li.code-active-line:before,
+		body.showEditorSelection li.code-line:hover:before {
+			left: -30px;
+		}
+
+		.vscode-light.showEditorSelection .code-active-line:before {
+			border-left: 3px solid rgba(0, 0, 0, 0.15);
+		}
+
+		.vscode-light.showEditorSelection .code-line:hover:before {
+			border-left: 3px solid rgba(0, 0, 0, 0.40);
+		}
+
+		.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+			border-left: none;
+		}
+
+		.vscode-dark.showEditorSelection .code-active-line:before {
+			border-left: 3px solid rgba(255, 255, 255, 0.4);
+		}
+
+		.vscode-dark.showEditorSelection .code-line:hover:before {
+			border-left: 3px solid rgba(255, 255, 255, 0.60);
+		}
+
+		.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+			border-left: none;
+		}
+
+		.vscode-high-contrast.showEditorSelection .code-active-line:before {
+			border-left: 3px solid rgba(255, 160, 0, 0.7);
+		}
+
+		.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+			border-left: 3px solid rgba(255, 160, 0, 1);
+		}
+
+		.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+			border-left: none;
+		}
+
+		img {
+			max-width: 100%;
+			max-height: 100%;
+		}
+
+		a {
+			text-decoration: none;
+		}
+
+		a:hover {
+			text-decoration: underline;
+		}
+
+		a:focus,
+		input:focus,
+		select:focus,
+		textarea:focus {
+			outline: 1px solid -webkit-focus-ring-color;
+			outline-offset: -1px;
+		}
+
+		hr {
+			border: 0;
+			height: 2px;
+			border-bottom: 2px solid;
+		}
+
+		h1 {
+			padding-bottom: 0.3em;
+			line-height: 1.2;
+			border-bottom-width: 1px;
+			border-bottom-style: solid;
+		}
+
+		h1,
+		h2,
+		h3 {
+			font-weight: normal;
+		}
+
+		table {
+			border-collapse: collapse;
+		}
+
+		table>thead>tr>th {
+			text-align: left;
+			border-bottom: 1px solid;
+		}
+
+		table>thead>tr>th,
+		table>thead>tr>td,
+		table>tbody>tr>th,
+		table>tbody>tr>td {
+			padding: 5px 10px;
+		}
+
+		table>tbody>tr+tr>td {
+			border-top: 1px solid;
+		}
+
+		blockquote {
+			margin: 0 7px 0 5px;
+			padding: 0 16px 0 10px;
+			border-left-width: 5px;
+			border-left-style: solid;
+		}
+
+		code {
+			font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+			font-size: 1em;
+			line-height: 1.357em;
+		}
+
+		body.wordWrap pre {
+			white-space: pre-wrap;
+		}
+
+		pre:not(.hljs),
+		pre.hljs code>div {
+			padding: 16px;
+			border-radius: 3px;
+			overflow: auto;
+		}
+
+		pre code {
+			color: var(--vscode-editor-foreground);
+			tab-size: 4;
+		}
+
+		/** Theming */
+
+		.vscode-light pre {
+			background-color: rgba(220, 220, 220, 0.4);
+		}
+
+		.vscode-dark pre {
+			background-color: rgba(10, 10, 10, 0.4);
+		}
+
+		.vscode-high-contrast pre {
+			background-color: rgb(0, 0, 0);
+		}
+
+		.vscode-high-contrast h1 {
+			border-color: rgb(0, 0, 0);
+		}
+
+		.vscode-light table>thead>tr>th {
+			border-color: rgba(0, 0, 0, 0.69);
+		}
+
+		.vscode-dark table>thead>tr>th {
+			border-color: rgba(255, 255, 255, 0.69);
+		}
+
+		.vscode-light h1,
+		.vscode-light hr,
+		.vscode-light table>tbody>tr+tr>td {
+			border-color: rgba(0, 0, 0, 0.18);
+		}
+
+		.vscode-dark h1,
+		.vscode-dark hr,
+		.vscode-dark table>tbody>tr+tr>td {
+			border-color: rgba(255, 255, 255, 0.18);
+		}
+	</style>
+
+	<style>
+		/* Tomorrow Theme */
+		/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+		/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+		/* Tomorrow Comment */
+		.hljs-comment,
+		.hljs-quote {
+			color: #8e908c;
+		}
+
+		/* Tomorrow Red */
+		.hljs-variable,
+		.hljs-template-variable,
+		.hljs-tag,
+		.hljs-name,
+		.hljs-selector-id,
+		.hljs-selector-class,
+		.hljs-regexp,
+		.hljs-deletion {
+			color: #c82829;
+		}
+
+		/* Tomorrow Orange */
+		.hljs-number,
+		.hljs-built_in,
+		.hljs-builtin-name,
+		.hljs-literal,
+		.hljs-type,
+		.hljs-params,
+		.hljs-meta,
+		.hljs-link {
+			color: #f5871f;
+		}
+
+		/* Tomorrow Yellow */
+		.hljs-attribute {
+			color: #eab700;
+		}
+
+		/* Tomorrow Green */
+		.hljs-string,
+		.hljs-symbol,
+		.hljs-bullet,
+		.hljs-addition {
+			color: #718c00;
+		}
+
+		/* Tomorrow Blue */
+		.hljs-title,
+		.hljs-section {
+			color: #4271ae;
+		}
+
+		/* Tomorrow Purple */
+		.hljs-keyword,
+		.hljs-selector-tag {
+			color: #8959a8;
+		}
+
+		.hljs {
+			display: block;
+			overflow-x: auto;
+			color: #4d4d4c;
+			padding: 0.5em;
+		}
+
+		.hljs-emphasis {
+			font-style: italic;
+		}
+
+		.hljs-strong {
+			font-weight: bold;
+		}
+	</style>
+
+	<style>
+		/*
+ * Markdown PDF CSS
+ */
+
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+			padding: 0 12px;
+		}
+
+		pre {
+			background-color: #f8f8f8;
+			border: 1px solid #cccccc;
+			border-radius: 3px;
+			overflow-x: auto;
+			white-space: pre-wrap;
+			overflow-wrap: break-word;
+		}
+
+		pre:not(.hljs) {
+			padding: 23px;
+			line-height: 19px;
+		}
+
+		blockquote {
+			background: rgba(127, 127, 127, 0.1);
+			border-color: rgba(0, 122, 204, 0.5);
+		}
+
+		.emoji {
+			height: 1.4em;
+		}
+
+		code {
+			font-size: 14px;
+			line-height: 19px;
+		}
+
+		/* for inline code */
+		:not(pre):not(.hljs)>code {
+			color: #C9AE75;
+			/* Change the old color so it seems less like an error */
+			font-size: inherit;
+		}
+
+		/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+		.page {
+			page-break-after: always;
+		}
+	</style>
+
+	<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+	<script>
+		window.MathJax = {
+			tex: { inlineMath: [['\\(', '\\)'], ['$', '$']], displayMath: [['\\[', '\\]'], ['$$', '$$']] },
+			options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
+		};
+	</script>
+	<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+
+<body>
+	<script>
+		mermaid.initialize({
+			startOnLoad: true,
+			theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+				? 'dark'
+				: 'default'
+		});
+	</script>
+	<h1 id="networking-study-reference">Networking Study Reference</h1>
+	<h2 id="1-introduction-to-the-internet">1. Introduction to the Internet</h2>
+	<p>The Internet is a global &quot;network of networks&quot; that provides an infrastructure for distributed
+		applications and services. It connects billions of computing devices, including:</p>
+	<ul>
+		<li><strong>Traditional Hosts</strong>: PCs, laptops, smartphones, servers.</li>
+		<li><strong>IoT / Embedded Devices</strong>: IP picture frames, Slingbox (remote cable control), Web-enabled
+			toasters, AR devices, sensorized mattresses, connected cars, scooters, and gaming devices.</li>
+		<li><strong>Advanced Applications</strong>: 5G/NextG Teleoperation, where command-and-control (C&amp;C) data
+			uses the downlink (DL) and vehicle sensor data (camera feeds) uses the uplink (UL).</li>
+	</ul>
+	<h3 id="11-perspectives-on-the-internet">1.1 Perspectives on the Internet</h3>
+	<ul>
+		<li><strong>Hardware/Software View</strong>: A collection of interconnected devices (hosts, routers, links) and
+			protocols (HTTP, TCP, IP, etc.) that control the sending and receiving of messages.</li>
+		<li><strong>Service View</strong>: An infrastructure that provides services to applications (Web, streaming,
+			email, social media) and provides a programming interface (&quot;hooks&quot;) for distributed applications
+			to connect.</li>
+	</ul>
+	<h3 id="12-key-components">1.2 Key Components</h3>
+	<ul>
+		<li><strong>Protocols</strong>: Protocols are everywhere. They define the format, order of messages sent and
+			received among network entities, and actions taken on message transmission or receipt. Examples include
+			HTTP, TCP, IP, WiFi, 4G/5G, and Ethernet.</li>
+		<li><strong>Internet Standards</strong>: Maintained by the <strong>IETF</strong> (Internet Engineering Task
+			Force) through <strong>RFCs</strong> (Request for Comments).</li>
+	</ul>
+	<hr>
+	<h2 id="2-network-structure">2. Network Structure</h2>
+	<p>The network is divided into three main components:</p>
+	<ol>
+		<li><strong>Network Edge</strong>: Hosts (clients and servers), often residing in data centers.</li>
+		<li><strong>Access Networks</strong>: The physical media (wired or wireless communication links) that connect
+			the edge devices to the first router (edge router).</li>
+		<li><strong>Network Core</strong>: A mesh of interconnected routers; the &quot;network of networks&quot; that
+			ties everything together (e.g., national or global ISPs, content provider networks).</li>
+	</ol>
+	<hr>
+	<h2 id="3-naming-and-addressing">3. Naming and Addressing</h2>
+	<p>Networking is more than connecting nodes; it requires a way to identify participants in a shared resource.</p>
+	<ul>
+		<li><strong>Address</strong>: A byte-string that identifies a specific node.</li>
+		<li><strong>Addressing Types</strong>:
+			<ul>
+				<li><strong>Unicast</strong>: Delivery to a single, specific node.</li>
+				<li><strong>Broadcast</strong>: Delivery to all nodes in the network.</li>
+				<li><strong>Multicast</strong>: Delivery to a specific subset of nodes in the network.</li>
+			</ul>
+		</li>
+	</ul>
+	<hr>
+	<h2 id="4-network-core-switching-and-multiplexing">4. Network Core: Switching and Multiplexing</h2>
+	<p>The network core is responsible for moving data through the mesh of routers. This is achieved through two primary
+		methods: <strong>Circuit Switching</strong> and <strong>Packet Switching</strong>.</p>
+	<h3 id="41-circuit-switching">4.1 Circuit Switching</h3>
+	<p>In circuit switching, a dedicated end-to-end connection (&quot;circuit&quot;) is established before any data is
+		sent.</p>
+	<ul>
+		<li><strong>Characteristics</strong>:
+			<ul>
+				<li><strong>Reserved Resources</strong>: Bandwidth and switch capacity are dedicated to the
+					&quot;call.&quot;</li>
+				<li><strong>Guaranteed Performance</strong>: No interference from other users (no jitter/congestion once
+					connected).</li>
+				<li><strong>Idle Resources</strong>: If the user isn't sending data, the allocated circuit remains idle
+					and cannot be used by others.</li>
+				<li><strong>Call Blocking</strong>: Occurs if all available circuits are already in use.</li>
+			</ul>
+		</li>
+		<li><strong>Analogy</strong>: The original telephone network; railroads and trains (fixed tracks).</li>
+	</ul>
+	<blockquote>
+		<p>[!IMPORTANT]
+			<strong>Is Circuit Switching ever better?</strong>
+			Yes. While packet switching is generally more efficient for &quot;bursty&quot; traffic (like web browsing),
+			circuit switching is superior for applications requiring <strong>guaranteed, constant bandwidth</strong> and
+			<strong>zero queuing delay</strong>, such as high-quality real-time video or dedicated communication lines.
+		</p>
+	</blockquote>
+	<h4 id="multiplexing-in-circuit-switching">Multiplexing in Circuit Switching</h4>
+	<p>Resources are divided into &quot;pieces&quot; using:</p>
+	<ul>
+		<li><strong>Frequency Division Multiplexing (FDM)</strong>: The total electromagnetic or optical frequency
+			spectrum is divided into narrow bands. Each call is allocated its own band.</li>
+		<li><strong>Time Division Multiplexing (TDM)</strong>: Time is divided into slots. Each call is allocated a
+			periodic time slot during which it can transmit at the maximum rate of the wider frequency band.</li>
+	</ul>
+	<h3 id="42-packet-switching">4.2 Packet Switching</h3>
+	<p>In packet switching, hosts break application-layer messages into small chunks called <strong>packets</strong>.
+		Packets from different users share network resources on demand.</p>
+	<ul>
+		<li><strong>Characteristics</strong>:
+			<ul>
+				<li><strong>Store-and-Forward</strong>: The entire packet (L bits) must arrive at a router before it can
+					be transmitted on the next link (rate R bps). Transmission delay = L/R.</li>
+				<li><strong>Statistical Multiplexing</strong>: Resources are used as needed; packets from different
+					sources are interleaved on the link.</li>
+			</ul>
+		</li>
+		<li><strong>Best-Effort Service</strong>: The network core provides a connectionless &quot;datagram&quot;
+			service that does not guarantee delivery, order, or timing. Reliability is handled by the edges.</li>
+		<li><strong>Queuing and Loss</strong>: If the arrival rate (bps) to a link exceeds its transmission rate,
+			packets will queue in the router's buffer (memory). If the buffer fills up, packets are dropped (lost).</li>
+		<li><strong>Analogy</strong>: The Internet; highways and cars (shared, dynamic routing).</li>
+	</ul>
+	<h3 id="43-packet-switching-advantage-statistical-multiplexing">4.3 Packet Switching Advantage: Statistical
+		Multiplexing</h3>
+	<p>Packet switching is often more efficient than circuit switching because it allows more users to share the same
+		resources.</p>
+	<p><strong>Example Scenario</strong>:</p>
+	<ul>
+		<li><strong>Link</strong>: 1 Mbps.</li>
+		<li><strong>Each User</strong>: Requires 100 kbps when active, but is only active 10% of the time.</li>
+		<li><strong>Circuit Switching</strong>: Can only support <strong>10 users</strong> (100 kbps each, statically
+			allocated).</li>
+		<li><strong>Packet Switching</strong>: Can support significantly more users with a very low probability of
+			congestion. If there are 35 users, the probability that more than 10 are active at the same time is
+			extremely small (approx. 0.0004).</li>
+	</ul>
+	<p><strong>Conclusion</strong>: Packet switching allows for more efficient use of network resources by exploiting
+		the &quot;bursty&quot; nature of data traffic.</p>
+	<h4 id="probability-of-congestion">Probability of Congestion</h4>
+	<p>To calculate the probability that exactly $k$ out of $n$ users are active (where each user is active with
+		probability $p$):
+		$$P(k) = \binom{n}{k} p^k (1-p)^{n-k}$$
+		<em>The probability of congestion is the sum of probabilities where $k$ exceeds the network's capacity.</em>
+	</p>
+	<h3 id="44-link-utilization">4.4 Link Utilization</h3>
+	<p><strong>Link Utilization</strong> is the percentage of a link's total capacity that is currently being used.</p>
+	<ul>
+		<li><strong>Formula</strong>: $U = (\text{Total Arrival Rate}) / (\text{Link Capacity}) \times 100%$</li>
+		<li><strong>Example</strong>: If two clients each send at 10 Mbps into a router that has a 100 Mbps output link,
+			the utilization is $(10 + 10) / 100 = 20%$.</li>
+	</ul>
+	<h3 id="45-routing-vs-forwarding">4.5 Routing vs. Forwarding</h3>
+	<p>These are the two key network-layer functions performed in the core:</p>
+	<ul>
+		<li><strong>Forwarding (Switching)</strong>: A <strong>local</strong> action. It involves moving arriving
+			packets from a router's input link to the appropriate output link based on a local forwarding table.</li>
+		<li><strong>Routing</strong>: A <strong>global</strong> action. It involves determining the end-to-end paths
+			(source-to-destination) taken by packets using routing algorithms.</li>
+	</ul>
+	<hr>
+	<h2 id="5-network-performance-metrics">5. Network Performance Metrics</h2>
+	<p>Network performance is primarily measured by how fast and reliably data moves from point A to point B.</p>
+	<h3 id="51-throughput">5.1 Throughput</h3>
+	<p><strong>Throughput</strong> is the rate (bits/time unit) at which bits are being sent from sender to receiver.
+	</p>
+	<ul>
+		<li><strong>Instantaneous Throughput</strong>: The rate at a specific point in time.</li>
+		<li><strong>Average Throughput</strong>: The rate over a longer period of time.</li>
+		<li><strong>Bottleneck Link</strong>: The link in an end-to-end path that constrains the total throughput.
+			<ul>
+				<li>If a server sends at rate $R_s$ and a client receives at rate $R_c$, the end-to-end throughput is
+					$\min(R_s, R_c)$.</li>
+				<li>In a shared backbone with capacity $R$ shared by $N$ connections, the throughput is $\min(R_s, R_c,
+					R/N)$.</li>
+			</ul>
+		</li>
+	</ul>
+	<h3 id="52-latency-delay">5.2 Latency (Delay)</h3>
+	<p>The total <strong>Nodal Delay</strong> at a single router is the sum of four components:
+		$$d_{nodal} = d_{proc} + d_{queue} + d_{trans} + d_{prop}$$</p>
+	<ol>
+		<li><strong>Processing Delay ($d_{proc}$)</strong>: Time spent checking for bit errors and determining the
+			output link. Usually microseconds.</li>
+		<li><strong>Queuing Delay ($d_{queue}$)</strong>: Time spent waiting at the output link for transmission.
+			Depends on the congestion level of the router.</li>
+		<li><strong>Transmission Delay ($d_{trans}$)</strong>: The time required to push all the packet's bits into the
+			link.
+			<ul>
+				<li>Formula: $d_{trans} = L / R$ (where $L$ is packet length in bits and $R$ is link bandwidth in bps).
+				</li>
+			</ul>
+		</li>
+		<li><strong>Propagation Delay ($d_{prop}$)</strong>: The time it takes for a bit to travel from the beginning of
+			the link to the next router.
+			<ul>
+				<li>Formula: $d_{prop} = d / s$ (where $d$ is the length of the physical link and $s$ is the propagation
+					speed in the medium, approx. $2 \times 10^8$ m/sec).</li>
+			</ul>
+		</li>
+	</ol>
+	<blockquote>
+		<p>[!TIP]
+			<strong>The Caravan Analogy</strong>
+			Think of a 10-car caravan as a <strong>packet</strong> and each car as a <strong>bit</strong>.
+		</p>
+		<ul>
+			<li><strong>Toll Booth</strong>: The communication link.</li>
+			<li><strong>Toll Service Time</strong>: Transmission delay (time to &quot;push&quot; the cars onto the
+				road).</li>
+			<li><strong>Highway Travel</strong>: Propagation delay (time for cars to travel between booths).</li>
+			<li>If the cars travel very fast (high propagation speed) but the toll booth is slow (low transmission
+				rate), cars may arrive at the next booth before the whole caravan has even left the first one.</li>
+		</ul>
+	</blockquote>
+	<h3 id="53-measuring-delay-traceroute">5.3 Measuring Delay: Traceroute</h3>
+	<p><strong>Traceroute</strong> is a diagnostic tool that provides delay measurements from a source to every router
+		along the end-to-end path.</p>
+	<ul>
+		<li>It sends three packets to each router $i$ along the path.</li>
+		<li>Each router returns the packets to the sender.</li>
+		<li>The sender measures the time interval between transmission and reply to determine the RTT (Round Trip Time).
+		</li>
+	</ul>
+	<hr>
+	<h2 id="6-protocol-layering-and-the-tcpip-stack">6. Protocol Layering and the TCP/IP Stack</h2>
+	<p>The Internet handles its immense complexity through a <strong>layered architecture</strong>. Each layer provides
+		a service to the layer above it by using the services of the layer below.</p>
+	<h3 id="61-the-5-layer-internet-stack">6.1 The 5-Layer Internet Stack</h3>
+	<ol>
+		<li><strong>Application Layer</strong>: Supports network applications (e.g., HTTP, SMTP, FTP, DNS). The data
+			unit is a <strong>Message</strong>.</li>
+		<li><strong>Transport Layer</strong>: Handles process-to-process data transfer (e.g., TCP for reliability, UDP).
+			The data unit is a <strong>Segment</strong>.</li>
+		<li><strong>Network Layer</strong>: Routes datagrams from source host to destination host (e.g., IP, routing
+			protocols). The data unit is a <strong>Datagram</strong>.</li>
+		<li><strong>Link Layer</strong>: Handles data transfer between neighboring network elements (e.g., Ethernet,
+			802.11 WiFi, PPP). The data unit is a <strong>Frame</strong>.</li>
+		<li><strong>Physical Layer</strong>: Carries the actual bits &quot;on the wire.&quot;</li>
+	</ol>
+	<h3 id="62-key-concepts-in-layering">6.2 Key Concepts in Layering</h3>
+	<ul>
+		<li><strong>Protocols vs. Services</strong>:
+			<ul>
+				<li><strong>Service</strong>: What a layer does (the functionality it provides to the layer above).</li>
+				<li><strong>Protocol</strong>: The rules/messages exchanged between peering entities (e.g., two
+					Transport layers on different hosts) to implement a service. Protocols define:</li>
+				<li><strong>Format</strong> of messages.</li>
+				<li><strong>Order</strong> of messages (e.g., a &quot;Hi-Hi&quot; <strong>Handshake</strong> before data
+					exchange).</li>
+				<li><strong>Actions</strong> taken on message transmission or receipt.</li>
+			</ul>
+		</li>
+		<li><strong>Interfaces</strong>:
+			<ul>
+				<li><strong>Service Interface</strong>: Operations to access the layer's service (used by the layer
+					above).</li>
+				<li><strong>Peer-to-Peer Interface</strong>: The protocol used for communication between peers.</li>
+			</ul>
+		</li>
+		<li><strong>PDUs vs. SDUs</strong>:
+			<ul>
+				<li><strong>SDU (Service Data Unit)</strong>: The data packet handed to a layer by the layer above.</li>
+				<li><strong>PDU (Protocol Data Unit)</strong>: The packet exchanged between peers. It consists of the
+					SDU plus a layer-specific header (e.g., $PDU = SDU + Header$).</li>
+			</ul>
+		</li>
+	</ul>
+	<h3 id="63-encapsulation-the-matryoshka-doll-model">6.3 Encapsulation (The Matryoshka Doll Model)</h3>
+	<p>As data moves down the stack at the sender:</p>
+	<ol>
+		<li><strong>Application</strong> creates a <strong>Message</strong>.</li>
+		<li><strong>Transport</strong> encapsulates it with a header ($H_t$) to create a <strong>Segment</strong>.</li>
+		<li><strong>Network</strong> encapsulates the segment with a header ($H_n$) to create a
+			<strong>Datagram</strong>.
+		</li>
+		<li><strong>Link</strong> encapsulates the datagram with a header ($H_l$) and potentially a trailer to create a
+			<strong>Frame</strong>.
+			At the receiver, the process is reversed (<strong>Decapsulation</strong>).
+		</li>
+	</ol>
+	<hr>
+	<h2 id="7-internet-architectural-principles">7. Internet Architectural Principles</h2>
+	<h3 id="71-the-hourglass-model">7.1 The Hourglass Model</h3>
+	<p>The Internet architecture is often described as an <strong>hourglass</strong>.</p>
+	<ul>
+		<li><strong>The Narrow Waist</strong>: IP (Internet Protocol) sits in the middle. Everything runs over IP, and
+			IP runs over everything.</li>
+		<li>This allows for diverse applications at the top and diverse physical technologies at the bottom to coexist.
+		</li>
+	</ul>
+	<h3 id="72-smart-edges-dumb-core">7.2 &quot;Smart Edges, Dumb Core&quot;</h3>
+	<p>A fundamental design principle of the Internet:</p>
+	<ul>
+		<li><strong>Dumb Core</strong>: The network core (routers) remains simple. Its primary job is
+			&quot;best-effort&quot; packet switching (addressing, routing, and forwarding).</li>
+		<li><strong>Smart Edges</strong>: Complex functionalities like error recovery, flow control, and congestion
+			control are implemented at the end systems (hosts).</li>
+	</ul>
+	<hr>
+	<h2 id="8-network-challenges-and-solutions">8. Network Challenges and Solutions</h2>
+	<h3 id="81-common-errors">8.1 Common Errors</h3>
+	<ul>
+		<li><strong>Bit-level errors</strong>: Caused by electrical interference.</li>
+		<li><strong>Frame-level errors</strong>: Collisions or contention at the link layer.</li>
+		<li><strong>Packet-level errors</strong>: Delay or loss due to congestion/buffer overflow.</li>
+		<li><strong>Out-of-order delivery</strong>: Packets taking different paths through the network.</li>
+		<li><strong>Link/Node failures</strong>: System crashes or physical cable cuts.</li>
+	</ul>
+	<h3 id="82-mitigation-mechanisms">8.2 Mitigation Mechanisms</h3>
+	<p>To &quot;fill the gap&quot; between application expectations and underlying technology, the following are used:
+	</p>
+	<ul>
+		<li><strong>Redundancy</strong>: Adding bits to detect and correct errors.</li>
+		<li><strong>Acknowledgements (ACKs) &amp; Retransmissions</strong>: Recovering lost data.</li>
+		<li><strong>Sequence Numbers</strong>: Ensuring packets are reordered correctly at the receiver.</li>
+		<li><strong>Adaptive Routing</strong>: Sensing failures and routing around them.</li>
+	</ul>
+	<hr>
+	<h2 id="10-message-segmentation-and-pipelining">10. Message Segmentation and Pipelining</h2>
+	<p>In modern networks, long application-layer messages (e.g., a 10 MB image) are broken into smaller
+		<strong>packets</strong> (segmentation) before being sent.
+	</p>
+	<h3 id="101-the-pipelining-effect">10.1 The Pipelining Effect</h3>
+	<p>Segmentation allows for <strong>pipelining</strong>: while the first switch is forwarding packet 1 to the second
+		switch, the source host can already be sending packet 2 to the first switch. This significantly reduces total
+		end-to-end delay compared to sending the entire message as one giant block.</p>
+	<h3 id="102-delay-formulas">10.2 Delay Formulas</h3>
+	<p>For a message of size $M$ bits, segmented into $P$ packets of length $L$ bits each, sent over $N$ links of rate
+		$R$ bps:</p>
+	<ol>
+		<li>
+			<p><strong>Without Segmentation</strong>:
+				$$T_{total} = N \times (M / R)$$
+				<em>(The entire message must be stored-and-forwarded at every hop.)</em>
+			</p>
+		</li>
+		<li>
+			<p><strong>With Segmentation (General Formula)</strong>:
+				$$T_{total} = (N + P - 1) \times (L / R)$$</p>
+			<ul>
+				<li><strong>Derivation</strong>: It takes $L/R$ to push the first packet to the first switch. It takes
+					$(N-1) \times (L/R)$ for the first packet to reach the destination. Meanwhile, the remaining $(P-1)$
+					packets follow immediately behind, each arriving $L/R$ after the previous one.</li>
+				<li><strong>Note</strong>: This ignores propagation and processing delays. If included, add $N \times
+					d_{prop}$.</li>
+			</ul>
+		</li>
+	</ol>
+	<h3 id="103-pros-and-cons-of-segmentation">10.3 Pros and Cons of Segmentation</h3>
+	<table>
+		<thead>
+			<tr>
+				<th style="text-align:left"><strong>Advantages</strong></th>
+				<th style="text-align:left"><strong>Disadvantages</strong></th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td style="text-align:left"><strong>Reduced Delay</strong>: Pipelining speeds up delivery.</td>
+				<td style="text-align:left"><strong>Header Overhead</strong>: Every packet needs its own header
+					(metadata).</td>
+			</tr>
+			<tr>
+				<td style="text-align:left"><strong>Error Management</strong>: If a packet is corrupted, only that small
+					packet needs to be retransmitted, not the whole message.</td>
+				<td style="text-align:left"><strong>Reassembly Complexity</strong>: The receiver must put the packets
+					back in the correct order.</td>
+			</tr>
+			<tr>
+				<td style="text-align:left"><strong>Fairness</strong>: Prevents one large file from hogging a link for a
+					long duration.</td>
+				<td style="text-align:left"><strong>Processing Load</strong>: Routers must process many small packets
+					instead of one large one.</td>
+			</tr>
+		</tbody>
+	</table>
+
+</body>
+
+</html>
