@@ -1,0 +1,2551 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSCI 4211 — Unified Practice Exam</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600;700&family=Trebuchet+MS:wght@400;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      /* Vista Blue palette */
+      --sky-mid: #4A9CC8;
+      --sky-deep: #1A5080;
+      --navy-panel: rgba(14, 40, 100, 0.78);
+      --navy-panel-solid: #0e2864;
+      --navy-panel-lighter: rgba(22, 58, 138, 0.72);
+      --navy-border: rgba(90, 150, 220, 0.45);
+      --navy-inner: rgba(8, 25, 70, 0.85);
+
+      /* Accent colors — Vista era */
+      --orange: #E8790A;
+      --orange-light: #F5971E;
+      --orange-glow: rgba(232, 121, 10, 0.35);
+      --green-pill: #4A9E2A;
+      --green-pill-light: #6FC244;
+      --green-pill-dark: #357A1A;
+
+      /* Text */
+      --white: #ffffff;
+      --link-blue: #B8DCFF;
+      --link-hover: #ddf0ff;
+      --muted-blue: rgba(180, 215, 255, 0.65);
+      --dim-blue: rgba(150, 195, 240, 0.5);
+
+      /* Chapter colors — still distinct but blue-family */
+      --ch1: #60B8F0;
+      --ch2: #F5A623;
+      --ch3: #6FD97A;
+      --ch5: #CF9FFF;
+
+      /* Feedback */
+      --correct: #6FE880;
+      --wrong: #FF7070;
+      --info: #80CAFF;
+
+      --sans: 'Trebuchet MS', 'Segoe UI', Tahoma, sans-serif;
+      --mono: 'Courier New', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── BODY / BACKGROUND ── */
+    body {
+      font-family: var(--sans);
+      font-weight: 400;
+      line-height: 1.72;
+      min-height: 100vh;
+      color: var(--white);
+      background: #3A8DC0;
+      /* fallback */
+    }
+
+    /* Fixed background fills the entire viewport */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url('vista_bg.png');
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      z-index: -1;
+    }
+
+    /* ── TOP TOOLBAR — Vista window chrome style ── */
+    .top-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 300;
+      background: linear-gradient(180deg, #d6e8f7 0%, #b8d4ee 40%, #9ec4e4 100%);
+      border-bottom: 2px solid rgba(80, 130, 190, 0.7);
+      box-shadow: 0 2px 12px rgba(10, 40, 90, 0.35);
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      height: 52px;
+    }
+
+    /* Back/Forward orange circle buttons */
+    .nav-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid #b86000;
+      background: radial-gradient(circle at 45% 35%, #FFAA44 0%, #E8790A 55%, #B85500 100%);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 200, 100, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      transition: filter 0.1s;
+    }
+
+    .nav-btn:hover {
+      filter: brightness(1.15);
+    }
+
+    /* Home button — orange rounded square */
+    .home-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid #b86000;
+      background: radial-gradient(circle at 45% 30%, #FFAA44 0%, #E8790A 60%, #B85500 100%);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 200, 100, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+    }
+
+    /* Glossy green pill button — the signature Vista element */
+    .pill-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0 1.1rem;
+      height: 30px;
+      border-radius: 50px;
+      border: 1px solid var(--green-pill-dark);
+      background: linear-gradient(180deg,
+          #8EDF60 0%,
+          #6FC244 28%,
+          #4A9E2A 50%,
+          #3A8020 100%);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(200, 255, 160, 0.55);
+      color: white;
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-shadow: 0 1px 2px rgba(0, 60, 0, 0.5);
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: filter 0.1s;
+    }
+
+    .pill-btn:hover {
+      filter: brightness(1.1);
+    }
+
+    /* Toolbar search bar */
+    .toolbar-search {
+      flex: 1;
+      max-width: 400px;
+      display: flex;
+      align-items: center;
+      background: white;
+      border: 1px solid #8AAAC0;
+      border-radius: 14px;
+      padding: 0 0.6rem 0 0.9rem;
+      height: 26px;
+      margin-left: auto;
+      gap: 0.4rem;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.12);
+    }
+
+    .toolbar-search input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      color: #444;
+      background: transparent;
+    }
+
+    .toolbar-search input::placeholder {
+      color: #aaa;
+      font-style: italic;
+    }
+
+    .search-go {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1px solid #b86000;
+      background: radial-gradient(circle at 45% 35%, #FFAA44, #E8790A 70%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: white;
+      font-size: 0.6rem;
+      flex-shrink: 0;
+    }
+
+    /* Course badge in toolbar */
+    .toolbar-badge {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: #1A4A7A;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    .toolbar-sep {
+      width: 1px;
+      height: 24px;
+      background: rgba(80, 120, 170, 0.4);
+      flex-shrink: 0;
+    }
+
+    /* Progress bar inside toolbar */
+    .toolbar-progress {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .prog-track {
+      width: 100px;
+      height: 4px;
+      background: rgba(80, 120, 170, 0.3);
+      border-radius: 2px;
+      overflow: hidden;
+      border: 1px solid rgba(80, 120, 170, 0.3);
+    }
+
+    .prog-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #E8790A, #F5C040);
+      border-radius: 2px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+
+    #prog-label {
+      font-size: 0.68rem;
+      color: #1A4A7A;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+
+    .score-chip {
+      background: linear-gradient(180deg, #d0e8f8, #b0cee8);
+      border: 1px solid #7AAAC8;
+      border-radius: 10px;
+      padding: 0.15rem 0.65rem;
+      font-size: 0.72rem;
+      color: #0e3060;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .score-chip strong {
+      color: #c85500;
+    }
+
+    /* ── HERO / BRANDING ── */
+    .hero {
+      padding: 2.8rem 2.5rem 1.5rem;
+      max-width: 940px;
+      margin: 0 auto;
+    }
+
+    .hero-brand {
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-brand .ms {
+      font-size: 0.82rem;
+      color: rgba(255, 255, 255, 0.75);
+      letter-spacing: 0.04em;
+      font-weight: 400;
+      display: block;
+      margin-bottom: 0.1rem;
+    }
+
+    .hero-brand .course-name {
+      font-size: 3.4rem;
+      font-weight: 700;
+      color: white;
+      line-height: 1.0;
+      letter-spacing: -0.01em;
+      display: block;
+      text-shadow: 0 2px 12px rgba(10, 50, 120, 0.4);
+    }
+
+    .hero-brand .subtitle {
+      font-size: 1.05rem;
+      color: rgba(255, 255, 255, 0.82);
+      font-weight: 400;
+      display: block;
+      margin-top: 0.2rem;
+      letter-spacing: 0.01em;
+    }
+
+    .hero-meta {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+      color: var(--link-blue);
+      margin-top: 0.8rem;
+    }
+
+    .hero-meta span {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .hero-meta .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    /* ── CHAPTER NAV TABS ── */
+    .chapter-nav {
+      max-width: 940px;
+      margin: 0 auto;
+      padding: 0 2.5rem 1.2rem;
+      display: flex;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+
+    .ch-tab {
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.3rem 1rem;
+      border-radius: 50px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.12);
+      color: rgba(255, 255, 255, 0.85);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-decoration: none;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .ch-tab:hover {
+      background: rgba(255, 255, 255, 0.22);
+      color: white;
+      border-color: rgba(255, 255, 255, 0.55);
+    }
+
+    .ch-tab.ch-1 {
+      border-color: rgba(96, 184, 240, 0.6);
+      background: rgba(96, 184, 240, 0.18);
+      color: #d0eeff;
+    }
+
+    .ch-tab.ch-2 {
+      border-color: rgba(245, 166, 35, 0.6);
+      background: rgba(245, 166, 35, 0.18);
+      color: #FFE4A0;
+    }
+
+    .ch-tab.ch-3 {
+      border-color: rgba(111, 217, 122, 0.6);
+      background: rgba(111, 217, 122, 0.18);
+      color: #CCFFCC;
+    }
+
+    .ch-tab.ch-5 {
+      border-color: rgba(207, 159, 255, 0.6);
+      background: rgba(207, 159, 255, 0.18);
+      color: #EDD8FF;
+    }
+
+    /* ── MAIN ── */
+    main {
+      max-width: 940px;
+      margin: 0 auto;
+      padding: 0 2.5rem 6rem;
+    }
+
+    /* ── SECTION BLOCK ── */
+    .section-block {
+      margin-top: 2.2rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      padding: 0.9rem 1.4rem;
+      background: linear-gradient(180deg, rgba(30, 70, 150, 0.9) 0%, rgba(14, 40, 100, 0.92) 100%);
+      border: 1px solid var(--navy-border);
+      border-bottom: 1px solid rgba(60, 110, 190, 0.3);
+      border-radius: 12px 12px 0 0;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 -1px 0 rgba(100, 170, 255, 0.2) inset, 0 2px 8px rgba(10, 30, 80, 0.3);
+    }
+
+    .section-badge {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.6rem;
+      border-radius: 3px;
+      border: 1px solid;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .sb-ch1 {
+      color: var(--ch1);
+      border-color: rgba(96, 184, 240, 0.5);
+      background: rgba(96, 184, 240, 0.12);
+    }
+
+    .sb-ch2 {
+      color: var(--ch2);
+      border-color: rgba(245, 166, 35, 0.5);
+      background: rgba(245, 166, 35, 0.12);
+    }
+
+    .sb-ch3 {
+      color: var(--ch3);
+      border-color: rgba(111, 217, 122, 0.5);
+      background: rgba(111, 217, 122, 0.12);
+    }
+
+    .sb-ch5 {
+      color: var(--ch5);
+      border-color: rgba(207, 159, 255, 0.5);
+      background: rgba(207, 159, 255, 0.12);
+    }
+
+    .section-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: white;
+      letter-spacing: 0.02em;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    .section-count {
+      margin-left: auto;
+      font-size: 0.68rem;
+      color: var(--muted-blue);
+    }
+
+    .section-questions {
+      border: 1px solid var(--navy-border);
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      overflow: hidden;
+      background: var(--navy-panel);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 20px rgba(10, 30, 80, 0.35);
+    }
+
+    /* ── QUESTION CARD ── */
+    .q-card {
+      border-bottom: 1px solid rgba(60, 110, 200, 0.25);
+      transition: background 0.2s;
+    }
+
+    .q-card:last-child {
+      border-bottom: none;
+    }
+
+    .q-card.state-correct {
+      border-left: 3px solid var(--correct);
+    }
+
+    .q-card.state-wrong {
+      border-left: 3px solid var(--wrong);
+    }
+
+    .q-card.state-revealed {
+      border-left: 3px solid var(--info);
+    }
+
+    .q-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem 1.4rem;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+
+    .q-row:hover {
+      background: rgba(80, 140, 230, 0.1);
+    }
+
+    .q-badge {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      padding: 0.16rem 0.45rem;
+      border-radius: 3px;
+      border: 1px solid rgba(100, 160, 240, 0.35);
+      color: var(--muted-blue);
+      background: rgba(30, 70, 160, 0.3);
+      white-space: nowrap;
+      margin-top: 0.12rem;
+      flex-shrink: 0;
+    }
+
+    .q-row-title {
+      flex: 1;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--link-blue);
+      line-height: 1.5;
+    }
+
+    .q-row-meta {
+      font-size: 0.62rem;
+      color: var(--dim-blue);
+      margin-top: 0.2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .q-chevron {
+      color: var(--muted-blue);
+      font-size: 0.8rem;
+      margin-top: 0.2rem;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+
+    .q-card.open .q-chevron {
+      transform: rotate(180deg);
+    }
+
+    .q-body {
+      display: none;
+      padding: 0 1.4rem 1.4rem;
+      border-top: 1px solid rgba(60, 110, 200, 0.2);
+      background: rgba(8, 25, 80, 0.45);
+    }
+
+    .q-card.open .q-body {
+      display: block;
+    }
+
+    .q-stem {
+      font-size: 0.85rem;
+      color: var(--link-blue);
+      padding: 0.9rem 0 1rem;
+      line-height: 1.78;
+    }
+
+    .q-stem code {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      background: rgba(30, 80, 180, 0.4);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: #A0D8FF;
+    }
+
+    .q-stem .formula {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      background: rgba(20, 60, 140, 0.5);
+      border: 1px solid rgba(80, 140, 220, 0.35);
+      padding: 0.6rem 0.9rem;
+      border-radius: 5px;
+      margin: 0.6rem 0;
+      color: #C0D8FF;
+    }
+
+    .q-stem strong {
+      color: white;
+      font-weight: 600;
+    }
+
+    .q-stem em {
+      color: var(--ch2);
+      font-style: italic;
+    }
+
+    /* Calc box */
+    .calc-box {
+      background: rgba(20, 60, 140, 0.4);
+      border: 1px dashed rgba(80, 140, 220, 0.4);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .calc-title {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      color: var(--ch2);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+    }
+
+    .calc-given {
+      font-size: 0.8rem;
+      color: var(--muted-blue);
+      line-height: 1.8;
+    }
+
+    .calc-given span {
+      color: white;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+    }
+
+    /* ── CHOICES ── */
+    .choices {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .choice-btn {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7rem;
+      padding: 0.55rem 0.9rem;
+      border: 1px solid rgba(80, 140, 220, 0.3);
+      border-radius: 5px;
+      background: rgba(20, 55, 130, 0.35);
+      color: var(--link-blue);
+      font-family: var(--sans);
+      font-size: 0.84rem;
+      font-weight: 400;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.12s;
+      line-height: 1.5;
+      width: 100%;
+    }
+
+    .choice-btn:hover:not(:disabled) {
+      border-color: rgba(200, 220, 255, 0.5);
+      background: rgba(40, 90, 180, 0.45);
+      color: white;
+    }
+
+    .choice-btn .ck {
+      font-family: var(--mono);
+      font-size: 0.63rem;
+      color: var(--dim-blue);
+      min-width: 1.2rem;
+      margin-top: 0.12rem;
+      flex-shrink: 0;
+    }
+
+    .choice-btn.btn-correct {
+      border-color: var(--correct) !important;
+      background: rgba(70, 220, 100, 0.12) !important;
+      color: var(--correct) !important;
+    }
+
+    .choice-btn.btn-wrong {
+      border-color: var(--wrong) !important;
+      background: rgba(255, 100, 100, 0.12) !important;
+      color: var(--wrong) !important;
+    }
+
+    .choice-btn:disabled {
+      cursor: default;
+    }
+
+    /* ── TRUE/FALSE ── */
+    .tf-wrap {
+      display: flex;
+      gap: 0.55rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .tf-btn {
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.5rem 1.8rem;
+      border-radius: 50px;
+      border: 1px solid rgba(80, 140, 220, 0.4);
+      background: rgba(20, 55, 130, 0.4);
+      color: var(--link-blue);
+      cursor: pointer;
+      transition: all 0.12s;
+      box-shadow: inset 0 1px 0 rgba(150, 200, 255, 0.15);
+    }
+
+    .tf-btn:hover:not(:disabled) {
+      border-color: rgba(200, 230, 255, 0.6);
+      background: rgba(40, 90, 180, 0.5);
+      color: white;
+    }
+
+    .tf-btn.tf-correct {
+      border-color: var(--correct) !important;
+      background: rgba(70, 220, 100, 0.14) !important;
+      color: var(--correct) !important;
+    }
+
+    .tf-btn.tf-wrong {
+      border-color: var(--wrong) !important;
+      background: rgba(255, 100, 100, 0.14) !important;
+      color: var(--wrong) !important;
+    }
+
+    .tf-btn:disabled {
+      cursor: default;
+    }
+
+    /* ── INPUT / NUMERIC ── */
+    .input-row {
+      display: flex;
+      gap: 0.55rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 0.8rem;
+    }
+
+    .ans-input {
+      background: rgba(10, 35, 100, 0.6);
+      border: 1px solid rgba(80, 140, 220, 0.4);
+      border-radius: 5px;
+      padding: 0.48rem 0.8rem;
+      color: white;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.12s;
+      min-width: 140px;
+    }
+
+    .ans-input:focus {
+      border-color: rgba(150, 200, 255, 0.7);
+    }
+
+    .ans-input.inp-correct {
+      border-color: var(--correct);
+      color: var(--correct);
+    }
+
+    .ans-input.inp-wrong {
+      border-color: var(--wrong);
+      color: var(--wrong);
+    }
+
+    .ans-input-label {
+      font-size: 0.65rem;
+      color: var(--dim-blue);
+      min-width: 80px;
+      font-family: var(--mono);
+    }
+
+    .unit-label {
+      font-size: 0.78rem;
+      color: var(--muted-blue);
+    }
+
+    /* ── TEXTAREA ── */
+    .ans-textarea {
+      width: 100%;
+      background: rgba(10, 35, 100, 0.55);
+      border: 1px solid rgba(80, 140, 220, 0.35);
+      border-radius: 5px;
+      padding: 0.65rem 0.85rem;
+      color: white;
+      font-family: var(--sans);
+      font-size: 0.84rem;
+      font-weight: 400;
+      outline: none;
+      resize: vertical;
+      min-height: 75px;
+      line-height: 1.6;
+      margin-bottom: 0.7rem;
+      transition: border-color 0.12s;
+    }
+
+    .ans-textarea:focus {
+      border-color: rgba(150, 200, 255, 0.7);
+    }
+
+    .ans-textarea::placeholder {
+      color: var(--dim-blue);
+    }
+
+    /* ── SUB-QUESTIONS ── */
+    .sub-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .sub-item {
+      display: flex;
+      gap: 0.7rem;
+    }
+
+    .sub-lbl {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--ch1);
+      flex-shrink: 0;
+      padding-top: 0.5rem;
+      min-width: 1.3rem;
+    }
+
+    .sub-txt {
+      font-size: 0.84rem;
+      color: var(--link-blue);
+      line-height: 1.6;
+    }
+
+    .sub-txt strong {
+      color: white;
+      font-weight: 600;
+    }
+
+    .sub-answer-row {
+      display: flex;
+      gap: 0.65rem;
+      align-items: flex-start;
+      margin-bottom: 0.45rem;
+    }
+
+    /* ── CHECKBOX MC ── */
+    .mc-opts {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .mc-opt {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.5rem 0.85rem;
+      border: 1px solid rgba(80, 140, 220, 0.3);
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.12s;
+      font-size: 0.84rem;
+      user-select: none;
+      background: rgba(20, 55, 130, 0.3);
+      color: var(--link-blue);
+    }
+
+    .mc-opt:hover {
+      border-color: rgba(200, 230, 255, 0.5);
+      background: rgba(40, 90, 180, 0.4);
+    }
+
+    .mc-opt input {
+      accent-color: var(--ch1);
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .mc-opt.selected {
+      border-color: rgba(150, 210, 255, 0.6);
+      background: rgba(50, 110, 200, 0.35);
+      color: white;
+    }
+
+    /* ── ACTION BUTTONS — Vista gloss style ── */
+    .check-btn,
+    .reveal-btn,
+    .sub-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: filter 0.12s;
+      border-radius: 50px;
+      white-space: nowrap;
+    }
+
+    /* Check = orange pill */
+    .check-btn {
+      padding: 0.38rem 1.1rem;
+      border: 1px solid #b86000;
+      background: linear-gradient(180deg, #FFAA44 0%, #E8790A 45%, #C05500 100%);
+      color: white;
+      text-shadow: 0 1px 2px rgba(80, 20, 0, 0.5);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 200, 120, 0.5);
+    }
+
+    .check-btn:hover:not(:disabled) {
+      filter: brightness(1.12);
+    }
+
+    .check-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    /* Reveal = blue glass pill */
+    .reveal-btn {
+      padding: 0.35rem 1rem;
+      border: 1px solid rgba(100, 170, 255, 0.4);
+      background: linear-gradient(180deg, rgba(80, 150, 240, 0.55) 0%, rgba(40, 90, 190, 0.5) 100%);
+      color: var(--link-blue);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(150, 200, 255, 0.25);
+      margin-top: 0.5rem;
+      backdrop-filter: blur(4px);
+    }
+
+    .reveal-btn:hover {
+      filter: brightness(1.15);
+      color: white;
+    }
+
+    /* ── FEEDBACK ── */
+    .feedback {
+      display: none;
+      border-radius: 5px;
+      padding: 0.65rem 0.9rem;
+      margin-top: 0.55rem;
+      font-size: 0.8rem;
+      line-height: 1.65;
+      border-left: 3px solid;
+    }
+
+    .feedback.show {
+      display: block;
+    }
+
+    .feedback.fb-correct {
+      background: rgba(70, 220, 100, 0.08);
+      border-color: var(--correct);
+      color: #a0f0b8;
+    }
+
+    .feedback.fb-wrong {
+      background: rgba(255, 100, 100, 0.08);
+      border-color: var(--wrong);
+      color: #ffbbbb;
+    }
+
+    .feedback.fb-info {
+      background: rgba(80, 160, 255, 0.08);
+      border-color: var(--info);
+      color: #aaddff;
+    }
+
+    .feedback strong {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .feedback .expl {
+      color: var(--link-blue);
+      margin-top: 0.25rem;
+      font-size: 0.78rem;
+    }
+
+    /* ── ANSWER REVEAL BOX ── */
+    .answer-box {
+      display: none;
+      margin-top: 0.65rem;
+      padding: 0.85rem 1rem;
+      background: rgba(20, 70, 160, 0.35);
+      border: 1px solid rgba(80, 160, 255, 0.25);
+      border-radius: 5px;
+      font-size: 0.82rem;
+      line-height: 1.72;
+      color: var(--link-blue);
+      backdrop-filter: blur(4px);
+    }
+
+    .answer-box.show {
+      display: block;
+    }
+
+    .answer-box strong {
+      color: var(--ch3);
+      font-weight: 700;
+    }
+
+    /* ── FIELD LABEL ── */
+    .field-label {
+      font-size: 0.62rem;
+      color: var(--dim-blue);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.3rem;
+      font-family: var(--mono);
+    }
+
+    /* ── SUB-SECTION DIVIDER ── */
+    .sub-section-div {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      color: var(--dim-blue);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 1rem 1.4rem 0.45rem;
+      background: rgba(8, 25, 80, 0.35);
+      border-top: 1px solid rgba(60, 110, 200, 0.2);
+      font-family: var(--mono);
+    }
+
+    .sub-section-div::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(60, 110, 200, 0.2);
+    }
+
+    /* ── SCORE CARD ── */
+    #score-card {
+      display: none;
+      text-align: center;
+      border: 1px solid var(--navy-border);
+      border-radius: 12px;
+      background: var(--navy-panel);
+      backdrop-filter: blur(14px);
+      padding: 2.5rem;
+      margin-top: 3rem;
+      box-shadow: 0 8px 32px rgba(10, 30, 80, 0.4);
+    }
+
+    #score-card.show {
+      display: block;
+    }
+
+    .score-giant {
+      font-size: 4.5rem;
+      font-weight: 700;
+      color: white;
+      line-height: 1;
+      margin: 0.5rem 0;
+      text-shadow: 0 2px 16px rgba(100, 180, 255, 0.4);
+    }
+
+    .score-sub {
+      font-size: 0.84rem;
+      color: var(--muted-blue);
+      margin-top: 0.4rem;
+    }
+
+    .reset-btn {
+      margin-top: 1.5rem;
+      padding: 0.5rem 1.8rem;
+      border-radius: 50px;
+      border: 1px solid rgba(100, 170, 255, 0.4);
+      background: linear-gradient(180deg, rgba(80, 150, 240, 0.5), rgba(40, 90, 190, 0.5));
+      color: var(--link-blue);
+      font-family: var(--sans);
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: filter 0.12s;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(150, 200, 255, 0.2);
+    }
+
+    .reset-btn:hover {
+      filter: brightness(1.15);
+      color: white;
+    }
+
+    @media (max-width: 640px) {
+      .top-toolbar {
+        padding: 0 0.8rem;
+        gap: 0.5rem;
+      }
+
+      .toolbar-search {
+        display: none;
+      }
+
+      .hero {
+        padding: 1.8rem 1.2rem 1.2rem;
+      }
+
+      .hero-brand .course-name {
+        font-size: 2.4rem;
+      }
+
+      .chapter-nav {
+        padding: 0 1.2rem 1rem;
+      }
+
+      main {
+        padding: 0 1.2rem 4rem;
+      }
+
+      .section-header {
+        padding: 0.75rem 1rem;
+      }
+
+      .q-row {
+        padding: 0.85rem 1rem;
+      }
+
+      .q-body {
+        padding: 0 1rem 1.1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── VISTA-STYLE TOOLBAR ── -->
+  <div class="top-toolbar">
+    <!-- Back/Forward -->
+    <div class="nav-btn" title="Back">◀</div>
+    <div class="nav-btn" title="Forward">▶</div>
+    <!-- Home -->
+    <div class="home-btn" title="Home">🏠</div>
+    <!-- Green pill -->
+    <div class="pill-btn">📚 Study Tools ▾</div>
+
+    <div class="toolbar-sep"></div>
+    <span class="toolbar-badge">CSCI 4211</span>
+    <div class="toolbar-sep"></div>
+
+    <!-- Progress -->
+    <div class="toolbar-progress">
+      <span id="prog-label">0 / 28 answered</span>
+      <div class="prog-track">
+        <div class="prog-fill" id="prog-fill"></div>
+      </div>
+    </div>
+
+    <div class="score-chip">Score: <strong id="live-score">0</strong></div>
+
+    <!-- Search bar -->
+    <div class="toolbar-search">
+      <input type="text" placeholder="Type a search term or topic…" />
+      <div class="search-go">▶</div>
+    </div>
+  </div>
+
+  <!-- ── HERO / BRANDING ── -->
+  <div class="hero">
+    <div class="hero-brand">
+      <span class="course-name">CSCI 4211</span>
+      <span class="subtitle">with Unified Practice Exam</span>
+    </div>
+    <div class="hero-meta">
+      <span><span class="dot" style="background:var(--ch1)"></span> Chapter 1 — Network Fundamentals (8 Q)</span>
+      <span><span class="dot" style="background:var(--ch2)"></span> Chapter 2 — Application Layer (11 Q)</span>
+      <span><span class="dot" style="background:var(--ch3)"></span> Chapter 3 — Transport Layer (14 Q)</span>
+      <span><span class="dot" style="background:var(--ch5)"></span> Chapters 5 &amp; 7 — Routing &amp; Wireless (12
+        Q)</span>
+    </div>
+  </div>
+
+  <!-- ── CHAPTER NAV ── -->
+  <nav class="chapter-nav">
+    <a class="ch-tab ch-1" href="#ch1">Ch 1 · Fundamentals</a>
+    <a class="ch-tab ch-2" href="#ch2">Ch 2 · Application</a>
+    <a class="ch-tab ch-3" href="#ch3">Ch 3 · Transport</a>
+    <a class="ch-tab ch-5" href="#ch5">Ch 5 &amp; 7 · Routing &amp; Wireless</a>
+  </nav>
+
+  <main>
+
+    <!-- ════════ CHAPTER 1 ════════ -->
+    <div class="section-block" id="ch1">
+      <div class="section-header">
+        <span class="section-badge sb-ch1">Chapter 1</span>
+        <span class="section-title">Network Fundamentals</span>
+        <span class="section-count">8 Questions</span>
+      </div>
+      <div class="section-questions">
+
+        <div class="q-card" id="q1">
+          <div class="q-row" onclick="toggleCard('q1')">
+            <span class="q-badge">Q1</span>
+            <div>
+              <div class="q-row-title">True or False: Propagation delay depends on the size of the packet being
+                transmitted.</div>
+              <div class="q-row-meta">True / False · Conceptual</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="q-stem">Recall the four sources of delay: <strong>nodal processing, queuing,
+                transmission,</strong> and <strong>propagation</strong>. Consider each definition carefully.</div>
+            <div class="tf-wrap">
+              <button class="tf-btn" onclick="doTF('q1',true,false)">True</button>
+              <button class="tf-btn" onclick="doTF('q1',false,false)">False</button>
+            </div>
+            <div class="feedback" id="q1-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q2">
+          <div class="q-row" onclick="toggleCard('q2')">
+            <span class="q-badge">Q2</span>
+            <div>
+              <div class="q-row-title">Which layer of the Internet protocol stack is responsible for routing packets
+                from source to destination?</div>
+              <div class="q-row-meta">Multiple Choice · Protocol Stack</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="q-stem">The Internet protocol stack: <strong>application, transport, network, link,</strong> and
+              <strong>physical</strong>. Each layer serves a distinct role.</div>
+            <div class="choices">
+              <button class="choice-btn" onclick="doMC('q2',0,2)"><span class="ck">A</span>Application layer</button>
+              <button class="choice-btn" onclick="doMC('q2',1,2)"><span class="ck">B</span>Transport layer</button>
+              <button class="choice-btn" onclick="doMC('q2',2,2)"><span class="ck">C</span>Network layer</button>
+              <button class="choice-btn" onclick="doMC('q2',3,2)"><span class="ck">D</span>Link layer</button>
+            </div>
+            <div class="feedback" id="q2-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q3">
+          <div class="q-row" onclick="toggleCard('q3')">
+            <span class="q-badge">Q3</span>
+            <div>
+              <div class="q-row-title">Transmission delay: How long to transmit a 2 MB file over a 4 Mbps link?</div>
+              <div class="q-row-meta">Numeric · Calculation</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="q-stem">File size: <strong>2 MB</strong>, link rate: <strong>R = 4 Mbps</strong>. Ignore all
+              other delays.<div class="formula">d_trans = L / R</div>Enter your answer in <strong>seconds</strong>.
+            </div>
+            <div class="field-label">Your answer (seconds)</div>
+            <div class="input-row">
+              <input class="ans-input" id="q3-in" type="number" step="any" placeholder="e.g. 4" />
+              <button class="check-btn"
+                onclick="doNumeric('q3',4,'2 MB = 16 Mb. d_trans = 16 Mb / 4 Mbps = 4 s.')">Check</button>
+            </div>
+            <div class="feedback" id="q3-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q4">
+          <div class="q-row" onclick="toggleCard('q4')">
+            <span class="q-badge">Q4</span>
+            <div>
+              <div class="q-row-title">In store-and-forward switching, a router may forward a packet only after…</div>
+              <div class="q-row-meta">Multiple Choice · Switching</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="q-stem">Think carefully about <em>when</em> the router is allowed to begin transmitting a
+              received packet.</div>
+            <div class="choices">
+              <button class="choice-btn" onclick="doMC('q4',0,1)"><span class="ck">A</span>It has received the first bit
+                of the packet</button>
+              <button class="choice-btn" onclick="doMC('q4',1,1)"><span class="ck">B</span>It has received the entire
+                packet</button>
+              <button class="choice-btn" onclick="doMC('q4',2,1)"><span class="ck">C</span>The destination host has sent
+                an acknowledgment</button>
+              <button class="choice-btn" onclick="doMC('q4',3,1)"><span class="ck">D</span>The outgoing link is
+                idle</button>
+            </div>
+            <div class="feedback" id="q4-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q5">
+          <div class="q-row" onclick="toggleCard('q5')">
+            <span class="q-badge">Q5</span>
+            <div>
+              <div class="q-row-title">True or False: In circuit-switched networks, bandwidth is reserved end-to-end
+                even when no data is actively being sent.</div>
+              <div class="q-row-meta">True / False · Circuit Switching</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="tf-wrap">
+              <button class="tf-btn" onclick="doTF('q5',true,true)">True</button>
+              <button class="tf-btn" onclick="doTF('q5',false,true)">False</button>
+            </div>
+            <div class="feedback" id="q5-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q6">
+          <div class="q-row" onclick="toggleCard('q6')">
+            <span class="q-badge">Q6</span>
+            <div>
+              <div class="q-row-title">End-to-end delay: 3 links, store-and-forward, 1500-bit packet at 1 Mbps each
+              </div>
+              <div class="q-row-meta">Numeric · End-to-End Delay</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="q-stem"><strong>L = 1500 bits</strong>, <strong>2 routers (3 links)</strong>, <strong>R = 1
+                Mbps</strong> each. Ignore propagation, queuing, and processing delays.<div class="formula">d_end-to-end
+                = N × (L / R)</div>Enter your answer in <strong>milliseconds</strong>.</div>
+            <div class="field-label">Your answer (ms)</div>
+            <div class="input-row">
+              <input class="ans-input" id="q6-in" type="number" step="any" placeholder="e.g. 4.5" />
+              <button class="check-btn"
+                onclick="doNumeric('q6',4.5,'N=3 links. L/R = 1500/1,000,000 = 1.5 ms per link. Total = 3 × 1.5 = 4.5 ms.')">Check</button>
+            </div>
+            <div class="feedback" id="q6-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q7">
+          <div class="q-row" onclick="toggleCard('q7')">
+            <span class="q-badge">Q7</span>
+            <div>
+              <div class="q-row-title">Key advantage of packet switching over circuit switching for bursty data traffic?
+              </div>
+              <div class="q-row-meta">Multiple Choice · Switching Tradeoffs</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="q-stem">Bursty traffic arrives in irregular bursts — typical of web browsing, file transfers,
+              etc. Consider how each approach utilizes link capacity.</div>
+            <div class="choices">
+              <button class="choice-btn" onclick="doMC('q7',0,3)"><span class="ck">A</span>Guaranteed bandwidth for
+                every flow at all times</button>
+              <button class="choice-btn" onclick="doMC('q7',1,3)"><span class="ck">B</span>Lower setup latency because
+                no circuit must be established</button>
+              <button class="choice-btn" onclick="doMC('q7',2,3)"><span class="ck">C</span>Predictable, bounded
+                end-to-end delay</button>
+              <button class="choice-btn" onclick="doMC('q7',3,3)"><span class="ck">D</span>Better statistical
+                multiplexing — idle capacity can be used by other users</button>
+            </div>
+            <div class="feedback" id="q7-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q8">
+          <div class="q-row" onclick="toggleCard('q8')">
+            <span class="q-badge">Q8</span>
+            <div>
+              <div class="q-row-title">Short Answer: What is the difference between a host's IP address and its MAC
+                address?</div>
+              <div class="q-row-meta">Short Answer · Conceptual</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="q-stem">In 2–3 sentences, explain the difference between an <strong>IP address</strong> and a
+              <strong>MAC address</strong> in terms of purpose, scope, and where each is used in the network stack.
+            </div>
+            <div class="field-label">Your answer</div>
+            <textarea class="ans-textarea" id="q8-in" placeholder="Write 2–3 sentences…"></textarea>
+            <button class="check-btn"
+              onclick="doRevealOnly('q8','An <strong>IP address</strong> is a logical 32-bit (IPv4) address at the <em>network layer</em> that identifies a host\'s position in the internetwork and can change (e.g., via DHCP). A <strong>MAC address</strong> is a flat 48-bit hardware identifier at the <em>link layer</em> burned into the NIC, used for hop-by-hop delivery within a single LAN and does not change with location.')">Reveal
+              Model Answer</button>
+            <div class="feedback" id="q8-fb"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════════ CHAPTER 2 ════════ -->
+    <div class="section-block" id="ch2">
+      <div class="section-header">
+        <span class="section-badge sb-ch2">Chapter 2</span>
+        <span class="section-title">Application Layer</span>
+        <span class="section-count">11 Questions</span>
+      </div>
+      <div class="section-questions">
+
+        <div class="q-card" id="q9">
+          <div class="q-row" onclick="toggleCard('q9')">
+            <span class="q-badge">Q9</span>
+            <div>
+              <div class="q-row-title">HTTP/1.1 vs HTTP/2: What is one key technical improvement HTTP/2 makes and why
+                does it matter?</div>
+              <div class="q-row-meta">Short Answer · HTTP</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="q-stem">Compare the two versions in terms of connection usage and latency.</div>
+            <div class="field-label">Your answer</div>
+            <textarea class="ans-textarea" id="q9-in" placeholder="Write your answer here…"></textarea>
+            <button class="reveal-btn" onclick="toggleReveal('q9-ans',this)">Show Answer Hint</button>
+            <div class="answer-box" id="q9-ans"><strong>Key point:</strong> HTTP/2 introduces <em>multiplexing</em> —
+              multiple requests and responses can be in-flight over a single TCP connection simultaneously. This
+              eliminates head-of-line blocking at the HTTP layer, reducing page load times especially for many small
+              objects. HTTP/2 also adds header compression (HPACK) and server push.</div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q10">
+          <div class="q-row" onclick="toggleCard('q10')">
+            <span class="q-badge">Q10</span>
+            <div>
+              <div class="q-row-title">Iterative vs. recursive DNS resolution — which places more load on the local DNS
+                server?</div>
+              <div class="q-row-meta">Short Answer · DNS</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="q-stem">Explain the difference and identify which approach makes the local DNS server do more
+              work.</div>
+            <div class="field-label">Your answer</div>
+            <textarea class="ans-textarea" id="q10-in" placeholder="Write your answer here…"></textarea>
+            <button class="reveal-btn" onclick="toggleReveal('q10-ans',this)">Show Answer Hint</button>
+            <div class="answer-box" id="q10-ans"><strong>Key point:</strong> In <em>iterative</em> resolution the local
+              DNS server contacts each server in turn and assembles the answer itself — more load on the local server.
+              In <em>recursive</em> resolution each queried server queries the next, offloading work to upstream
+              servers.</div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q11">
+          <div class="q-row" onclick="toggleCard('q11')">
+            <span class="q-badge">Q11</span>
+            <div>
+              <div class="q-row-title">DNS caching: two benefits and one downside</div>
+              <div class="q-row-meta">Short Answer · DNS</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <ul class="sub-list">
+              <li class="sub-item"><span class="sub-lbl">a.</span><span class="sub-txt">What does DNS caching store, and
+                  for how long?</span></li>
+              <li class="sub-item"><span class="sub-lbl">b.</span><span class="sub-txt">Two benefits for network
+                  performance?</span></li>
+              <li class="sub-item"><span class="sub-lbl">c.</span><span class="sub-txt">One potential downside when a
+                  DNS record changes?</span></li>
+            </ul>
+            <div class="sub-answer-row"><span class="sub-lbl">a.</span><textarea class="ans-textarea" rows="2"
+                placeholder="Answer for (a)…"></textarea></div>
+            <div class="sub-answer-row"><span class="sub-lbl">b.</span><textarea class="ans-textarea" rows="2"
+                placeholder="Answer for (b)…"></textarea></div>
+            <div class="sub-answer-row"><span class="sub-lbl">c.</span><textarea class="ans-textarea" rows="2"
+                placeholder="Answer for (c)…"></textarea></div>
+            <button class="reveal-btn" onclick="toggleReveal('q11-ans',this)">Show Answer Hints</button>
+            <div class="answer-box" id="q11-ans"><strong>(a)</strong> Hostname→IP mappings with a TTL set by the
+              authoritative server.<br><strong>(b)</strong> Reduces resolution latency and reduces load on root/TLD DNS
+              servers.<br><strong>(c)</strong> Stale cache entries — if a record changes before TTL expires, clients may
+              get outdated IPs.</div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q12">
+          <div class="q-row" onclick="toggleCard('q12')">
+            <span class="q-badge">Q12</span>
+            <div>
+              <div class="q-row-title">Non-persistent HTTP: how long to download 1 base page + 5 embedded objects? (RTT
+                = 20 ms, zero transmission time)</div>
+              <div class="q-row-meta">Numeric · HTTP Delay</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="calc-box">
+              <div class="calc-title">Given</div>
+              <div class="calc-given">RTT = <span>20 ms</span> · Objects = <span>6 total (1 HTML + 5 embedded)</span> ·
+                Mode = <span>Non-persistent, serial</span> · T_x = <span>0 ms</span></div>
+            </div>
+            <div class="field-label">Your answer (ms)</div>
+            <div class="input-row">
+              <input class="ans-input" id="q12-in" type="number" step="any" placeholder="e.g. 240" />
+              <button class="check-btn"
+                onclick="doNumeric('q12',240,'Each object = 1 RTT (TCP SYN) + 1 RTT (HTTP) = 2 RTT. 6 objects × 2 RTT = 12 RTT = 12 × 20 ms = 240 ms.')">Check</button>
+            </div>
+            <div class="feedback" id="q12-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q13">
+          <div class="q-row" onclick="toggleCard('q13')">
+            <span class="q-badge">Q13</span>
+            <div>
+              <div class="q-row-title">SMTP vs IMAP: which sends mail and which retrieves mail?</div>
+              <div class="q-row-meta">Short Answer · Email</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="q-stem">Briefly distinguish the roles of SMTP and IMAP in the email system.</div>
+            <div class="field-label">Your answer</div>
+            <textarea class="ans-textarea" id="q13-in" placeholder="Write your answer here…"></textarea>
+            <button class="reveal-btn" onclick="toggleReveal('q13-ans',this)">Show Answer Hint</button>
+            <div class="answer-box" id="q13-ans"><strong>Key point:</strong> <em>SMTP</em> is used to
+              <strong>send</strong> email from client to server and between servers (push protocol). <em>IMAP</em> is
+              used to <strong>retrieve and manage</strong> email from a server to a client (pull protocol, messages stay
+              on server).</div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q14">
+          <div class="q-row" onclick="toggleCard('q14')">
+            <span class="q-badge">Q14</span>
+            <div>
+              <div class="q-row-title">Which of the following best describes a CDN? (Select all that apply)</div>
+              <div class="q-row-meta">Multiple Select · CDN</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="mc-opts">
+              <label class="mc-opt"><input type="checkbox"
+                  onchange="this.closest('.mc-opt').classList.toggle('selected',this.checked)"> Stores copies of content
+                at geographically distributed servers to reduce latency</label>
+              <label class="mc-opt"><input type="checkbox"
+                  onchange="this.closest('.mc-opt').classList.toggle('selected',this.checked)"> Replaces the origin
+                server entirely; the origin server is no longer needed</label>
+              <label class="mc-opt"><input type="checkbox"
+                  onchange="this.closest('.mc-opt').classList.toggle('selected',this.checked)"> Allows clients to
+                receive content from a nearby "edge" server rather than a distant origin</label>
+              <label class="mc-opt"><input type="checkbox"
+                  onchange="this.closest('.mc-opt').classList.toggle('selected',this.checked)"> Uses DNS redirection to
+                steer clients to the optimal CDN node</label>
+              <label class="mc-opt"><input type="checkbox"
+                  onchange="this.closest('.mc-opt').classList.toggle('selected',this.checked)"> Requires clients to use
+                a special browser plugin to function</label>
+            </div>
+            <button class="reveal-btn" onclick="toggleReveal('q14-ans',this)">Show Answer</button>
+            <div class="answer-box" id="q14-ans"><strong>Correct: 1, 3, 4.</strong><br>CDNs cache content at edge
+              servers (1) so clients get it from a nearby node (3). DNS redirection routes clients to the nearest CDN
+              server (4). The origin is still needed (2 is false), and no browser plugin is required (5 is false).</div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q15">
+          <div class="q-row" onclick="toggleCard('q15')">
+            <span class="q-badge">Q15</span>
+            <div>
+              <div class="q-row-title">DASH: How does the server prepare content and how does the client decide on
+                quality?</div>
+              <div class="q-row-meta">Short Answer · Streaming</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <ul class="sub-list">
+              <li class="sub-item"><span class="sub-lbl">a.</span><span class="sub-txt">How does the server prepare
+                  content for DASH?</span></li>
+              <li class="sub-item"><span class="sub-lbl">b.</span><span class="sub-txt">How does the client decide which
+                  quality chunk to request next?</span></li>
+            </ul>
+            <div class="sub-answer-row"><span class="sub-lbl">a.</span><textarea class="ans-textarea" rows="2"
+                placeholder="Answer for (a)…"></textarea></div>
+            <div class="sub-answer-row"><span class="sub-lbl">b.</span><textarea class="ans-textarea" rows="2"
+                placeholder="Answer for (b)…"></textarea></div>
+            <button class="reveal-btn" onclick="toggleReveal('q15-ans',this)">Show Answer Hints</button>
+            <div class="answer-box" id="q15-ans"><strong>(a)</strong> The server encodes the video at multiple bitrates
+              and divides each into chunks. A manifest file lists available versions and chunk
+              URLs.<br><strong>(b)</strong> The client measures download throughput and requests the highest-quality
+              chunk that can be received without rebuffering — all intelligence is client-side.</div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q16">
+          <div class="q-row" onclick="toggleCard('q16')">
+            <span class="q-badge">Q16</span>
+            <div>
+              <div class="q-row-title">Persistent HTTP with pipelining: 1 HTML + 4 objects, RTT = 15 ms, zero
+                transmission time</div>
+              <div class="q-row-meta">Numeric · HTTP Delay</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="calc-box">
+              <div class="calc-title">Given</div>
+              <div class="calc-given">RTT = <span>15 ms</span> · Objects = <span>5 total (1 HTML + 4 embedded)</span> ·
+                Mode = <span>Persistent + Pipelining</span> · T_x = <span>0 ms</span></div>
+            </div>
+            <div class="field-label">Your answer (ms)</div>
+            <div class="input-row">
+              <input class="ans-input" id="q16-in" type="number" step="any" placeholder="e.g. 45" />
+              <button class="check-btn"
+                onclick="doNumeric('q16',45,'1 RTT TCP handshake + 1 RTT HTML + 1 RTT pipeline all 4 objects = 3 RTT = 45 ms.')">Check</button>
+            </div>
+            <div class="feedback" id="q16-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q17">
+          <div class="q-row" onclick="toggleCard('q17')">
+            <span class="q-badge">Q17</span>
+            <div>
+              <div class="q-row-title">How does P2P file distribution time scale vs. client-server as the number of
+                peers grows?</div>
+              <div class="q-row-meta">Short Answer · P2P</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="field-label">Your answer</div>
+            <textarea class="ans-textarea" id="q17-in" placeholder="Write your answer here…"></textarea>
+            <button class="reveal-btn" onclick="toggleReveal('q17-ans',this)">Show Answer Hint</button>
+            <div class="answer-box" id="q17-ans"><strong>Key point:</strong> In client-server, distribution time grows
+              linearly with N. In P2P, each new peer also uploads to others — aggregate upload capacity scales with N,
+              so P2P distribution time grows very slowly, making it dramatically more scalable.</div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q18">
+          <div class="q-row" onclick="toggleCard('q18')">
+            <span class="q-badge">Q18</span>
+            <div>
+              <div class="q-row-title">True or False: A web cache can reduce response time even when the origin server's
+                bandwidth is not the bottleneck.</div>
+              <div class="q-row-meta">True / False + Justify · Web Cache</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="tf-wrap">
+              <button class="tf-btn" onclick="doTF('q18',true,true)">True</button>
+              <button class="tf-btn" onclick="doTF('q18',false,true)">False</button>
+            </div>
+            <div class="field-label">Justification</div>
+            <textarea class="ans-textarea" rows="3" placeholder="Explain your reasoning…"></textarea>
+            <button class="reveal-btn" onclick="toggleReveal('q18-ans',this)">Show Answer</button>
+            <div class="answer-box" id="q18-ans"><strong>True.</strong> Even with fast origin bandwidth, a web cache
+              serves content from a nearby proxy, eliminating wide-area propagation delay. The cache reduces the
+              effective RTT, regardless of origin bandwidth.</div>
+            <div class="feedback" id="q18-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q19">
+          <div class="q-row" onclick="toggleCard('q19')">
+            <span class="q-badge">Q19</span>
+            <div>
+              <div class="q-row-title">Describe the full sequence from typing https://example.com to receiving the first
+                byte of HTML (DNS, TCP, TLS).</div>
+              <div class="q-row-meta">Short Answer · Protocol Stack</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="field-label">Your answer (numbered steps encouraged)</div>
+            <textarea class="ans-textarea" rows="8" placeholder="List the steps in order…"></textarea>
+            <button class="reveal-btn" onclick="toggleReveal('q19-ans',this)">Show Answer Hint</button>
+            <div class="answer-box" id="q19-ans"><strong>Key steps:</strong><br>1. Browser checks local DNS cache; if
+              miss, queries local DNS server.<br>2. Local DNS performs iterative lookup: root → TLD → authoritative →
+              returns IP.<br>3. Browser initiates TCP 3-way handshake (SYN → SYN-ACK → ACK).<br>4. TLS handshake over
+              established TCP (ClientHello → ServerHello → cert → key agreement → Finished).<br>5. Browser sends HTTP
+              GET over the encrypted TLS tunnel.<br>6. Server responds; first byte arrives at client.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════════ CHAPTER 3 ════════ -->
+    <div class="section-block" id="ch3">
+      <div class="section-header">
+        <span class="section-badge sb-ch3">Chapter 3</span>
+        <span class="section-title">Transport Layer</span>
+        <span class="section-count">14 Questions</span>
+      </div>
+      <div class="section-questions">
+
+        <div class="sub-section-div">UDP &amp; Reliable Data Transfer</div>
+
+        <div class="q-card" id="q20">
+          <div class="q-row" onclick="toggleCard('q20')">
+            <span class="q-badge">Q20</span>
+            <div>
+              <div class="q-row-title">True or False: UDP segments must carry source and destination port numbers even
+                though UDP doesn't guarantee reliable delivery.</div>
+              <div class="q-row-meta">True / False · UDP</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="tf-wrap">
+              <button class="tf-btn" onclick="doTF('q20',true,true)">True</button>
+              <button class="tf-btn" onclick="doTF('q20',false,true)">False</button>
+            </div>
+            <div class="feedback" id="q20-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q21">
+          <div class="q-row" onclick="toggleCard('q21')">
+            <span class="q-badge">Q21</span>
+            <div>
+              <div class="q-row-title">True or False: In rdt2.0, timers are used to handle the case where a packet is
+                lost entirely.</div>
+              <div class="q-row-meta">True / False · RDT</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="tf-wrap">
+              <button class="tf-btn" onclick="doTF('q21',true,false)">True</button>
+              <button class="tf-btn" onclick="doTF('q21',false,false)">False</button>
+            </div>
+            <div class="feedback" id="q21-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q22">
+          <div class="q-row" onclick="toggleCard('q22')">
+            <span class="q-badge">Q22</span>
+            <div>
+              <div class="q-row-title">Sequence numbers in RDT were introduced primarily to…</div>
+              <div class="q-row-meta">Multiple Choice · RDT</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="choices">
+              <button class="choice-btn" onclick="doMC('q22',0,2)"><span class="ck">A</span>Allow the receiver to
+                calculate a checksum for error detection</button>
+              <button class="choice-btn" onclick="doMC('q22',1,2)"><span class="ck">B</span>Increase transmission speed
+                by pipelining packets</button>
+              <button class="choice-btn" onclick="doMC('q22',2,2)"><span class="ck">C</span>Allow the receiver to detect
+                and discard duplicate packets caused by retransmissions</button>
+              <button class="choice-btn" onclick="doMC('q22',3,2)"><span class="ck">D</span>Specify the size of the
+                receiver's buffer window</button>
+            </div>
+            <div class="feedback" id="q22-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q23">
+          <div class="q-row" onclick="toggleCard('q23')">
+            <span class="q-badge">Q23</span>
+            <div>
+              <div class="q-row-title">Why were timers introduced in rdt3.0 but not in rdt2.x?</div>
+              <div class="q-row-meta">Multiple Choice · RDT</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="choices">
+              <button class="choice-btn" onclick="doMC('q23',0,1)"><span class="ck">A</span>To handle corrupted packets
+                the checksum fails to detect</button>
+              <button class="choice-btn" onclick="doMC('q23',1,1)"><span class="ck">B</span>To recover from packet loss,
+                since a lost packet produces no NAK or ACK at the sender</button>
+              <button class="choice-btn" onclick="doMC('q23',2,1)"><span class="ck">C</span>To synchronize clocks
+                between sender and receiver</button>
+              <button class="choice-btn" onclick="doMC('q23',3,1)"><span class="ck">D</span>To limit the number of
+                outstanding unacknowledged packets</button>
+            </div>
+            <div class="feedback" id="q23-fb"></div>
+          </div>
+        </div>
+
+        <div class="sub-section-div">Go-Back-N &amp; Selective Repeat</div>
+
+        <div class="q-card" id="q24">
+          <div class="q-row" onclick="toggleCard('q24')">
+            <span class="q-badge">Q24</span>
+            <div>
+              <div class="q-row-title">GBN: W=7, 4-bit seq nums, packets 5 & 6 lost. Highest cumulatively ACKed sequence
+                number?</div>
+              <div class="q-row-meta">Multiple Choice · Go-Back-N</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="q-stem">Packets 3, 4 received in order; 5, 6 lost; 7, 8, 9 received out-of-order.</div>
+            <div class="choices">
+              <button class="choice-btn" onclick="doMC('q24',0,1)"><span class="ck">A</span>Seq 6 — the last received
+                packet before the gap</button>
+              <button class="choice-btn" onclick="doMC('q24',1,1)"><span class="ck">B</span>Seq 4 — the last in-order
+                packet before the gap (5 &amp; 6 were lost)</button>
+              <button class="choice-btn" onclick="doMC('q24',2,1)"><span class="ck">C</span>Seq 9 — all sent packets are
+                acknowledged regardless of loss in GBN</button>
+              <button class="choice-btn" onclick="doMC('q24',3,1)"><span class="ck">D</span>Seq 7 — GBN buffers
+                out-of-order packets and ACKs the highest received</button>
+            </div>
+            <div class="feedback" id="q24-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q25">
+          <div class="q-row" onclick="toggleCard('q25')">
+            <span class="q-badge">Q25</span>
+            <div>
+              <div class="q-row-title">Selective Repeat: same loss scenario — what does the receiver do with packets 7,
+                8, 9?</div>
+              <div class="q-row-meta">Multiple Choice · Selective Repeat</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="choices">
+              <button class="choice-btn" onclick="doMC('q25',0,1)"><span class="ck">A</span>Discards them since they
+                arrived out of order</button>
+              <button class="choice-btn" onclick="doMC('q25',1,1)"><span class="ck">B</span>Buffers them and sends
+                individual ACKs for each one</button>
+              <button class="choice-btn" onclick="doMC('q25',2,1)"><span class="ck">C</span>Sends a single cumulative
+                ACK for the highest in-order sequence number</button>
+              <button class="choice-btn" onclick="doMC('q25',3,1)"><span class="ck">D</span>Requests retransmission of
+                all packets starting from 5</button>
+            </div>
+            <div class="feedback" id="q25-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q26">
+          <div class="q-row" onclick="toggleCard('q26')">
+            <span class="q-badge">Q26</span>
+            <div>
+              <div class="q-row-title">With n-bit sequence numbers, maximum window size for Selective Repeat must
+                satisfy…</div>
+              <div class="q-row-meta">Multiple Choice · SR Window</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="choices">
+              <button class="choice-btn" onclick="doMC('q26',0,1)"><span class="ck">A</span>W ≤ 2ⁿ — to use all
+                available sequence numbers</button>
+              <button class="choice-btn" onclick="doMC('q26',1,1)"><span class="ck">B</span>W ≤ 2ⁿ⁻¹ — to prevent
+                confusing a retransmitted old packet with a new one</button>
+              <button class="choice-btn" onclick="doMC('q26',2,1)"><span class="ck">C</span>W ≤ 2ⁿ − 1 — the same
+                constraint used for Go-Back-N</button>
+              <button class="choice-btn" onclick="doMC('q26',3,1)"><span class="ck">D</span>W ≤ n — to keep sequence
+                numbers small enough to fit in the header</button>
+            </div>
+            <div class="feedback" id="q26-fb"></div>
+          </div>
+        </div>
+
+        <div class="sub-section-div">TCP — Sequence Numbers &amp; ACKs</div>
+
+        <div class="q-card" id="q27">
+          <div class="q-row" onclick="toggleCard('q27')">
+            <span class="q-badge">Q27</span>
+            <div>
+              <div class="q-row-title">Fill in: TCP starts at ISN=200, 500 bytes per segment. Sequence numbers for
+                segments 1–4?</div>
+              <div class="q-row-meta">Fill in the Blank · TCP Seq Numbers</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="q-stem">ISN = <strong>200</strong>, segment size = <strong>500 bytes</strong>.</div>
+            <div class="input-row" style="flex-wrap:wrap;gap:0.5rem;">
+              <span class="ans-input-label">Segment 1:</span><input class="ans-input" id="q27-1" type="number"
+                placeholder="seq #" style="width:110px;" />
+              <span class="ans-input-label">Segment 2:</span><input class="ans-input" id="q27-2" type="number"
+                placeholder="seq #" style="width:110px;" />
+              <span class="ans-input-label">Segment 3:</span><input class="ans-input" id="q27-3" type="number"
+                placeholder="seq #" style="width:110px;" />
+              <span class="ans-input-label">Segment 4:</span><input class="ans-input" id="q27-4" type="number"
+                placeholder="seq #" style="width:110px;" />
+            </div>
+            <button class="check-btn" onclick="checkTCPSeq()">Check Answers</button>
+            <div class="feedback" id="q27-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q28">
+          <div class="q-row" onclick="toggleCard('q28')">
+            <span class="q-badge">Q28</span>
+            <div>
+              <div class="q-row-title">TCP: bytes 1–1000 and 2001–3000 received; 1001–2000 missing. What ACK does the
+                receiver send?</div>
+              <div class="q-row-meta">Multiple Choice · TCP ACKs</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="choices">
+              <button class="choice-btn" onclick="doMC('q28',0,2)"><span class="ck">A</span>3001 — TCP acknowledges the
+                highest byte received</button>
+              <button class="choice-btn" onclick="doMC('q28',1,2)"><span class="ck">B</span>2001 — TCP acknowledges the
+                start of the gap</button>
+              <button class="choice-btn" onclick="doMC('q28',2,2)"><span class="ck">C</span>1001 — TCP uses cumulative
+                ACKs and expects the next in-order byte</button>
+              <button class="choice-btn" onclick="doMC('q28',3,2)"><span class="ck">D</span>1000 — TCP ACK equals the
+                last byte successfully received</button>
+            </div>
+            <div class="feedback" id="q28-fb"></div>
+          </div>
+        </div>
+
+        <div class="sub-section-div">TCP Congestion Control</div>
+
+        <div class="q-card" id="q29">
+          <div class="q-row" onclick="toggleCard('q29')">
+            <span class="q-badge">Q29</span>
+            <div>
+              <div class="q-row-title">During Slow Start, how does cwnd grow per RTT (assuming no loss)?</div>
+              <div class="q-row-meta">Multiple Choice · Congestion Control</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="choices">
+              <button class="choice-btn" onclick="doMC('q29',0,1)"><span class="ck">A</span>Linearly — increases by 1
+                MSS per RTT</button>
+              <button class="choice-btn" onclick="doMC('q29',1,1)"><span class="ck">B</span>Exponentially — doubles each
+                RTT (1 MSS per ACK)</button>
+              <button class="choice-btn" onclick="doMC('q29',2,1)"><span class="ck">C</span>Remains constant until a
+                loss event occurs</button>
+              <button class="choice-btn" onclick="doMC('q29',3,1)"><span class="ck">D</span>Increases by ssthresh every
+                RTT</button>
+            </div>
+            <div class="feedback" id="q29-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q30">
+          <div class="q-row" onclick="toggleCard('q30')">
+            <span class="q-badge">Q30</span>
+            <div>
+              <div class="q-row-title">TCP Reno: on three duplicate ACKs, the sender…</div>
+              <div class="q-row-meta">Multiple Choice · TCP Reno</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="choices">
+              <button class="choice-btn" onclick="doMC('q30',0,1)"><span class="ck">A</span>Sets cwnd=1 MSS and
+                ssthresh=cwnd/2, then re-enters Slow Start</button>
+              <button class="choice-btn" onclick="doMC('q30',1,1)"><span class="ck">B</span>Sets ssthresh=cwnd/2, then
+                cwnd=ssthresh+3 MSS and enters Fast Recovery</button>
+              <button class="choice-btn" onclick="doMC('q30',2,1)"><span class="ck">C</span>Does nothing until the
+                retransmission timer expires</button>
+              <button class="choice-btn" onclick="doMC('q30',3,1)"><span class="ck">D</span>Halves cwnd and continues
+                Congestion Avoidance without retransmitting</button>
+            </div>
+            <div class="feedback" id="q30-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q31">
+          <div class="q-row" onclick="toggleCard('q31')">
+            <span class="q-badge">Q31</span>
+            <div>
+              <div class="q-row-title">TCP Reno: cwnd=32 KB, ssthresh=16 KB, MSS=1 KB. Timeout occurs. New cwnd and
+                ssthresh?</div>
+              <div class="q-row-meta">Fill in the Blank · Congestion Control</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="input-row" style="flex-wrap:wrap;gap:0.5rem;">
+              <span class="ans-input-label">New cwnd:</span><input class="ans-input" id="q31-1" type="number"
+                placeholder="KB" style="width:90px;" /><span class="unit-label">KB</span>
+              <span class="ans-input-label">New ssthresh:</span><input class="ans-input" id="q31-2" type="number"
+                placeholder="KB" style="width:90px;" /><span class="unit-label">KB</span>
+            </div>
+            <button class="check-btn" onclick="checkCWND()">Check Answers</button>
+            <div class="feedback" id="q31-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q32">
+          <div class="q-row" onclick="toggleCard('q32')">
+            <span class="q-badge">Q32</span>
+            <div>
+              <div class="q-row-title">True or False: TCP Tahoe and Reno respond identically to both timeout and triple
+                duplicate ACK events.</div>
+              <div class="q-row-meta">True / False · TCP Tahoe vs Reno</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="tf-wrap">
+              <button class="tf-btn" onclick="doTF('q32',true,false)">True</button>
+              <button class="tf-btn" onclick="doTF('q32',false,false)">False</button>
+            </div>
+            <div class="feedback" id="q32-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q33">
+          <div class="q-row" onclick="toggleCard('q33')">
+            <span class="q-badge">Q33</span>
+            <div>
+              <div class="q-row-title">cwnd=20 KB, rwnd=12 KB — max unacknowledged data in flight?</div>
+              <div class="q-row-meta">Multiple Choice · Flow &amp; Congestion Control</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="choices">
+              <button class="choice-btn" onclick="doMC('q33',0,1)"><span class="ck">A</span>20 KB — cwnd is the only
+                constraint</button>
+              <button class="choice-btn" onclick="doMC('q33',1,1)"><span class="ck">B</span>12 KB — effective window =
+                min(cwnd, rwnd)</button>
+              <button class="choice-btn" onclick="doMC('q33',2,1)"><span class="ck">C</span>32 KB — the windows are
+                additive</button>
+              <button class="choice-btn" onclick="doMC('q33',3,1)"><span class="ck">D</span>16 KB — the average of the
+                two windows</button>
+            </div>
+            <div class="feedback" id="q33-fb"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════════ CHAPTERS 5 & 7 ════════ -->
+    <div class="section-block" id="ch5">
+      <div class="section-header">
+        <span class="section-badge sb-ch5">Ch 5 &amp; 7</span>
+        <span class="section-title">Routing, SDN, BGP &amp; Wireless</span>
+        <span class="section-count">12 Questions</span>
+      </div>
+      <div class="section-questions">
+
+        <div class="sub-section-div">Link-State &amp; Distance Vector</div>
+
+        <div class="q-card" id="q34">
+          <div class="q-row" onclick="toggleCard('q34')">
+            <span class="q-badge">Q34</span>
+            <div>
+              <div class="q-row-title">Dijkstra's algorithm: what information must each router have before computing
+                shortest paths?</div>
+              <div class="q-row-meta">Multiple Choice · Link-State</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="choices">
+              <button class="choice-btn" onclick="doMC('q34',0,1)"><span class="ck">A</span>Only the costs of its
+                directly connected links</button>
+              <button class="choice-btn" onclick="doMC('q34',1,1)"><span class="ck">B</span>A complete map of the entire
+                network topology (all nodes and link costs)</button>
+              <button class="choice-btn" onclick="doMC('q34',2,1)"><span class="ck">C</span>Distance vectors received
+                from all neighbors</button>
+              <button class="choice-btn" onclick="doMC('q34',3,1)"><span class="ck">D</span>Only the AS-PATH attributes
+                from BGP</button>
+            </div>
+            <div class="feedback" id="q34-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q35">
+          <div class="q-row" onclick="toggleCard('q35')">
+            <span class="q-badge">Q35</span>
+            <div>
+              <div class="q-row-title">Distance vector: a router updates its entry for destination X using which
+                formula?</div>
+              <div class="q-row-meta">Multiple Choice · Distance Vector</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="choices">
+              <button class="choice-btn" onclick="doMC('q35',0,1)"><span class="ck">A</span>D_x(y) = max over all
+                neighbors v of { c(x,v) + D_v(y) }</button>
+              <button class="choice-btn" onclick="doMC('q35',1,1)"><span class="ck">B</span>D_x(y) = min over all
+                neighbors v of { c(x,v) + D_v(y) }</button>
+              <button class="choice-btn" onclick="doMC('q35',2,1)"><span class="ck">C</span>D_x(y) = c(x,y) only if
+                directly connected, else ∞</button>
+              <button class="choice-btn" onclick="doMC('q35',3,1)"><span class="ck">D</span>D_x(y) = sum of all link
+                costs on the known shortest path</button>
+            </div>
+            <div class="feedback" id="q35-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q36">
+          <div class="q-row" onclick="toggleCard('q36')">
+            <span class="q-badge">Q36</span>
+            <div>
+              <div class="q-row-title">Dijkstra from F: after adding node E (cost 2), updated cost and predecessor for
+                node D?</div>
+              <div class="q-row-meta">Multiple Choice · Dijkstra Computation</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="q-stem" style="font-size:0.8rem;">Network: F–B=4, F–E=2, B–A=3, B–C=8, E–D=4, E–C=10, A–C=2,
+              C–D=4/5 (Figure 1 topology)</div>
+            <div class="choices">
+              <button class="choice-btn" onclick="doMC('q36',0,1)"><span class="ck">A</span>Cost = 6, predecessor =
+                B</button>
+              <button class="choice-btn" onclick="doMC('q36',1,1)"><span class="ck">B</span>Cost = 6, predecessor =
+                E</button>
+              <button class="choice-btn" onclick="doMC('q36',2,1)"><span class="ck">C</span>Cost = 4, predecessor =
+                E</button>
+              <button class="choice-btn" onclick="doMC('q36',3,1)"><span class="ck">D</span>Cost remains ∞</button>
+            </div>
+            <div class="feedback" id="q36-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q37">
+          <div class="q-row" onclick="toggleCard('q37')">
+            <span class="q-badge">Q37</span>
+            <div>
+              <div class="q-row-title">Key difference between link-state and distance vector in terms of information
+                exchanged?</div>
+              <div class="q-row-meta">Short Answer · Routing</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="field-label">Your answer</div>
+            <textarea class="ans-textarea" placeholder="Write your answer…"></textarea>
+            <button class="reveal-btn" onclick="toggleReveal('q37-ans',this)">Show Answer</button>
+            <div class="answer-box" id="q37-ans"><strong>Link-state:</strong> Each router broadcasts its local link
+              costs to <em>all</em> routers (flooding), so every router builds a complete topology map and runs
+              Dijkstra's locally.<br><br><strong>Distance vector:</strong> Each router shares its full distance vector
+              only with <em>direct neighbors</em>, iterating via Bellman-Ford until convergence. No global topology is
+              known.</div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q38">
+          <div class="q-row" onclick="toggleCard('q38')">
+            <span class="q-badge">Q38</span>
+            <div>
+              <div class="q-row-title">Why does poisoned reverse fail to prevent loops involving three or more routers?
+              </div>
+              <div class="q-row-meta">Short Answer · Count-to-Infinity</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="field-label">Your answer</div>
+            <textarea class="ans-textarea" placeholder="Write your answer…"></textarea>
+            <button class="reveal-btn" onclick="toggleReveal('q38-ans',this)">Show Answer</button>
+            <div class="answer-box" id="q38-ans">Poisoned reverse only poisons routes advertised back to the <em>direct
+                next-hop</em>. A third router C (not the direct next-hop) may still advertise a stale low-cost path
+              through A→B. B sees C's advertisement, updates its table to route through C, and the loop A→B→C→A forms —
+              poisoned reverse never touched C's advertisement to B.</div>
+          </div>
+        </div>
+
+        <div class="sub-section-div">SDN &amp; BGP</div>
+
+        <div class="q-card" id="q39">
+          <div class="q-row" onclick="toggleCard('q39')">
+            <span class="q-badge">Q39</span>
+            <div>
+              <div class="q-row-title">SDN match-action rules can match on which fields?</div>
+              <div class="q-row-meta">Multiple Choice · SDN</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="choices">
+              <button class="choice-btn" onclick="doMC('q39',0,2)"><span class="ck">A</span>Only destination IP
+                address</button>
+              <button class="choice-btn" onclick="doMC('q39',1,2)"><span class="ck">B</span>Destination IP and MAC
+                address only</button>
+              <button class="choice-btn" onclick="doMC('q39',2,2)"><span class="ck">C</span>Ingress port, MAC src/dst,
+                IP src/dst, protocol, TCP/UDP port, and more</button>
+              <button class="choice-btn" onclick="doMC('q39',3,2)"><span class="ck">D</span>Only Layer 3 and above
+                fields (IP, TCP, UDP)</button>
+            </div>
+            <div class="feedback" id="q39-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q40">
+          <div class="q-row" onclick="toggleCard('q40')">
+            <span class="q-badge">Q40</span>
+            <div>
+              <div class="q-row-title">BGP: a route advertised by a customer to its provider will be re-advertised to…
+              </div>
+              <div class="q-row-meta">Short Answer · BGP Policy</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="q-stem" style="font-size:0.8rem;color:var(--link-blue);">Think about the export policy "rule of
+              thumb" from lecture.</div>
+            <div class="field-label">Your answer</div>
+            <input type="text" class="ans-input" id="q40-in" placeholder="type your answer…"
+              style="width:100%;max-width:300px;" />
+            <button class="check-btn" style="margin-top:0.5rem;" onclick="checkBGP()">Check</button>
+            <div class="feedback" id="q40-fb"></div>
+            <div class="answer-box" id="q40-ans" style="margin-top:0.7rem;"><strong>Answer:</strong> Everyone — the
+              provider re-advertises customer routes to all neighbors (customers, peers, and providers), because doing
+              so generates revenue.</div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q41">
+          <div class="q-row" onclick="toggleCard('q41')">
+            <span class="q-badge">Q41</span>
+            <div>
+              <div class="q-row-title">In a BGP peering relationship, routes learned from that peer are re-advertised
+                to…</div>
+              <div class="q-row-meta">Multiple Choice · BGP Policy</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="choices">
+              <button class="choice-btn" onclick="doMC('q41',0,1)"><span class="ck">A</span>All neighbors including
+                other peers and providers</button>
+              <button class="choice-btn" onclick="doMC('q41',1,1)"><span class="ck">B</span>Only your own customers, not
+                other peers or providers</button>
+              <button class="choice-btn" onclick="doMC('q41',2,1)"><span class="ck">C</span>Nobody — peer routes are
+                never re-advertised</button>
+              <button class="choice-btn" onclick="doMC('q41',3,1)"><span class="ck">D</span>Providers only</button>
+            </div>
+            <div class="feedback" id="q41-fb"></div>
+          </div>
+        </div>
+
+        <div class="sub-section-div">Wireless — 802.11</div>
+
+        <div class="q-card" id="q42">
+          <div class="q-row" onclick="toggleCard('q42')">
+            <span class="q-badge">Q42</span>
+            <div>
+              <div class="q-row-title">Why does 802.11 use CSMA/CA instead of CSMA/CD?</div>
+              <div class="q-row-meta">Short Answer · Wireless</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="field-label">Your answer</div>
+            <textarea class="ans-textarea" placeholder="Write your answer…"></textarea>
+            <button class="reveal-btn" onclick="toggleReveal('q42-ans',this)">Show Answer</button>
+            <div class="answer-box" id="q42-ans">Collision <em>detection</em> requires simultaneously listening while
+              sending. In wireless, the transmitter's own signal is orders of magnitude stronger than any colliding
+              incoming signal, making it physically impossible to detect a collision while transmitting. 802.11 avoids
+              collisions before they happen using random backoff and optional RTS/CTS handshaking.</div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q43">
+          <div class="q-row" onclick="toggleCard('q43')">
+            <span class="q-badge">Q43</span>
+            <div>
+              <div class="q-row-title">The hidden terminal problem occurs when…</div>
+              <div class="q-row-meta">Multiple Choice · Wireless</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="choices">
+              <button class="choice-btn" onclick="doMC('q43',0,1)"><span class="ck">A</span>Two stations are too close
+                and interfere with each other</button>
+              <button class="choice-btn" onclick="doMC('q43',1,1)"><span class="ck">B</span>Two stations that cannot
+                hear each other both transmit to the same AP, causing a collision at the AP</button>
+              <button class="choice-btn" onclick="doMC('q43',2,1)"><span class="ck">C</span>A station is blocked from
+                transmitting by a nearby station it can hear, even though the AP is free</button>
+              <button class="choice-btn" onclick="doMC('q43',3,1)"><span class="ck">D</span>The AP is hidden behind a
+                NAT router</button>
+            </div>
+            <div class="feedback" id="q43-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q44">
+          <div class="q-row" onclick="toggleCard('q44')">
+            <span class="q-badge">Q44</span>
+            <div>
+              <div class="q-row-title">802.11 RTS/CTS: a station that hears a CTS (but did not send the RTS) will…</div>
+              <div class="q-row-meta">Multiple Choice · Wireless / RTS-CTS</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="choices">
+              <button class="choice-btn" onclick="doMC('q44',0,2)"><span class="ck">A</span>Immediately send its own RTS
+                to compete for the channel</button>
+              <button class="choice-btn" onclick="doMC('q44',1,2)"><span class="ck">B</span>Ignores the CTS and begins
+                transmitting anyway</button>
+              <button class="choice-btn" onclick="doMC('q44',2,2)"><span class="ck">C</span>Defers transmission for the
+                duration indicated in the CTS's NAV field</button>
+              <button class="choice-btn" onclick="doMC('q44',3,2)"><span class="ck">D</span>Sends an ACK back to the
+                AP</button>
+            </div>
+            <div class="feedback" id="q44-fb"></div>
+          </div>
+        </div>
+
+        <div class="q-card" id="q45">
+          <div class="q-row" onclick="toggleCard('q45')">
+            <span class="q-badge">Q45</span>
+            <div>
+              <div class="q-row-title">Ethernet switch: how does it learn MAC addresses, and what does it do with an
+                unknown destination MAC?</div>
+              <div class="q-row-meta">Multiple Choice · Link Layer</div>
+            </div>
+            <span class="q-chevron">▾</span>
+          </div>
+          <div class="q-body">
+            <div class="choices">
+              <button class="choice-btn" onclick="doMC('q45',0,1)"><span class="ck">A</span>Using ARP broadcasts; drops
+                the frame</button>
+              <button class="choice-btn" onclick="doMC('q45',1,1)"><span class="ck">B</span>Inspecting the source MAC of
+                incoming frames (self-learning); floods out all interfaces except the arrival port</button>
+              <button class="choice-btn" onclick="doMC('q45',2,1)"><span class="ck">C</span>Static configuration by
+                admin; sends an ICMP error back to source</button>
+              <button class="choice-btn" onclick="doMC('q45',3,1)"><span class="ck">D</span>Running a routing protocol;
+                drops the frame silently</button>
+            </div>
+            <div class="feedback" id="q45-fb"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── SCORE CARD ── -->
+    <div id="score-card">
+      <div style="font-size:0.7rem;color:var(--muted-blue);text-transform:uppercase;letter-spacing:0.1em;">Auto-Graded
+        Score</div>
+      <div class="score-giant" id="score-display">—</div>
+      <div class="score-sub" id="score-msg"></div>
+      <button class="reset-btn" onclick="location.reload()">↺ Reset All Answers</button>
+    </div>
+
+  </main>
+
+  <script>
+    const TOTAL_SCORED = 28;
+    const answered = new Set();
+    const correct = new Set();
+
+    function toggleCard(id) {
+      document.getElementById(id).classList.toggle('open');
+    }
+
+    function updateProgress() {
+      const n = answered.size;
+      const c = correct.size;
+      document.getElementById('prog-label').textContent = `${n} / ${TOTAL_SCORED} answered`;
+      document.getElementById('prog-fill').style.width = `${Math.min(n / TOTAL_SCORED, 1) * 100}%`;
+      document.getElementById('live-score').textContent = c;
+      if (n >= TOTAL_SCORED) showScore();
+    }
+
+    function doTF(qid, userTrue, correctTrue) {
+      if (answered.has(qid)) return;
+      answered.add(qid);
+      const btns = document.querySelectorAll(`#${qid} .tf-btn`);
+      const isCorrect = userTrue === correctTrue;
+      if (isCorrect) correct.add(qid);
+      btns.forEach(b => {
+        b.disabled = true;
+        const isT = b.textContent.trim() === 'True';
+        if (isT === correctTrue) b.classList.add('tf-correct');
+        else if (isT === userTrue && !isCorrect) b.classList.add('tf-wrong');
+      });
+      const exp = {
+        q1: 'Propagation delay = distance / propagation speed. It depends on the link distance and medium, NOT packet size. Transmission delay (L/R) depends on packet size.',
+        q5: 'In circuit switching, a dedicated circuit is reserved end-to-end for the entire call, even during silent periods — a key inefficiency vs. packet switching.',
+        q18: 'Even with fast origin bandwidth, the cache serves content from a nearby proxy, reducing wide-area propagation delay.',
+        q20: 'UDP still needs port numbers for demultiplexing — to deliver data to the correct application process.',
+        q21: 'rdt2.x only handles corruption via checksums + NAK/ACK. Timers for packet loss were added in rdt3.0.',
+        q32: 'TCP Tahoe always resets cwnd to 1 MSS for both events. TCP Reno uses Fast Recovery (cwnd = ssthresh + 3 MSS) for triple dup ACKs instead.'
+      };
+      showFeedback(qid, isCorrect, exp[qid] || '');
+      document.getElementById(qid).classList.add(isCorrect ? 'state-correct' : 'state-wrong');
+      updateProgress();
+    }
+
+    function doMC(qid, chosen, correctIdx) {
+      if (answered.has(qid)) return;
+      answered.add(qid);
+      const isCorrect = chosen === correctIdx;
+      if (isCorrect) correct.add(qid);
+      const btns = document.querySelectorAll(`#${qid} .choice-btn`);
+      btns.forEach((b, i) => {
+        b.disabled = true;
+        if (i === correctIdx) b.classList.add('btn-correct');
+        else if (i === chosen && !isCorrect) b.classList.add('btn-wrong');
+      });
+      const exp = {
+        q2: 'The <strong>network layer</strong> (IP) routes packets across networks using logical (IP) addresses.',
+        q4: 'Store-and-forward requires the router to receive the <em>entire</em> packet before forwarding.',
+        q7: '<strong>Statistical multiplexing</strong> — idle capacity is used by other flows.',
+        q22: 'Sequence numbers let the receiver identify and discard duplicate packets from retransmissions.',
+        q23: 'Without a timer, a completely lost packet produces no NAK/ACK, so the sender would wait forever.',
+        q24: 'GBN uses cumulative ACKs. Since 5 & 6 are lost, the highest in-order packet is seq 4.',
+        q25: 'Selective Repeat buffers out-of-order arrivals and ACKs each one individually.',
+        q26: 'SR requires W ≤ 2^(n-1) to avoid confusing a retransmitted packet for a new one.',
+        q28: 'TCP cumulative ACKs indicate the next expected byte. With a gap at 1001, ACK = 1001.',
+        q29: 'Slow Start: cwnd increments by 1 MSS per ACK — effectively doubles every RTT (exponential).',
+        q30: 'TCP Reno Fast Recovery: on 3 dup ACKs, ssthresh = cwnd/2, then cwnd = ssthresh + 3 MSS.',
+        q33: 'Effective window = min(cwnd, rwnd) = min(20, 12) = 12 KB.',
+        q34: 'Dijkstra (link-state) requires a complete network topology map — obtained by flooding link-state packets.',
+        q35: 'Bellman-Ford: D_x(y) = min over all neighbors v of { c(x,v) + D_v(y) }.',
+        q36: 'Via E: cost F→E = 2, E→D = 4, total = 6 with predecessor E.',
+        q39: 'SDN flow tables are generalized — they can match on any header field across multiple layers.',
+        q41: 'Peering policy: re-advertise only to customers. Not to other peers or providers.',
+        q43: 'Hidden terminal: two stations out of each other\'s range both transmit to the same AP — collision at the AP.',
+        q44: 'Hearing the CTS, a station reads the NAV duration and defers transmission for that period.',
+        q45: 'Self-learning: switch records source MAC of each incoming frame. Unknown destination → flood all ports except source.'
+      };
+      showFeedback(qid, isCorrect, exp[qid] || '');
+      document.getElementById(qid).classList.add(isCorrect ? 'state-correct' : 'state-wrong');
+      updateProgress();
+    }
+
+    function doNumeric(qid, correctVal, explanation) {
+      if (answered.has(qid)) return;
+      const inp = document.getElementById(`${qid}-in`);
+      const v = parseFloat(inp.value);
+      if (isNaN(v)) { inp.style.borderColor = 'var(--ch2)'; return; }
+      answered.add(qid);
+      const tol = Math.abs(correctVal) * 0.01 + 0.001;
+      const isCorrect = Math.abs(v - correctVal) <= tol;
+      if (isCorrect) correct.add(qid);
+      inp.disabled = true;
+      inp.classList.add(isCorrect ? 'inp-correct' : 'inp-wrong');
+      document.querySelector(`#${qid} .check-btn`).disabled = true;
+      const fb = document.getElementById(`${qid}-fb`);
+      fb.className = `feedback show ${isCorrect ? 'fb-correct' : 'fb-wrong'}`;
+      fb.innerHTML = `<strong>${isCorrect ? '✓ Correct' : '✗ Incorrect'}</strong><span class="expl">${explanation}${!isCorrect ? ` Your answer: ${v} — Correct: ${correctVal}` : ''}</span>`;
+      document.getElementById(qid).classList.add(isCorrect ? 'state-correct' : 'state-wrong');
+      updateProgress();
+    }
+
+    function doRevealOnly(qid, modelAnswer) {
+      if (answered.has(qid)) return;
+      answered.add(qid);
+      correct.add(qid);
+      const inp = document.getElementById(`${qid}-in`);
+      if (inp) inp.disabled = true;
+      document.querySelector(`#${qid} .check-btn`).disabled = true;
+      const fb = document.getElementById(`${qid}-fb`);
+      fb.className = 'feedback show fb-info';
+      fb.innerHTML = `<strong>Model Answer</strong><span class="expl">${modelAnswer}</span>`;
+      document.getElementById(qid).classList.add('state-revealed');
+      updateProgress();
+    }
+
+    function checkTCPSeq() {
+      if (answered.has('q27')) return;
+      const answers = [200, 700, 1200, 1700];
+      const ids = ['q27-1', 'q27-2', 'q27-3', 'q27-4'];
+      let allOk = true;
+      ids.forEach((id, i) => {
+        const inp = document.getElementById(id);
+        const v = parseInt(inp.value);
+        const ok = v === answers[i];
+        inp.classList.add(ok ? 'inp-correct' : 'inp-wrong');
+        inp.disabled = true;
+        if (!ok) allOk = false;
+      });
+      answered.add('q27');
+      if (allOk) correct.add('q27');
+      document.querySelector('#q27 .check-btn').disabled = true;
+      const fb = document.getElementById('q27-fb');
+      fb.className = `feedback show ${allOk ? 'fb-correct' : 'fb-wrong'}`;
+      fb.innerHTML = `<strong>${allOk ? '✓ Correct' : '✗ Incorrect'}</strong><span class="expl">Seq numbers: 200, 700, 1200, 1700. Each segment increments by 500 (bytes per segment).</span>`;
+      document.getElementById('q27').classList.add(allOk ? 'state-correct' : 'state-wrong');
+      updateProgress();
+    }
+
+    function checkCWND() {
+      if (answered.has('q31')) return;
+      const v1 = parseInt(document.getElementById('q31-1').value);
+      const v2 = parseInt(document.getElementById('q31-2').value);
+      const ok1 = v1 === 1, ok2 = v2 === 16;
+      document.getElementById('q31-1').classList.add(ok1 ? 'inp-correct' : 'inp-wrong');
+      document.getElementById('q31-2').classList.add(ok2 ? 'inp-correct' : 'inp-wrong');
+      document.getElementById('q31-1').disabled = true;
+      document.getElementById('q31-2').disabled = true;
+      const allOk = ok1 && ok2;
+      answered.add('q31');
+      if (allOk) correct.add('q31');
+      document.querySelector('#q31 .check-btn').disabled = true;
+      const fb = document.getElementById('q31-fb');
+      fb.className = `feedback show ${allOk ? 'fb-correct' : 'fb-wrong'}`;
+      fb.innerHTML = `<strong>${allOk ? '✓ Correct' : '✗ Incorrect'}</strong><span class="expl">On timeout: ssthresh = cwnd/2 = 32/2 = 16 KB; cwnd resets to 1 MSS (1 KB). Sender re-enters Slow Start.</span>`;
+      document.getElementById('q31').classList.add(allOk ? 'state-correct' : 'state-wrong');
+      updateProgress();
+    }
+
+    function checkBGP() {
+      if (answered.has('q40')) return;
+      const val = document.getElementById('q40-in').value.trim().toLowerCase().replace(/[^a-z0-9 ]/g, '');
+      const accepted = ['everyone', 'all neighbors', 'all', 'everyone including', 'customers peers', 'providers peers'];
+      const isCorrect = accepted.some(a => val.includes(a));
+      document.getElementById('q40-in').classList.add(isCorrect ? 'inp-correct' : 'inp-wrong');
+      document.getElementById('q40-in').disabled = true;
+      answered.add('q40');
+      if (isCorrect) correct.add('q40');
+      const fb = document.getElementById('q40-fb');
+      fb.className = `feedback show ${isCorrect ? 'fb-correct' : 'fb-wrong'}`;
+      fb.innerHTML = `<strong>${isCorrect ? '✓ Correct' : '✗ Incorrect'}</strong>`;
+      if (!isCorrect) document.getElementById('q40-ans').classList.add('show');
+      document.getElementById('q40').classList.add(isCorrect ? 'state-correct' : 'state-wrong');
+      updateProgress();
+    }
+
+    function toggleReveal(ansId, btn) {
+      const box = document.getElementById(ansId);
+      const shown = box.classList.toggle('show');
+      if (!btn.dataset.orig) btn.dataset.orig = btn.textContent;
+      btn.textContent = shown ? 'Hide Answer' : btn.dataset.orig;
+    }
+
+    function showFeedback(qid, isCorrect, explanation) {
+      const fb = document.getElementById(`${qid}-fb`);
+      if (!fb) return;
+      fb.className = `feedback show ${isCorrect ? 'fb-correct' : 'fb-wrong'}`;
+      fb.innerHTML = `<strong>${isCorrect ? '✓ Correct' : '✗ Incorrect'}</strong><span class="expl">${explanation}</span>`;
+    }
+
+    function showScore() {
+      const sc = document.getElementById('score-card');
+      sc.classList.add('show');
+      const n = correct.size, t = TOTAL_SCORED;
+      document.getElementById('score-display').textContent = `${n} / ${t}`;
+      const pct = Math.round(n / t * 100);
+      const msg = pct >= 90 ? 'Excellent — exam-ready!' : pct >= 75 ? 'Strong effort — review missed questions.' : pct >= 60 ? 'Getting there — keep practicing.' : 'More review needed before the exam.';
+      document.getElementById('score-msg').textContent = msg;
+      document.getElementById('score-display').style.color = pct >= 75 ? 'var(--correct)' : pct >= 50 ? 'var(--ch2)' : 'var(--wrong)';
+      sc.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    document.getElementById('q1').classList.add('open');
+  </script>
+</body>
+
+</html>
